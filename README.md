@@ -16,3 +16,23 @@ NZQA have been kind enough to provide a [dataset](https://catalogue.data.govt.nz
 
 - Node.js RESTful backend
 - HTML/CSS/JS frontend, probably bootstrap or some other fast frontend CSS/JS library
+
+## Layout
+
+- Home page
+    - Search bar (present in all pages, fast, locally based)
+    - List of user-selected subjects (starred, locally stored)
+    - List of all subjects
+- Subject page
+    - List of all years to choose from
+    - List of all assessments (description), their number/number of credits, and their most recent achievement standard.
+        - Download papers for last 3 years (as dropdown on subject, if external)
+- Year page
+    - Every assessment is shown for that year, including marking schedule, exam paper, exemplars (if they exist)
+    - For internal assessments, show exemplars.
+- Assessment page
+    - Description, number of credits, PEP, all past papers, all exemplars etc. (organised by type, then chronologically)
+
+## More info/Kanban Board
+
+[Notion](https://www.notion.so/Fast-access-NZQA-d4f21847f9174bc2954bd6a3e8205363)
