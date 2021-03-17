@@ -26,7 +26,7 @@ def get_assessments(subject): # this function will parse the assessment search q
     
     subjectname = subject['name'].replace(" ", "+") # e.g. turn Digital Technologies into Digital+Technologies for the query
     
-    for level in (1,): # for all the levels we're worried about
+    for level in (1,2,3): # for all the levels we're worried about
         formatted = url.format(subjname=subjectname.lower(), level=level) # put info into url format
         
         print(f'Getting assessments for {subject["name"]}, level {level}') # debug
