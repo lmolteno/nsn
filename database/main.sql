@@ -1,5 +1,3 @@
-CREATE DATABASE nzqa;
-
 CREATE TABLE subjects (
  subject_id INT PRIMARY KEY,
  name VARCHAR
@@ -11,7 +9,7 @@ CREATE TABLE standard_types (
 );
 
 CREATE TABLE fields (
- fields_id INT PRIMARY KEY,
+ field_id INT PRIMARY KEY,
  name VARCHAR
 );
 
@@ -50,15 +48,15 @@ CREATE TABLE standards (
    REFERENCES domains(domain_id)
 );
 
-CREATE TABLE asssessment_subject (
- standard_id INT NOT NULL,
+CREATE TABLE standard_subject (
+ standard_number INT NOT NULL,
  subject_id INT NOT NULL,
  CONSTRAINT fk_standard_subject
-  FOREIGN KEY(standard_id)
-   REFERENCES standards(standard_id)
+  FOREIGN KEY(standard_number)
+   REFERENCES standards(standard_number)
     ON DELETE CASCADE,
  CONSTRAINT fk_subject_standard
   FOREIGN KEY(subject_id)
-   REFERENCES subjects(subject)
+   REFERENCES subjects(subject_id)
     ON DELETE CASCADE
 );
