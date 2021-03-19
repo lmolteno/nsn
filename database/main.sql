@@ -1,9 +1,11 @@
+CREATE DATABASE nzqa;
+
 CREATE TABLE subjects (
  subject_id INT PRIMARY KEY,
  name VARCHAR
 );
 
-CREATE TABLE assessment_types (
+CREATE TABLE standard_types (
  type_id INT PRIMARY KEY,
  name VARCHAR
 );
@@ -23,8 +25,8 @@ CREATE TABLE domains (
  name VARCHAR
 );
 
-CREATE TABLE assessments (
- assessment_number INT PRIMARY KEY,
+CREATE TABLE standards (
+ standard_number INT PRIMARY KEY,
  title VARCHAR NOT NULL,
  internal BOOL NOT NULL,
  type_id INT,
@@ -34,28 +36,28 @@ CREATE TABLE assessments (
  field_id INT,
  subfield_id INT,
  domain_id INT,
- CONSTRAINT fk_assessment_type
+ CONSTRAINT fk_standard_type
   FOREIGN KEY(type_id) 
-   REFERENCES assessment_types(type_id),
- CONSTRAINT fk_assessment_field
+   REFERENCES standard_types(type_id),
+ CONSTRAINT fk_standard_field
   FOREIGN KEY(field_id) 
    REFERENCES fields(field_id),
- CONSTRAINT fk_assessment_subfield
+ CONSTRAINT fk_standard_subfield
   FOREIGN KEY(subfield_id) 
    REFERENCES subfields(subfield_id),
- CONSTRAINT fk_assessment_domain
+ CONSTRAINT fk_standard_domain
   FOREIGN KEY(domain_id) 
    REFERENCES domains(domain_id)
 );
 
 CREATE TABLE asssessment_subject (
- assessment_id INT NOT NULL,
+ standard_id INT NOT NULL,
  subject_id INT NOT NULL,
- CONSTRAINT fk_assessment_subject
-  FOREIGN KEY(assessment_id)
-   REFERENCES assessments(assessment_id)
+ CONSTRAINT fk_standard_subject
+  FOREIGN KEY(standard_id)
+   REFERENCES standards(standard_id)
     ON DELETE CASCADE,
- CONSTRAINT fk_subject_assessment
+ CONSTRAINT fk_subject_standard
   FOREIGN KEY(subject_id)
    REFERENCES subjects(subject)
     ON DELETE CASCADE
