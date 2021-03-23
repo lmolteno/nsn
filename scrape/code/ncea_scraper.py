@@ -2,11 +2,11 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import time
-from datetime import datetime
+from datetime import datetime,timedelta
 import random
 import os
 
-of = "..output/ncea_standards.json"
+of = "../output/ncea_standards.json"
 f_string = "%H:%M:%S %d/%m/%Y"
 
 def get_subjects(): # this function will parse the NCEA subjects page to find the names and url-names for each subject
