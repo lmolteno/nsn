@@ -36,9 +36,11 @@ for scraped in s_st[:1]:
     level_m = provided['level'] == scraped['level']
     print(scraped, provided)
 
+
+# Enter the data
 import psycopg2
 conn = psycopg2.connect(
-    host="localhost",
+    host="db",
     database="nzqa",
     user="entry",
     password="ilikeenteringdata")

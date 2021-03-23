@@ -1,4 +1,3 @@
-# Use postgres/example user/password credentials
 version: '3.1'
 
 services:
@@ -38,3 +37,14 @@ services:
             - ./static:/usr/share/nginx/html/
         ports:
             - 8090:80
+            
+    scraper:
+        build:
+            context: ./scrape
+        restart: unless-stopped
+        volumes:
+            - ./scrape/code:/code
+            - ./scrape/output:/output
+        environment:
+            FORCE_SCRAPE: 0 # enable this for testing and stuff, otherwise, on restart, it will scrape every year
+            
