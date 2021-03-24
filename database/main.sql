@@ -28,7 +28,7 @@ CREATE TABLE standards (
  title VARCHAR NOT NULL,
  internal BOOL NOT NULL,
  type_id INT,
- version INT NOT NULL,
+ version INT,
  level INT NOT NULL,
  credits INT NOT NULL,
  field_id INT,
