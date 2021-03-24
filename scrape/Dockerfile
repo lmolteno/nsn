@@ -1,3 +1,4 @@
+# database maintenence dockerfile
 FROM debian:buster
 MAINTAINER Linus Molteno "linus@molteno.net"
 ARG DEBIAN_FRONTEND=noninteractive
@@ -18,3 +19,4 @@ VOLUME /code
 WORKDIR /code
 
 CMD python3 ncea_scraper.py # run the python scraping script. if the current json file is older than a year, re-scrape
+CMD python3 combine.py # enter the data into the database

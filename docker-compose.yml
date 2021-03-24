@@ -48,3 +48,5 @@ services:
         environment:
             FORCE_SCRAPE: 0 # enable this for testing and stuff, otherwise, on restart, it will scrape every year
             
+# https://github.com/allinurl/goaccess
+            
