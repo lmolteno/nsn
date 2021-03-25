@@ -2,3 +2,4 @@
 *.xcf
 *old_ncea_standards.json
 *ncea_standards.json
+*__pycache__/

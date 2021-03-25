@@ -12,18 +12,18 @@ services:
             POSTGRES_PASSWORD: nzqa
             POSTGRES_DB: nzqa
 
-    api_service:
-        build: 
-            context: ./backend
-        restart: unless-stopped
-        volumes:
-            - ./backend/code:/code
-        environment:
-            POSTGRES_USER: nzqa
-            POSTGRES_PASSWORD: nzqa
-            POSTGRES_DB: nzqa
-        ports:
-            - 3000:3000
+    #api_service:
+        #build: 
+            #context: ./backend
+        #restart: unless-stopped
+        #volumes:
+            #- ./backend/code:/code
+        #environment:
+            #POSTGRES_USER: nzqa
+            #POSTGRES_PASSWORD: nzqa
+            #POSTGRES_DB: nzqa
+        #ports:
+            #- 3000:3000
     
     adminer:
         image: adminer
@@ -42,11 +42,11 @@ services:
         build:
             context: ./scrape
         restart: unless-stopped
-        volumes:
-            - ./scrape/code:/code
-            - ./scrape/output:/output
+        #volumes:
+            #- ./scrape/code:/code
+            #- ./scrape/output:/output
         environment:
-            FORCE_SCRAPE: 0 # enable this for testing and stuff, otherwise, on restart, it will scrape every year
+            FORCE_SCRAPE: 0
             
 # https://github.com/allinurl/goaccess
             
