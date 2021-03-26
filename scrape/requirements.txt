@@ -1,4 +1,4 @@
- bs4
- psycopg2-binary
- pandas
- requests
+bs4
+psycopg2-binary
+pandas
+requests

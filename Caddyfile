@@ -1,0 +1,13 @@
+localhost {
+	file_server {
+		root /static/	
+	}
+	reverse_proxy /api/* api_service:5000
+	log {
+        output file /static/analytics/access.log {
+            roll_keep_for 2160h
+        }
+        format json
+	}
+}
+

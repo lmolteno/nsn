@@ -12,41 +12,57 @@ services:
             POSTGRES_PASSWORD: nzqa
             POSTGRES_DB: nzqa
 
-    #api_service:
-        #build: 
-            #context: ./backend
-        #restart: unless-stopped
-        #volumes:
-            #- ./backend/code:/code
-        #environment:
-            #POSTGRES_USER: nzqa
-            #POSTGRES_PASSWORD: nzqa
-            #POSTGRES_DB: nzqa
-        #ports:
-            #- 3000:3000
+    api_service:
+        build: 
+            context: ./backend
+        restart: unless-stopped
+        volumes:
+            - ./backend/code:/code
+        environment:
+            POSTGRES_USER: nzqa
+            POSTGRES_PASSWORD: nzqa
+            POSTGRES_DB: nzqa
+        ports:
+            - 5000:5000
     
     adminer:
         image: adminer
         restart: unless-stopped
         ports:
             - 8080:8080
-            
-    web_server:
-        image: nginx
-        volumes:
-            - ./static:/usr/share/nginx/html/
+        
+    caddy:
+        image: caddy:2.0.0-alpine
         ports:
-            - 8090:80
+            - 80:80
+            - 443:443
+        volumes:
+            - ./static:/static
+            - ./Caddyfile:/etc/caddy/Caddyfile
             
     scraper:
         build:
             context: ./scrape
+        depends_on:
+            - 'db'
         restart: unless-stopped
         #volumes:
             #- ./scrape/code:/code
             #- ./scrape/output:/output
         environment:
             FORCE_SCRAPE: 0
+            POSTGRES_USER: nzqa
+            POSTGRES_PASSWORD: nzqa
+            POSTGRES_DB: nzqa
             
-# https://github.com/allinurl/goaccess
-            
+    analytics:
+        image: allinurl/goaccess
+        depends_on:
+            - 'caddy'
+        restart: unless-stopped
+        volumes:
+            - ./static:/static
+            - ./goaccess/:/etc/goaccess
+        ports:
+            - 7890:7890
+        command: ['/static/analytics/access.log']

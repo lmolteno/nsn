@@ -1,8 +1,10 @@
-FROM python:3.8-slim-buster
+# syntax = docker/dockerfile:1.2
+FROM python:3.9-slim-buster
 MAINTAINER Linus Molteno "linus@molteno.net"
 WORKDIR /code
 COPY requirements.txt /code/
-RUN pip install -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache \
+    pip install -r requirements.txt
 COPY ./code /code/
 COPY ./output /output
 # run the python scraping script. if the current json file is older than a year, re-scrape

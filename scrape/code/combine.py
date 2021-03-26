@@ -3,6 +3,7 @@ import json
 from urllib.request import urlopen
 import pandas as pd
 import psycopg2
+import os
 
 def combine():
     s_st  = [] # empty list to be filled with Scraped STandards 
@@ -121,9 +122,9 @@ def combine():
     # Enter the data
     conn = psycopg2.connect(
         host="db", # this is because docker! cool!
-        database="nzqa",
-        user="nzqa",
-        password="nzqa")
+        database=os.environ.get("POSTGRES_DB"),
+        user=os.environ.get("POSTGRES_USER"),
+        password=os.environ.get("POSTGRES_PASSWORD"))
 
     # enter info
     with conn.cursor() as curs:
