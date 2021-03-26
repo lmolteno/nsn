@@ -1,0 +1,29 @@
+:root {
+  --nzqa_blue: #00709e;
+  --white: #ffffff;
+}
+
+nav {
+    background-color: var(--nzqa_blue);
+}
+
+#main-container {
+    background-color: #f2f2f2;
+}
+
+.card-columns {
+   column-count: 3;
+}
+
+@media screen and (max-width: 768px) {
+  .card-columns {
+    column-count: 1;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .card-columns {
+    column-count: 2;
+  }
+}
+
