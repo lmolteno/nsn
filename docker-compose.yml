@@ -46,9 +46,9 @@ services:
         depends_on:
             - 'db'
         restart: unless-stopped
-        #volumes:
-            #- ./scrape/code:/code
-            #- ./scrape/output:/output
+        volumes:
+            - ./scrape/code:/code
+            - ./scrape/output:/output
         environment:
             FORCE_SCRAPE: 0
             POSTGRES_USER: nzqa
@@ -66,3 +66,5 @@ services:
         ports:
             - 7890:7890
         command: ['/static/analytics/access.log']
+
+# for search use getmeili/meilisearch:latest

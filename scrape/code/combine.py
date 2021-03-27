@@ -4,6 +4,7 @@ from urllib.request import urlopen
 import pandas as pd
 import psycopg2
 import os
+from datetime import datetime
 
 def combine():
     s_st  = [] # empty list to be filled with Scraped STandards 
@@ -19,16 +20,16 @@ def combine():
 
 
     # import and re-format the csv dataset provided by nzqa
-    print("reading csv")
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Downloading NZQA Dataset")
     ds_df = pd.read_csv(online_url) # DataSet DataFrame
     ds_df.columns = ['title','number','type','version','level','credits','status','v_status','field','subfield','domain'] # rename columns to ones that don't have spaces
-    print("parsing csv")
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Parsing...")
     for index,row in ds_df.iterrows():
         achievement = row['type'] == "Achivement"
         if row['status']  == "Registered" and row['v_status'] == "Current": # check that the standard is worth holding on to
             ds_st.append(dict(row))
 
-    print(f'combining the two, basing on {len(s_st)} standards')
+    print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] combining the two, basing on {len(s_st)} standards')
     # join the two, getting all the assessments from the json object and assigning them a field, subfield, and domain
     # also check that the two datasets match, print and debug where they don't
     standards = [] # output list of tuple objects for each standard
@@ -116,7 +117,7 @@ def combine():
         except StopIteration: # there is no duplicate
             standards.append(outtuple)
 
-    print("Entering data")
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Entering data")
     print(f"Resolved:\n{duplicate:>3d} {'Duplicates':>15s}\n{mismatch:>3d} {'Mismatches':>15s}\n{singular:>3d} {'Singulars':>15s}")
 
     # Enter the data
@@ -148,7 +149,7 @@ def combine():
             domain_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);''', standards)
         
         curs.executemany("INSERT INTO standard_subject (subject_id, standard_number) VALUES (%s,%s);", subject_standards)
-        print(f"Committing {len(standards)} standards")
+        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Committing {len(standards)} standards")
         conn.commit()
 
     conn.close()

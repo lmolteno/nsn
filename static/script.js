@@ -28,20 +28,21 @@ function displaySubjects() {
     outhtml = "" // this will be filled with list elements
     subjects.forEach(subject => {
         // construct li element for each subject with a star
-        outhtml += "<li class='py-1'><a class='link text-decoration-none' href=/subject?id=";
+        outhtml += "<li class='py-1 row'><a type='button' onClick='starSubject("
         outhtml += subject.subject_id.toString();
-        outhtml += ">";
-        outhtml += subject.name;
-        outhtml += "</a><a type='button' onClick='starSubject("
-        outhtml += subject.subject_id.toString();
-        outhtml += ", this)' class='btn float-end btn-sm p-0 pe-1'>";
+        outhtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-3'>";
         // check if the subject is starred or not
         is_starred = starred.find(s => s.subject_id === subject.subject_id)
         if (is_starred) {
-            outhtml += starFull + "</a></li>";
+            outhtml += starFull + "</a>";
         } else {
-            outhtml += starOutline + "</a></li>";
+            outhtml += starOutline + "</a>";
         }
+        outhtml += "<a class='col link text-decoration-none' href=/subject?id=";
+        outhtml += subject.subject_id.toString();
+        outhtml += ">";
+        outhtml += subject.name;
+        outhtml += "</a></li>"
     });
     $("#subjectlist").html(outhtml);
 }
@@ -62,7 +63,7 @@ function starSubject(subject_id, element) {
 
 function unstarSubject(subject_id, element) { // for removing the starred subject, with the event from the starred list
     index = starred.findIndex(s => s.subject_id === subject_id); // get index
-    starred = starred.splice(index+1, 1); // remove from array
+    starred.splice(index, 1); // remove from array
     window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
     displayStarred(); // update display
     displaySubjects();
@@ -86,14 +87,14 @@ function displayStarred() {
         outhtml = "";
         starred.forEach(subject => {
             // construct li element for each starred subject
-            outhtml += "<li class='py-1'><a class='link text-decoration-none' href=/subject?id=";
+            outhtml += "<li class='py-1 row'><a type='button' onClick='unstarSubject("
+            outhtml += subject.subject_id.toString();
+            outhtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-3'>" + cross + "</a>";
+            outhtml += "<a class='col link text-decoration-none' href=/subject?id=";
             outhtml += subject.subject_id.toString();
             outhtml += ">";
             outhtml += subject.name;
-            outhtml += "</a><a type='button' onClick='unstarSubject("
-            outhtml += subject.subject_id.toString();
-            outhtml += ", this)' class='btn float-end btn-sm p-0 pe-1'>";
-            outhtml += cross + "</a></li>";
+            outhtml += "</a></li>"
         });
         $("#starredlist").html(outhtml);
     }

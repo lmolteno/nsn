@@ -1,5 +1,3 @@
-
-print("importing")
 import time
 import json
 import os
@@ -9,7 +7,7 @@ from combine import combine
 import psycopg2
 
 def clean():
-    print("cleaning database")
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Cleaning database")
     tables = ['subjects','fields','subfields','domains','standard_types','standard_subject','standards']
     conn = psycopg2.connect(
         host="db", # this is because docker! cool!
@@ -24,7 +22,7 @@ def clean():
     conn.close()
 
 def is_empty():
-    print("checking if database is empty")
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Checking if database is empty")
 
     conn = psycopg2.connect(
         host="db", # this is because docker! cool!
@@ -40,18 +38,18 @@ def is_empty():
     return empty
 
 if __name__ == "__main__":
-    print("starting checking")
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Starting checking")
     while True:
         if os.path.isfile(of): # check if the output file exists
             with open(of) as outfile:
-                print("loading file")
+                print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Loading file")
                 data = json.load(outfile)
                 lastupdated = datetime.strptime(data['updated'], f_string)
                 # add a year to the previous time and see if it's less than now (i'm not too worried about leap years)
                 olderthanayear = (lastupdated + timedelta(days=365)) < datetime.now() 
                 # if FORCE_SCRAPE environment variable is set, scrape even if previous file is young young
                 if olderthanayear or os.environ.get("FORCE_SCRAPE") == '1': 
-                    print("Scraping")
+                    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] File is outdated, or scrape is forced. Scraping")
                     scrape_and_dump(of)
                     clean()
                     combine()
@@ -59,10 +57,11 @@ if __name__ == "__main__":
                     clean()
                     combine()
                 else:
-                    print("Nothing to be done, up-to-date scrape data")
+                    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Nothing to be done, up-to-date scrape data")
         else:
-            print("No file exists, scraping data.")
+            print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] No file exists, scraping data.")
             scrape_and_dump(of)
             clean()
             combine()
+        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting an hour...")
         time.sleep(60**2) # every n seconds (60^2 is an hour)
