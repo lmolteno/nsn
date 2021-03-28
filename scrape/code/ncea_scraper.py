@@ -82,15 +82,14 @@ def get_assessments(subject): # this function will parse the assessment search q
         formatted = url.format(subjname=subjectname.lower(), level=level) # put info into url format
         
         print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Getting assessments for {subject["name"]}, level {level}') # debug
-        
         page = requests.get(formatted) # send request
-        soup = BeautifulSoup(page.content, 'html.parser') # html parser init
+        soup = BeautifulSoup(page.content.decode("utf8"), "html.parser",) # html parser init
         results = soup.find_all('tr', class_="dataHighlight") # get all the table rows that are highlighted (header rows)
-        
         for row in results: # for all the header rows
             a_tags = len(row.find_all('td')[0].find_all('a')) # find how many a tags there are
             num, title, credits, external = row.find_all('strong') # find the bolded text
-            if a_tags < 2: # the assessment hasn't expired (an extra <a> tag is added when it has expired that links to the review page)
+            #if a_tags < 2: # the assessment hasn't expired (an extra <a> tag is added when it has expired that links to the review page) (this is actually false)
+            if "expired" not in str(row):
                 new_ass = { # populate dictionary
                     'level': level, # the level the assessment applies to
                     'number': int(num.text), # assessment number
@@ -101,6 +100,7 @@ def get_assessments(subject): # this function will parse the assessment search q
                     'achievement': int(num.text) >= 90000
                 }
                 assessments.append(new_ass)
+
     return assessments
 
 def scrape_and_dump(of):
@@ -117,3 +117,4 @@ def scrape_and_dump(of):
 
 if __name__ == "__main__": # if the module isn't imported
     print(get_subjects())
+    print(get_assessments({"name": "Reo Maori"}))
