@@ -12,4 +12,3 @@ COPY ./output /output
 # combine dataset and enter into the database
 # CMD python3 combine.py
 CMD python3 -u checker.py
- 

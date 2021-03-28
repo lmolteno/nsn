@@ -67,4 +67,8 @@ services:
             - 7890:7890
         command: ['/static/analytics/access.log']
 
-# for search use getmeili/meilisearch:latest
+    search:
+        image: getmeili/meilisearch:latest
+        restart: unless-stopped
+        ports:
+            - 7700:7700

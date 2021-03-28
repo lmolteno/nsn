@@ -5,6 +5,7 @@ import pandas as pd
 import psycopg2
 import os
 from datetime import datetime
+import meilisearch # for entering in search data
 
 replacement_words = [
     ("M?ori", "Maori"),
@@ -45,6 +46,10 @@ def combine():
     domains = []
     types = []
     subject_standards = [] # join table between subjects and standards
+    
+    # for meilei
+    search_standards = [] # list of standards to be populated for search only
+    # will contain id (standard_number), title, level, credits, subject name
 
     # counts of errors
     mismatch  = 0
@@ -114,17 +119,24 @@ def combine():
             else: # the titles are just different wording
                 # use the scraped title as these are what people would expect, what's on the website and stuff
                 title = scraped['title'] # only do this if there aren't ? in the scraped title though
-
+        
+        search_standard = {"id": str(standard_number),
+                           "title": title,
+                           "level": level,
+                           "credits": credits,
+                           "internal": internal}
+        
         # the same order as the definition in sql for ease of insertion
         outtuple = (standard_number, title, internal, type_id, version, level, credits, field_id, subfield_id, domain_id)
         
         # ensure no duplication
         try:
-            aaaa = next(standard for standard in standards if standard[0] == outtuple[0])
+            aaaa = next(standard for standard in standards if standard[0] == outtuple[0]) # if it can already be found
             duplicate += 1
-            #print(f"DUPLICATE    AS{scraped['number']:<5d}")
+            #print(f"DUPLICATE AS{scraped['number']:<5d}")
         except StopIteration: # there is no duplicate
             standards.append(outtuple)
+            search_standards.append(search_standard)
 
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Entering data")
     print(f"Resolved:\n{duplicate:>3d} {'Duplicates':>15s}\n{mismatch:>3d} {'Mismatches':>15s}\n{singular:>3d} {'Singulars':>15s}")
@@ -135,7 +147,17 @@ def combine():
         database=os.environ.get("POSTGRES_DB"),
         user=os.environ.get("POSTGRES_USER"),
         password=os.environ.get("POSTGRES_PASSWORD"))
+    
+    # convert list of tuples into list of dictionaries
+    search_subjects = [{"id": str(index), "name": subj_name} for index, subj_name in enumerate(subjects)]
+    
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Entering subjects and standards into Meilisearch")
 
+    # save both the subjects and standards to the search utility
+    client = meilisearch.Client('http://search:7700')
+    client.index('subjects').add_documents(search_subjects)
+    client.index('standards').add_documents(search_standards)
+    
     # enter info
     with conn.cursor() as curs:
         # insert types ([*enumerate(types)] turns ['a','b'] to [(0,'a'), (1,'b')], assigning indicies)

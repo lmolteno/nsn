@@ -1,6 +1,14 @@
+// globals
 subjects = [];
 starred = [];
 
+// for accessing the search engine
+const client = new MeiliSearch({
+    host: 'http://127.0.0.1:7700',
+    apiKey: '',
+})
+
+// const for svg icons
 const starOutline = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
   <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.523-3.356c.329-.314.158-.888-.283-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767l-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288l1.847-3.658 1.846 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.564.564 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"/>
 </svg>`;
@@ -23,7 +31,7 @@ function getSubjects(then=function(){a=1}) { // update the local list of subject
     });
 }
 
-function displaySubjects() {
+function displaySubjects() { // display the current list of subjects
     console.log("Displaying " + subjects.length.toString() + " subjects"); 
     outhtml = "" // this will be filled with list elements
     subjects.forEach(subject => {
@@ -100,7 +108,95 @@ function displayStarred() {
     }
 }
 
+async function search() {
+    searchtext = $("#searchbox").val()
+    
+    if (searchtext.length != 0) {
+        // standards stuff
+        const standindex = client.index('standards')
+        
+        const standards = await standindex.search(searchtext, {limit: 5})
+        
+        outhtml = ""
+        if (standards['hits'].length > 0) {
+            outhtml +=  `<h3 class="mb-0 border-bottom">Standards</h3>
+                        <table class="table-responsive table table-hover">
+                            <thead>
+                                <tr>
+                                <th scope="col" class="col-1">Number</th>
+                                <th scope="col" class="col-9">Title</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Level</th>
+                                <th scope="col">Credits</th>
+                                <th scope="col">I/E</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+            standards['hits'].forEach(result => {
+                outhtml += "<tr class='clickable' onclick='linkToAssessment(" + result.id + ")'>"
+                outhtml += "<th scope='row'><span class='float-end'>" + result.id + "</span></th>"
+                outhtml += "<td>" + result.title + "</td>"
+                outhtml += "<td>" + ((parseInt(result.id) < 90000) ? "Unit" : "Achievement") + "</td>"
+                outhtml += "<td>" + result.level.toString() + "</td>"
+                outhtml += "<td>" + result.credits.toString() + "</td>"
+                outhtml += "<td>" + (result.internal ? "Internal" : "External") + "</td>"
+                outhtml += "</tr>"
+            });
+            outhtml += "</tbody></table>"
+        }
+        
+        // subjects stuff
+        const subjindex = client.index('subjects')
+        
+        const subjects = await subjindex.search(searchtext, {limit: 5})
+        if (subjects.hits.length > 0) {
+            outhtml += `<h3 class="mb-0 border-bottom">Subjects</h3>
+                        <table class="table-responsive table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+            subjects['hits'].forEach(result => {
+                outhtml += "<tr>"
+                outhtml += "<td>"
+                outhtml += "<a type='button' onClick='starSubject("
+                outhtml += result.id;
+                outhtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-3'>";
+                // check if the subject is starred or not
+                is_starred = starred.find(s => s.subject_id === parseInt(result.id))
+                if (is_starred) {
+                    outhtml += starFull + "</a>";
+                } else {
+                    outhtml += starOutline + "</a>";
+                }       
+                outhtml += "<a href='/subject?id=" + result.id + "' class='text-decoration-none link'>" + result.name + "</a></td>"
+                outhtml += "</tr>"
+            });
+            outhtml += "</tbody></table>"
+        }
+        
+        if (subjects.hits.length == 0 && standards.hits.length == 0) {
+            outhtml = "<p class='text-muted mb-2'>Nothin' here!</p>"
+        }
+        $("#search-results").html(outhtml)
+        $("#search-results").css("visibility","visible");
+    } else {
+        $("#search-results").html("")
+        $("#search-results").css("visibility","hidden");
+    }
+}
+
+function linkToAssessment(number) {
+    nzqaurl = "https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber=" + number.toString()
+    window.open(nzqaurl, '_blank')
+}
+
 $(document).ready(function() {
     getSubjects(then=displaySubjects); // for async requests, we have to do "thens", like promises
     getStarred(then=displayStarred); // reference the local storage to find the starred subjects
+    $("#searchbox").val("")
+    search();
+    document.getElementById("searchbox").addEventListener('input', search);
 });
