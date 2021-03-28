@@ -6,6 +6,11 @@ import psycopg2
 import os
 from datetime import datetime
 
+replacement_words = [
+    ("M?ori", "Maori"),
+    ("P?keh?", "Pakeha")
+]
+
 def combine():
     s_st  = [] # empty list to be filled with Scraped STandards 
     ds_st = [] # empty list to be filled with DataSet STandards
@@ -29,7 +34,7 @@ def combine():
         if row['status']  == "Registered" and row['v_status'] == "Current": # check that the standard is worth holding on to
             ds_st.append(dict(row))
 
-    print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] combining the two, basing on {len(s_st)} standards')
+    print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Combining the two, basing on {len(s_st)} standards')
     # join the two, getting all the assessments from the json object and assigning them a field, subfield, and domain
     # also check that the two datasets match, print and debug where they don't
     standards = [] # output list of tuple objects for each standard
@@ -67,6 +72,10 @@ def combine():
         field_id        = None 
         subfield_id     = None
         domain_id       = None
+        
+        # do the replacement for the LUT of replaced words
+        for word, replacement in replacement_words:
+            title = title.replace(word, replacement)
 
         related_entry = True # this is a flag for when there is/n't a related entry in the provided dataset
         try:
@@ -153,4 +162,3 @@ def combine():
         conn.commit()
 
     conn.close()
-
