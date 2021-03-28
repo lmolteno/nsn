@@ -9,33 +9,44 @@ import psycopg2
 def clean():
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Cleaning database")
     tables = ['subjects','fields','subfields','domains','standard_types','standard_subject','standards']
-    conn = psycopg2.connect(
-        host="db", # this is because docker! cool!
-        database=os.environ.get("POSTGRES_DB"),
-        user=os.environ.get("POSTGRES_USER"),
-        password=os.environ.get("POSTGRES_PASSWORD"))
-    
-    with conn.cursor() as curs:
-        for table in tables:
-            curs.execute(f"DELETE FROM {table};")
-        conn.commit()
-    conn.close()
+    success = False # error handling for while the Postgres is starting
+    while not success:
+        try:
+            conn = psycopg2.connect(
+                host="db", # this is because docker! cool!
+                database=os.environ.get("POSTGRES_DB"),
+                user=os.environ.get("POSTGRES_USER"),
+                password=os.environ.get("POSTGRES_PASSWORD"))
+            
+            with conn.cursor() as curs:
+                for table in tables:
+                    curs.execute(f"DELETE FROM {table};")
+                conn.commit()
+            conn.close()
+            success = True
+        except psycopg2.OperationalError:
+            time.sleep(5)
 
 def is_empty():
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Checking if database is empty")
-
-    conn = psycopg2.connect(
-        host="db", # this is because docker! cool!
-        database=os.environ.get("POSTGRES_DB"),
-        user=os.environ.get("POSTGRES_USER"),
-        password=os.environ.get("POSTGRES_PASSWORD"))
-    empty = False
-    with conn.cursor() as curs:
-        curs.execute("SELECT COUNT(*) FROM subjects;")
-        count = curs.fetchone()[0]
-        empty = count == 0
-    conn.close()
-    return empty
+    success = False # error handling for while the Postgres is starting
+    while not success:
+        try:
+            conn = psycopg2.connect(
+                host="db", # this is because docker! cool!
+                database=os.environ.get("POSTGRES_DB"),
+                user=os.environ.get("POSTGRES_USER"),
+                password=os.environ.get("POSTGRES_PASSWORD"))
+            empty = False
+            with conn.cursor() as curs:
+                curs.execute("SELECT COUNT(*) FROM subjects;")
+                count = curs.fetchone()[0]
+                empty = count == 0
+            conn.close()
+            success = True
+            return empty
+        except psycopg2.OperationalError:
+            time.sleep(5)
 
 if __name__ == "__main__":
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Starting checking")
