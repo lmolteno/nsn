@@ -117,9 +117,10 @@ async function search() {
         
         const standards = await standindex.search(searchtext, {limit: 5})
         
-        outhtml = ""
+        outhtml = '<div class="table-responsive">'
         if (standards['hits'].length > 0) {
             outhtml +=  `<h3 class="mb-0 border-bottom">Standards</h3>
+
                         <table class="table-responsive table table-hover">
                             <thead>
                                 <tr>
@@ -180,6 +181,7 @@ async function search() {
         if (subjects.hits.length == 0 && standards.hits.length == 0) {
             outhtml = "<p class='text-muted mb-2'>Nothin' here!</p>"
         }
+        outhtml += "</div>"
         $("#search-results").html(outhtml)
         $("#search-results").css("visibility","visible");
     } else {

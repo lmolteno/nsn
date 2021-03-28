@@ -55,9 +55,10 @@ async function search() {
         
         const standards = await standindex.search(searchtext, {limit: 5})
         
-        outhtml = ""
+        outhtml = '<div class="table-responsive">'
         if (standards['hits'].length > 0) {
             outhtml +=  `<h3 class="mb-0 border-bottom">Standards</h3>
+
                         <table class="table-responsive table table-hover">
                             <thead>
                                 <tr>
@@ -99,6 +100,16 @@ async function search() {
             subjects['hits'].forEach(result => {
                 outhtml += "<tr>"
                 outhtml += "<td>"
+                outhtml += "<a type='button' onClick='starSubject("
+                outhtml += result.id;
+                outhtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-3'>";
+                // check if the subject is starred or not
+                is_starred = starred.find(s => s.subject_id === parseInt(result.id))
+                if (is_starred) {
+                    outhtml += starFull + "</a>";
+                } else {
+                    outhtml += starOutline + "</a>";
+                }       
                 outhtml += "<a href='/subject/?id=" + result.id + "' class='text-decoration-none link'>" + result.name + "</a></td>"
                 outhtml += "</tr>"
             });
@@ -108,6 +119,7 @@ async function search() {
         if (subjects.hits.length == 0 && standards.hits.length == 0) {
             outhtml = "<p class='text-muted mb-2'>Nothin' here!</p>"
         }
+        outhtml += "</div>"
         $("#search-results").html(outhtml)
         $("#search-results").css("visibility","visible");
     } else {
@@ -126,8 +138,9 @@ function updateEverything() { // populate the standards list, and the subject na
     $("#subject-name").hide()
     $("#subject-name").html(subject.name);
     $("#subject-name").fadeIn() // I love this so much
-    outhtml = `<h3 class="mb-0 border-bottom">Standards</h3>
-                <table class="table-responsive table table-hover">
+    outhtml = ` <div class="table-responsive">
+                <h3 class="mb-0 border-bottom">Standards</h3>
+                <table class="table table-hover">
                     <thead>
                         <tr>
                         <th scope="col" class="col-1">Number</th>
@@ -154,8 +167,10 @@ function updateEverything() { // populate the standards list, and the subject na
             }
         });
     });
-    outhtml += "</tbody></table>"
+    outhtml += "</tbody></table></div>";
+    $("#main-container").hide();
     $("#main-container").html(outhtml);
+    $("#main-container").fadeIn();    
 }
 
 $(document).ready(function() {
