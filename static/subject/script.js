@@ -1,6 +1,9 @@
 // globals
 subjects = [];
-starred = [];
+standards = [];
+const urlParams = new URLSearchParams(window.location.search); // get url parameters
+const subject_id = parseInt(urlParams.get('id'));
+subject = 0;
 
 // for accessing the search engine
 const client = new MeiliSearch({
@@ -19,93 +22,28 @@ const cross = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fi
   <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
 </svg>`;
 
-function getSubjects(then=function(){a=1}) { // update the local list of subjects
+function getSubjects() { // update the local list of subjects
     $.get("/api/subjects", function(data) { // send a get request to my api
         if (data.success) {
             console.log("Successfully gathered " + data['subjects'].length.toString() + " subjects");
             subjects = data['subjects'];
-            then(); // run the next function, which defaults to nothing
+            getStandards(); // run the next function
         } else {
             alert("Failure to get subjects. Try reloading. If the problem persists, email linus@molteno.net");
         }
     });
 }
 
-function displaySubjects() { // display the current list of subjects
-    console.log("Displaying " + subjects.length.toString() + " subjects"); 
-    outhtml = "" // this will be filled with list elements
-    subjects.forEach(subject => {
-        // construct li element for each subject with a star
-        outhtml += "<li class='py-1 row'><a type='button' onClick='starSubject("
-        outhtml += subject.subject_id.toString();
-        outhtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-3'>";
-        // check if the subject is starred or not
-        is_starred = starred.find(s => s.subject_id === subject.subject_id)
-        if (is_starred) {
-            outhtml += starFull + "</a>";
+function getStandards(then=function(){a=1}) { // get the list of standards for the subject
+    $.get("/api/standards?subject=" + subject_id.toString(), (data) => {
+        if (data.success) {
+            console.log("Successfully gathered " + data.standards.length.toString() + " standards");
+            standards = data.standards;
+            updateEverything(); // run the next function
         } else {
-            outhtml += starOutline + "</a>";
+            alert("Failure to get standards. Try reloading. If the problem persists, email linus@molteno.net");
         }
-        outhtml += "<a class='col link text-decoration-none' href=/subject/?id=";
-        outhtml += subject.subject_id.toString();
-        outhtml += ">";
-        outhtml += subject.name;
-        outhtml += "</a></li>"
-    });
-    $("#subjectlist").html(outhtml);
-}
-
-function starSubject(subject_id, element) {
-    if (starred.find(s => s.subject_id === subject_id)) { // already starred
-        index = starred.findIndex(s => s.subject_id === subject_id); // get index
-        element.innerHTML = starOutline; // replace with outline
-        starred.splice(index, 1); // remove from array
-    } else {
-        element.innerHTML = starFull; // fill star
-        subject = subjects.find(s => s.subject_id === subject_id); // get object (from id)
-        starred.push(subject); // add this to the starred list
-    }
-    window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
-    displayStarred(); // update display
-}
-
-function unstarSubject(subject_id, element) { // for removing the starred subject, with the event from the starred list
-    index = starred.findIndex(s => s.subject_id === subject_id); // get index
-    starred.splice(index, 1); // remove from array
-    window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
-    displayStarred(); // update display
-    displaySubjects();
-}
-
-function getStarred(then=None) {
-    if (window.localStorage.getItem('starred')) { // if this has been done before
-        starred = JSON.parse(window.localStorage.getItem('starred')); // update from browser storage (which only stores strings)
-    } else {
-        window.localStorage.setItem('starred', JSON.stringify(starred)); // initialise with empty array
-    }
-    then();
-}
-
-function displayStarred() {
-    if (starred.length == 0) {
-        $("#starredlist").html("<p class='text-muted'>Nothin' here!</p>");
-        $("#starredHeader").html('Starred Subjects<small class="text-muted fs-6 ps-3">Hit the ' + starOutline + ' icon to star a subject</small>');
-    } else {
-        $("#starredHeader").html('Starred Subjects');
-        outhtml = "";
-        starred.forEach(subject => {
-            // construct li element for each starred subject
-            outhtml += "<li class='py-1 row'><a type='button' onClick='unstarSubject("
-            outhtml += subject.subject_id.toString();
-            outhtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-3'>" + cross + "</a>";
-            outhtml += "<a class='col link text-decoration-none' href=/subject/?id=";
-            outhtml += subject.subject_id.toString();
-            outhtml += ">";
-            outhtml += subject.name;
-            outhtml += "</a></li>"
-        });
-        $("#starredlist").html(outhtml);
-    }
+    }); 
 }
 
 async function search() {
@@ -161,16 +99,6 @@ async function search() {
             subjects['hits'].forEach(result => {
                 outhtml += "<tr>"
                 outhtml += "<td>"
-                outhtml += "<a type='button' onClick='starSubject("
-                outhtml += result.id;
-                outhtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-3'>";
-                // check if the subject is starred or not
-                is_starred = starred.find(s => s.subject_id === parseInt(result.id))
-                if (is_starred) {
-                    outhtml += starFull + "</a>";
-                } else {
-                    outhtml += starOutline + "</a>";
-                }       
                 outhtml += "<a href='/subject/?id=" + result.id + "' class='text-decoration-none link'>" + result.name + "</a></td>"
                 outhtml += "</tr>"
             });
@@ -193,9 +121,45 @@ function linkToAssessment(number) {
     window.open(nzqaurl, '_blank')
 }
 
+function updateEverything() { // populate the standards list, and the subject name
+    subject = subjects.find(o => o.subject_id == subject_id)
+    $("#subject-name").hide()
+    $("#subject-name").html(subject.name);
+    $("#subject-name").fadeIn() // I love this so much
+    outhtml = `<h3 class="mb-0 border-bottom">Standards</h3>
+                <table class="table-responsive table table-hover">
+                    <thead>
+                        <tr>
+                        <th scope="col" class="col-1">Number</th>
+                        <th scope="col" class="col-9">Title</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Level</th>
+                        <th scope="col">Credits</th>
+                        <th scope="col">I/E</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+    [1,2,3].forEach(level => { // for each level
+        outhtml += "<tr><th colspan=6 class='text-center border-bottom border-dark'>Level " + level +"</th></tr>"
+        standards.forEach(standard => { // for each standard
+            if (standard.level == level) {
+                outhtml += "<tr class='clickable' onclick='linkToAssessment(" + standard.standard_number + ")'>"
+                outhtml += "<th scope='row'><span class='float-end'>" + standard.standard_number + "</span></th>"
+                outhtml += "<td>" + standard.title + "</td>"
+                outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
+                outhtml += "<td>" + standard.level + "</td>"
+                outhtml += "<td>" + standard.credits + "</td>"
+                outhtml += "<td>" + (standard.internal ? "Internal" : "External") + "</td>"
+                outhtml += "</tr>"
+            }
+        });
+    });
+    outhtml += "</tbody></table>"
+    $("#main-container").html(outhtml);
+}
+
 $(document).ready(function() {
-    getSubjects(then=displaySubjects); // for async requests, we have to do "thens", like promises
-    getStarred(then=displayStarred); // reference the local storage to find the starred subjects
+    getSubjects(); // for async requests, we have to do "thens", like promises
     $("#searchbox").val("")
     search();
     document.getElementById("searchbox").addEventListener('input', search);

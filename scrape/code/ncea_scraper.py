@@ -117,4 +117,4 @@ def scrape_and_dump(of):
 
 if __name__ == "__main__": # if the module isn't imported
     print(get_subjects())
-    print(get_assessments({"name": "Reo Maori"}))
+    print(get_assessments({"name": "Biology"}))
