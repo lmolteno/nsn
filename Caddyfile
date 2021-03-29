@@ -1,4 +1,4 @@
-localhost {
+nsn.mayhem.nz {
 	file_server {
 		root /static/	
 	}
