@@ -57,11 +57,11 @@ async function search() {
     searchtext = $("#searchbox").val()
     
     if (searchtext.length != 0) {
-        const standards = await standindex.search(searchtext, {limit: 5})
-        
         outhtml = '<div class="table-responsive">'
+        const standards = await standindex.search(searchtext, {limit: 5})
+        standardshtml = ""
         if (standards['hits'].length > 0) {
-            outhtml +=  `<h3 class="mb-1">Standards</h3>
+            standardshtml +=  `<h3 class="mb-1">Standards</h3>
 
                         <table class="table-bordered border-0 table table-hover">
                             <thead>
@@ -76,14 +76,15 @@ async function search() {
                             </thead>
                             <tbody>`;
             standards['hits'].forEach(result => {
-                outhtml += generateStandardRow(result)
+                standardshtml += generateStandardRow(result)
             });
-            outhtml += "</tbody></table>"
+            standardshtml += "</tbody></table>"
         }
-
+        
         const subjects = await subjindex.search(searchtext, {limit: 5})
+        subjecthtml = ""
         if (subjects.hits.length > 0) {
-            outhtml += `<h3 class="mb-1">Subjects</h3>
+            subjecthtml += `<h3 class="mb-1">Subjects</h3>
                         <table class="table table-bordered border-0">
                             <thead>
                                 <tr>
@@ -92,12 +93,12 @@ async function search() {
                             </thead>
                             <tbody>`;
             subjects['hits'].forEach(result => {
-                outhtml += generateSubjectRow(result)
+                subjecthtml += generateSubjectRow(result)
             });
-            outhtml += "</tbody></table>"
+            subjecthtml += "</tbody></table>"
         }
         
-        outhtml += "</div>"
+        outhtml += standards + subjects + "</div>"
         if (subjects.hits.length == 0 && standards.hits.length == 0) {
             outhtml = "<p class='text-muted mb-2'>Nothin' here!</p>"
         }
