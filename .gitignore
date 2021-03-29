@@ -1,6 +1,5 @@
 *list-of-all-standards-2020.csv
 *.xcf
 *old_ncea_standards.json
-*ncea_standards.json
 *__pycache__/
 static/analytics/*
