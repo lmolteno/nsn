@@ -163,7 +163,7 @@ async function search() {
         
         const subjects = await subjindex.search(searchtext, {limit: 5})
         if (subjects.hits.length > 0) {
-            outhtml += `<h3 class="mb-1">Standards</h3>
+            outhtml += `<h3 class="mb-1">Subjects</h3>
                         <table class="table table-bordered border-0">
                             <thead>
                                 <tr>
