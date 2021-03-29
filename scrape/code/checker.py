@@ -8,7 +8,7 @@ import psycopg2
 
 def clean():
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Cleaning database")
-    tables = ['subjects','fields','subfields','domains','standard_types','standard_subject','standards']
+    tables = ['subjects','standards','fields','subfields','domains','standard_types','standard_subject']
     success = False # error handling for while the Postgres is starting
     while not success:
         try:
@@ -60,7 +60,11 @@ if __name__ == "__main__":
                 olderthanayear = (lastupdated + timedelta(days=365)) < datetime.now() 
                 # if FORCE_SCRAPE environment variable is set, scrape even if previous file is young young
                 if olderthanayear or os.environ.get("FORCE_SCRAPE") == '1': 
-                    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] File is outdated, or scrape is forced. Scraping")
+                    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] File is outdated, or scrape is forced.")
+                    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Entering in old data to improve uptime")
+                    clean()
+                    combine()
+                    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Scraping")
                     scrape_and_dump(of)
                     clean()
                     combine()

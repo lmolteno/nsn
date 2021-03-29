@@ -82,10 +82,11 @@ def get_assessments(subject): # this function will parse the assessment search q
     for level in (1,2,3): # for all the levels we're worried about
         formatted = url.format(subjname=subjectname.lower(), level=level) # put info into url format
         
-        print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Getting assessments for {subject["name"]}, level {level}') # debug
+        print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Getting standards for {subject["name"]}, level {level}') # debug
         page = requests.get(formatted) # send request
         soup = BeautifulSoup(page.content.decode("utf8"), "html.parser",) # html parser init
         results = soup.find_all('tr', class_="dataHighlight") # get all the table rows that are highlighted (header rows)
+        num_ass = 0
         for row in results: # for all the header rows
             a_tags = len(row.find_all('td')[0].find_all('a')) # find how many a tags there are
             num, title, credits, external = row.find_all('strong') # find the bolded text
@@ -101,7 +102,8 @@ def get_assessments(subject): # this function will parse the assessment search q
                     'achievement': int(num.text) >= 90000
                 }
                 assessments.append(new_ass)
-
+                num_ass += 1
+        print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Found {num_ass} standards') # debug
     return assessments
 
 def scrape_and_dump(of):

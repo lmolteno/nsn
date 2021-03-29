@@ -36,10 +36,12 @@ services:
         ports:
             - 80:80
             - 443:443
+        user: root
         volumes:
             - ./static:/static
             - ./Caddyfile:/etc/caddy/Caddyfile
-            
+            - ./certs/config:/root/.config/caddy
+            - ./certs/local:/root/.local/share/caddy         
     scraper:
         build:
             context: ./scrape
@@ -50,7 +52,7 @@ services:
             - ./scrape/code:/code
             - ./scrape/output:/output
         environment:
-            FORCE_SCRAPE: 0
+            FORCE_SCRAPE: 1
             POSTGRES_USER: nzqa
             POSTGRES_PASSWORD: nzqa
             POSTGRES_DB: nzqa
@@ -63,12 +65,8 @@ services:
         volumes:
             - ./static:/static
             - ./goaccess/:/etc/goaccess
-        ports:
-            - 7890:7890
         command: ['/static/analytics/access.log']
 
     search:
         image: getmeili/meilisearch:latest
         restart: unless-stopped
-        ports:
-            - 7700:7700

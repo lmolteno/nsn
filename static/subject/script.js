@@ -10,7 +10,7 @@ subject = 0;
 
 // for accessing the search engine
 const client = new MeiliSearch({
-    host: 'http://127.0.0.1:7700',
+    host: 'https://nsn.molteno.org',
     apiKey: '',
 })
 
