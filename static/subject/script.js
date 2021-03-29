@@ -98,7 +98,7 @@ async function search() {
             subjecthtml += "</tbody></table>"
         }
         
-        outhtml += standards + subjects + "</div>"
+        outhtml += standardshtml + subjecthtml + "</div>"
         if (subjects.hits.length == 0 && standards.hits.length == 0) {
             outhtml = "<p class='text-muted mb-2'>Nothin' here!</p>"
         }
