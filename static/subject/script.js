@@ -2,6 +2,9 @@
 subjects = [];
 standards = [];
 const urlParams = new URLSearchParams(window.location.search); // get url parameters
+if (urlParams.get('id') == null) {
+    window.location = "/"; // if there's no id parameter in the url
+}
 const subject_id = parseInt(urlParams.get('id'));
 subject = 0;
 
@@ -57,12 +60,12 @@ async function search() {
         
         outhtml = '<div class="table-responsive">'
         if (standards['hits'].length > 0) {
-            outhtml +=  `<h3 class="mb-0 border-bottom">Standards</h3>
+            outhtml +=  `<h3 class="mb-1">Standards</h3>
 
-                        <table class="table-responsive table table-hover">
+                        <table class="table-bordered border-0 table table-hover">
                             <thead>
                                 <tr>
-                                <th scope="col" class="col-1">Number</th>
+                                <th scope="col" class="col-1 text-end">Number</th>
                                 <th scope="col" class="col-9">Title</th>
                                 <th scope="col">Type</th>
                                 <th scope="col">Level</th>
@@ -72,14 +75,7 @@ async function search() {
                             </thead>
                             <tbody>`;
             standards['hits'].forEach(result => {
-                outhtml += "<tr class='clickable' onclick='linkToAssessment(" + result.id + ")'>"
-                outhtml += "<th scope='row'><span class='float-end'>" + result.id + "</span></th>"
-                outhtml += "<td>" + result.title + "</td>"
-                outhtml += "<td>" + ((parseInt(result.id) < 90000) ? "Unit" : "Achievement") + "</td>"
-                outhtml += "<td>" + result.level.toString() + "</td>"
-                outhtml += "<td>" + result.credits.toString() + "</td>"
-                outhtml += "<td>" + (result.internal ? "Internal" : "External") + "</td>"
-                outhtml += "</tr>"
+                outhtml += generateStandardRow(result)
             });
             outhtml += "</tbody></table>"
         }
@@ -89,8 +85,8 @@ async function search() {
         
         const subjects = await subjindex.search(searchtext, {limit: 5})
         if (subjects.hits.length > 0) {
-            outhtml += `<h3 class="mb-0 border-bottom">Subjects</h3>
-                        <table class="table-responsive table">
+            outhtml += `<h3 class="mb-1">Standards</h3>
+                        <table class="table table-bordered border-0">
                             <thead>
                                 <tr>
                                     <th scope="col">Name</th>
@@ -98,28 +94,15 @@ async function search() {
                             </thead>
                             <tbody>`;
             subjects['hits'].forEach(result => {
-                outhtml += "<tr>"
-                outhtml += "<td>"
-                outhtml += "<a type='button' onClick='starSubject("
-                outhtml += result.id;
-                outhtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-3'>";
-                // check if the subject is starred or not
-                is_starred = starred.find(s => s.subject_id === parseInt(result.id))
-                if (is_starred) {
-                    outhtml += starFull + "</a>";
-                } else {
-                    outhtml += starOutline + "</a>";
-                }       
-                outhtml += "<a href='/subject/?id=" + result.id + "' class='text-decoration-none link'>" + result.name + "</a></td>"
-                outhtml += "</tr>"
+                outhtml += generateSubjectRow(result)
             });
             outhtml += "</tbody></table>"
         }
         
+        outhtml += "</div>"
         if (subjects.hits.length == 0 && standards.hits.length == 0) {
             outhtml = "<p class='text-muted mb-2'>Nothin' here!</p>"
         }
-        outhtml += "</div>"
         $("#search-results").html(outhtml)
         $("#search-results").css("visibility","visible");
     } else {
@@ -133,17 +116,44 @@ function linkToAssessment(number) {
     window.open(nzqaurl, '_blank')
 }
 
+function generateSubjectRow(subject) {
+    outhtml = ""
+    outhtml += "<tr>"
+    outhtml += "<td>"
+    outhtml += "<a href='/subject/?id=" + subject.id + "' class='text-decoration-none link'>" + subject.name + "</a></td>"
+    outhtml += "</tr>"
+    return outhtml
+}
+
+function generateStandardRow(standard) {
+    outhtml = ""
+    if (standard.standard_number != null) {
+        outhtml += "<tr class='clickable' onclick='linkToAssessment(" + standard.standard_number + ")'>"
+        outhtml += "<th scope='row'><span class='float-end'>" + standard.standard_number + "</span></th>"
+    } else {
+        outhtml += "<tr class='clickable' onclick='linkToAssessment(" + standard.id + ")'>"
+        outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
+    }
+    outhtml += "<td>" + standard.title + "</td>"
+    outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
+    outhtml += "<td class='text-center'>" + standard.level + "</td>"
+    outhtml += "<td class='text-center'>" + standard.credits + "</td>"
+    outhtml += "<td>" + (standard.internal ? "Internal" : "External") + "</td>"
+    outhtml += "</tr>"
+    return outhtml
+}
+
 function updateEverything() { // populate the standards list, and the subject name
     subject = subjects.find(o => o.subject_id == subject_id)
     $("#subject-name").hide()
     $("#subject-name").html(subject.name);
     $("#subject-name").fadeIn() // I love this so much
     outhtml = ` <div class="table-responsive">
-                <h3 class="mb-0 border-bottom">Standards</h3>
-                <table class="table table-hover">
+                <h3 class="mb-1">Standards</h3>
+                <table class="table table-bordered table-hover border-0">
                     <thead>
                         <tr>
-                        <th scope="col" class="col-1">Number</th>
+                        <th scope="col" class="col-1 text-end">Number</th>
                         <th scope="col" class="col-9">Title</th>
                         <th scope="col">Type</th>
                         <th scope="col">Level</th>
@@ -153,17 +163,10 @@ function updateEverything() { // populate the standards list, and the subject na
                     </thead>
                     <tbody>`;
     [1,2,3].forEach(level => { // for each level
-        outhtml += "<tr><th colspan=6 class='text-center border-bottom border-dark'>Level " + level +"</th></tr>"
+        outhtml += "<tr><th colspan=6 class='text-center border border-dark'>Level " + level +"</th></tr>"
         standards.forEach(standard => { // for each standard
             if (standard.level == level) {
-                outhtml += "<tr class='clickable' onclick='linkToAssessment(" + standard.standard_number + ")'>"
-                outhtml += "<th scope='row'><span class='float-end'>" + standard.standard_number + "</span></th>"
-                outhtml += "<td>" + standard.title + "</td>"
-                outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
-                outhtml += "<td>" + standard.level + "</td>"
-                outhtml += "<td>" + standard.credits + "</td>"
-                outhtml += "<td>" + (standard.internal ? "Internal" : "External") + "</td>"
-                outhtml += "</tr>"
+                outhtml += generateStandardRow(standard)
             }
         });
     });

@@ -26,6 +26,7 @@ outliers_lut = {
                     "Technology - General Education"],
     "tikanga-a-iwi": "Tikanga a Iwi",
     ## WEIRD POLYTECHY ONES TO IGNORE
+    "business studies": False
     "business & management": False,
     "core skills": False,
     "driver license (class 1)": False, # this could be changed later, as there are actually standards in a weird format, i just cant be bothered rn

@@ -35,24 +35,30 @@ function displaySubjects() { // display the current list of subjects
     console.log("Displaying " + subjects.length.toString() + " subjects"); 
     outhtml = "" // this will be filled with list elements
     subjects.forEach(subject => {
-        // construct li element for each subject with a star
-        outhtml += "<li class='py-1 row'><a type='button' onClick='starSubject("
-        outhtml += subject.subject_id.toString();
-        outhtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-3'>";
-        // check if the subject is starred or not
-        is_starred = starred.find(s => s.subject_id === subject.subject_id)
-        if (is_starred) {
-            outhtml += starFull + "</a>";
-        } else {
-            outhtml += starOutline + "</a>";
-        }
-        outhtml += "<a class='col link text-decoration-none' href=/subject/?id=";
-        outhtml += subject.subject_id.toString();
-        outhtml += ">";
-        outhtml += subject.name;
-        outhtml += "</a></li>"
+        outhtml += generateSubjectLI(subject);
     });
     $("#subjectlist").html(outhtml);
+}
+
+function generateSubjectLI(subject) {
+    // construct li element for each subject with a star
+    outhtml = ""
+    outhtml += "<li class='py-1 row'><a type='button' onClick='starSubject("
+    outhtml += subject.subject_id.toString();
+    outhtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-2'>";
+    // check if the subject is starred or not
+    is_starred = starred.find(s => s.subject_id === subject.subject_id)
+    if (is_starred) {
+        outhtml += starFull + "</a>";
+    } else {
+        outhtml += starOutline + "</a>";
+    }
+    outhtml += "<a class='col link text-decoration-none px-0 mx-2' href=/subject/?id=";
+    outhtml += subject.subject_id.toString();
+    outhtml += ">";
+    outhtml += subject.name;
+    outhtml += "</a></li>"
+    return outhtml
 }
 
 function starSubject(subject_id, element) {
@@ -98,7 +104,7 @@ function displayStarred() {
             outhtml += "<li class='py-1 row'><a type='button' onClick='unstarSubject("
             outhtml += subject.subject_id.toString();
             outhtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-3'>" + cross + "</a>";
-            outhtml += "<a class='col link text-decoration-none' href=/subject/?id=";
+            outhtml += "<a class='px-0 mx-2 col link text-decoration-none' href=/subject/?id=";
             outhtml += subject.subject_id.toString();
             outhtml += ">";
             outhtml += subject.name;
@@ -106,6 +112,19 @@ function displayStarred() {
         });
         $("#starredlist").html(outhtml);
     }
+}
+
+function generateStandardRow(standard) {
+    outhtml = ""
+    outhtml += "<tr class='clickable' onclick='linkToAssessment(" + standard.id + ")'>"
+    outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
+    outhtml += "<td>" + standard.title + "</td>"
+    outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
+    outhtml += "<td class='text-center'>" + standard.level + "</td>"
+    outhtml += "<td class='text-center'>" + standard.credits + "</td>"
+    outhtml += "<td>" + (standard.internal ? "Internal" : "External") + "</td>"
+    outhtml += "</tr>"
+    return outhtml
 }
 
 async function search() {
@@ -119,12 +138,12 @@ async function search() {
         
         outhtml = '<div class="table-responsive">'
         if (standards['hits'].length > 0) {
-            outhtml +=  `<h3 class="mb-0 border-bottom">Standards</h3>
+            outhtml +=  `<h3 class="mb-1">Standards</h3>
 
-                        <table class="table-responsive table table-hover">
+                        <table class="table-bordered border-0 table table-hover">
                             <thead>
                                 <tr>
-                                <th scope="col" class="col-1">Number</th>
+                                <th scope="col" class="col-1 text-end">Number</th>
                                 <th scope="col" class="col-9">Title</th>
                                 <th scope="col">Type</th>
                                 <th scope="col">Level</th>
@@ -134,14 +153,7 @@ async function search() {
                             </thead>
                             <tbody>`;
             standards['hits'].forEach(result => {
-                outhtml += "<tr class='clickable' onclick='linkToAssessment(" + result.id + ")'>"
-                outhtml += "<th scope='row'><span class='float-end'>" + result.id + "</span></th>"
-                outhtml += "<td>" + result.title + "</td>"
-                outhtml += "<td>" + ((parseInt(result.id) < 90000) ? "Unit" : "Achievement") + "</td>"
-                outhtml += "<td>" + result.level.toString() + "</td>"
-                outhtml += "<td>" + result.credits.toString() + "</td>"
-                outhtml += "<td>" + (result.internal ? "Internal" : "External") + "</td>"
-                outhtml += "</tr>"
+                outhtml += generateStandardRow(result)
             });
             outhtml += "</tbody></table>"
         }
@@ -151,8 +163,8 @@ async function search() {
         
         const subjects = await subjindex.search(searchtext, {limit: 5})
         if (subjects.hits.length > 0) {
-            outhtml += `<h3 class="mb-0 border-bottom">Subjects</h3>
-                        <table class="table-responsive table">
+            outhtml += `<h3 class="mb-1">Standards</h3>
+                        <table class="table table-bordered border-0">
                             <thead>
                                 <tr>
                                     <th scope="col">Name</th>
@@ -178,10 +190,10 @@ async function search() {
             outhtml += "</tbody></table>"
         }
         
+        outhtml += "</div>"
         if (subjects.hits.length == 0 && standards.hits.length == 0) {
             outhtml = "<p class='text-muted mb-2'>Nothin' here!</p>"
         }
-        outhtml += "</div>"
         $("#search-results").html(outhtml)
         $("#search-results").css("visibility","visible");
     } else {
@@ -198,7 +210,8 @@ function linkToAssessment(number) {
 $(document).ready(function() {
     getSubjects(then=displaySubjects); // for async requests, we have to do "thens", like promises
     getStarred(then=displayStarred); // reference the local storage to find the starred subjects
-    $("#searchbox").val("")
-    search();
-    document.getElementById("searchbox").addEventListener('input', search);
+    // disable the enter key going to a new url in the search box
+    $("#searchbox").val("") // reset value
+    search(); // initialise search results
+    document.getElementById("searchbox").addEventListener('input', search); // when something is input, search
 });

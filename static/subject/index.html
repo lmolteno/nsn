@@ -18,11 +18,11 @@
             <h1 class="text-center display-3 align-middle text-light" id="subject-name">&#x200b;</h1> <!-- the &#x200b; keeps the space tall, to make the loading of the subject name less jarring --> 
         </div>
 
-        
+        <!-- Search box -->
         <div class="container-lg rounded-3 mt-3 p-0" id="search-container">
-            <form class="d-flex w-auto input-group input-group-lg border rounded">
+            <form class="d-flex w-auto input-group input-group-lg border rounded" autocomplete='off' onsubmit="return false;">
                 <span class="input-group-text border-0 bg-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                         <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
                     </svg>
                 </span>
@@ -36,13 +36,14 @@
         <div class="container-lg border border-secondary rounded-3 my-3 pt-3" id="main-container">
         </div>
         
+        <!-- Footer -->
         <footer class="container-fluid">
         <div class="text-center">
             <p class="text-muted">
                 <span>Copyright © 2021 Linus Molteno</span>
             </p>
             <p class="small text-muted">
-                Names may not be accurate (e.g. Reo Maori instead of Te Reo M&#257;ori) due to technical limitations.
+                Names may not be accurate, and accents will be removed (e.g. Reo Maori instead of Te Reo M&#257;ori) due to technical limitations with the NZQA website.
             </p>
         </div>
         </footer>
