@@ -154,14 +154,17 @@ function updateEverything() { // populate the standards list, and the subject na
                         </tr>
                     </thead>`;
     var level_arr = (level == null) ? [1,2,3] : [level,]
-    level_arr.forEach(level => { // for each level allowed on the page
-        outhtml += "<thead><tr><th colspan=6 class='text-center border border-dark'>Level " + level +"</th></tr></thead><tbody>"
-        standards.forEach(standard => { // for each standard
-            if (standard.level == level) {
+    level_arr.forEach(current_level => { // for each level allowed on the page
+        standards_for_level = standards.filter(o => o.level == current_level);
+        if (standards_for_level.length > 0) {
+            outhtml += "<thead><tr><th colspan=6 class='text-center border border-dark'>Level " + current_level +"</th></tr></thead><tbody>"
+            standards_for_level.forEach(standard => { // for each standard
                 outhtml += generateStandardRow(standard)
-            }
-        });
-        outhtml += "</tbody>";
+            });
+            outhtml += "</tbody>";
+        } else {
+            outhtml += "<thead><tr><th colspan=6 class='text-center border border-dark'>No standards for Level " + current_level +"</th></tr></thead>";
+        }
     });
     outhtml += "</tbody></table></div>";
     $("#main-container").hide();

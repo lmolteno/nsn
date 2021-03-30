@@ -5,6 +5,7 @@
 
 nav {
     background-color: var(--nzqa_blue);
+    border-bottom: 5px solid #d22127;
 }
 
 .navbar_brand {
@@ -12,7 +13,7 @@ nav {
 }
 
 #heading-container {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Kiwi Maru', sans-serif;
 }
 
 #main-container {
