@@ -52,7 +52,7 @@ services:
             - ./scrape/code:/code
             - ./scrape/output:/output
         environment:
-            FORCE_SCRAPE: 1
+            FORCE_SCRAPE: 0
             POSTGRES_USER: nzqa
             POSTGRES_PASSWORD: nzqa
             POSTGRES_DB: nzqa

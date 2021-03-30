@@ -4,9 +4,13 @@ starred = [];
 
 // for accessing the search engine
 const client = new MeiliSearch({
-    host: 'https://nsn.molteno.org',
+    host: window.location.toString(),
     apiKey: '',
 })
+
+// subjects stuff
+const subjindex = client.index('subjects')
+const standindex = client.index('standards')
 
 // const for svg icons
 const starOutline = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
@@ -131,14 +135,9 @@ async function search() {
     searchtext = $("#searchbox").val()
     
     if (searchtext.length != 0) {
-        // standards stuff
-        const standindex = client.index('standards')
-        
         const standards = await standindex.search(searchtext, {limit: 5})
-        
-        outhtml = '<div class="table-responsive">'
         if (standards['hits'].length > 0) {
-            outhtml +=  `<h3 class="mb-1">Standards</h3>
+            standardshtml =  `<h3 class="mb-1">Standards</h3>
 
                         <table class="table-bordered border-0 table table-hover">
                             <thead>
@@ -153,17 +152,15 @@ async function search() {
                             </thead>
                             <tbody>`;
             standards['hits'].forEach(result => {
-                outhtml += generateStandardRow(result)
+                standardshtml += generateStandardRow(result)
             });
-            outhtml += "</tbody></table>"
+            standardshtml += "</tbody></table>"
+            $("#standards-results").html(standardshtml)
         }
-        
-        // subjects stuff
-        const subjindex = client.index('subjects')
         
         const subjects = await subjindex.search(searchtext, {limit: 5})
         if (subjects.hits.length > 0) {
-            outhtml += `<h3 class="mb-1">Subjects</h3>
+            subjecthtml = `<h3 class="mb-1">Subjects</h3>
                         <table class="table table-bordered border-0">
                             <thead>
                                 <tr>
@@ -172,32 +169,35 @@ async function search() {
                             </thead>
                             <tbody>`;
             subjects['hits'].forEach(result => {
-                outhtml += "<tr>"
-                outhtml += "<td>"
-                outhtml += "<a type='button' onClick='starSubject("
-                outhtml += result.id;
-                outhtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-3'>";
+                subjecthtml += "<tr>"
+                subjecthtml += "<td>"
+                subjecthtml += "<a type='button' onClick='starSubject("
+                subjecthtml += result.id;
+                subjecthtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-3'>";
                 // check if the subject is starred or not
                 is_starred = starred.find(s => s.subject_id === parseInt(result.id))
                 if (is_starred) {
-                    outhtml += starFull + "</a>";
+                    subjecthtml += starFull + "</a>";
                 } else {
-                    outhtml += starOutline + "</a>";
+                    subjecthtml += starOutline + "</a>";
                 }       
-                outhtml += "<a href='/subject/?id=" + result.id + "' class='text-decoration-none link'>" + result.name + "</a></td>"
-                outhtml += "</tr>"
+                subjecthtml += "<a href='/subject/?id=" + result.id + "' class='text-decoration-none link'>" + result.name + "</a></td>"
+                subjecthtml += "</tr>"
             });
-            outhtml += "</tbody></table>"
+            subjecthtml += "</tbody></table>"
+            $("#subjects-results").html(subjecthtml)
         }
         
-        outhtml += "</div>"
-        if (subjects.hits.length == 0 && standards.hits.length == 0) {
-            outhtml = "<p class='text-muted mb-2'>Nothin' here!</p>"
-        }
-        $("#search-results").html(outhtml)
+//         outhtml += standardshtml + subjecthtml + "</div>"
+//         if (subjects.hits.length == 0 && standards.hits.length == 0) {
+//             outhtml = "<p class='text-muted mb-2'>Nothin' here!</p>"
+//         }
+//         $("#search-results").html(outhtml)
         $("#search-results").css("visibility","visible");
     } else {
-        $("#search-results").html("")
+//         $("#search-results").html("")
+        $("#subjects-results").html("")
+        $("#standards-results").html("")
         $("#search-results").css("visibility","hidden");
     }
 }

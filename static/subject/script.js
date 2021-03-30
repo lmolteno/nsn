@@ -10,7 +10,7 @@ subject = 0;
 
 // for accessing the search engine
 const client = new MeiliSearch({
-    host: 'https://nsn.molteno.org',
+    host: window.location.toString(),
     apiKey: '',
 })
 
@@ -57,11 +57,9 @@ async function search() {
     searchtext = $("#searchbox").val()
     
     if (searchtext.length != 0) {
-        outhtml = '<div class="table-responsive">'
         const standards = await standindex.search(searchtext, {limit: 5})
-        standardshtml = ""
         if (standards['hits'].length > 0) {
-            standardshtml +=  `<h3 class="mb-1">Standards</h3>
+            standardshtml =  `<h3 class="mb-1">Standards</h3>
 
                         <table class="table-bordered border-0 table table-hover">
                             <thead>
@@ -79,12 +77,12 @@ async function search() {
                 standardshtml += generateStandardRow(result)
             });
             standardshtml += "</tbody></table>"
+            $("#standards-results").html(standardshtml)
         }
         
         const subjects = await subjindex.search(searchtext, {limit: 5})
-        subjecthtml = ""
         if (subjects.hits.length > 0) {
-            subjecthtml += `<h3 class="mb-1">Subjects</h3>
+            subjecthtml = `<h3 class="mb-1">Subjects</h3>
                         <table class="table table-bordered border-0">
                             <thead>
                                 <tr>
@@ -96,16 +94,19 @@ async function search() {
                 subjecthtml += generateSubjectRow(result)
             });
             subjecthtml += "</tbody></table>"
+            $("#subjects-results").html(subjecthtml)
         }
         
-        outhtml += standardshtml + subjecthtml + "</div>"
-        if (subjects.hits.length == 0 && standards.hits.length == 0) {
-            outhtml = "<p class='text-muted mb-2'>Nothin' here!</p>"
-        }
-        $("#search-results").html(outhtml)
+//         outhtml += standardshtml + subjecthtml + "</div>"
+//         if (subjects.hits.length == 0 && standards.hits.length == 0) {
+//             outhtml = "<p class='text-muted mb-2'>Nothin' here!</p>"
+//         }
+//         $("#search-results").html(outhtml)
         $("#search-results").css("visibility","visible");
     } else {
-        $("#search-results").html("")
+//         $("#search-results").html("")
+        $("#subjects-results").html("")
+        $("#standards-results").html("")
         $("#search-results").css("visibility","hidden");
     }
 }
