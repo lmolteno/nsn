@@ -48,6 +48,32 @@ def is_empty():
         except psycopg2.OperationalError:
             time.sleep(5)
 
+def test():
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Testing...")
+    success = False # error handling for while the Postgres is starting
+    passing = True
+    while not success:
+        try:
+            conn = psycopg2.connect(
+                host="db", # this is because docker! cool!
+                database=os.environ.get("POSTGRES_DB"),
+                user=os.environ.get("POSTGRES_USER"),
+                password=os.environ.get("POSTGRES_PASSWORD"))
+            empty = False
+            with conn.cursor() as curs:
+                curs.execute('''SELECT COUNT(*) FROM standards 
+                                INNER JOIN standard_types 
+                                ON standard_types.type_id = standards.type_id 
+                                WHERE standards.standard_number < 90000 
+                                AND standard_types.name LIKE '%Achievement%';''')
+                count = curs.fetchone()[0]
+                passing = passing and count == 0 # handle for if passing is already false (for implementation of future tests)
+            conn.close()
+            success = True
+            return empty
+        except psycopg2.OperationalError:
+            time.sleep(5)
+
 if __name__ == "__main__":
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Starting checking")
     while True:

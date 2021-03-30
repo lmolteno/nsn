@@ -96,23 +96,33 @@ function getStarred(then=None) {
     then();
 }
 
+function generateStarredCard(subject) {
+    // construct card element for each starred subject
+    outhtml = "<div class='col'><div class='card'>"
+    outhtml += `<div class='card-header' style="transform: rotate(0);">
+                    <div class='close-starred'><a type='button' onClick='unstarSubject(` + subject.subject_id + `, this)'
+                       class='col-1 btn float-end btn-sm p-0'>` + cross + `</a></div>
+                    <a class='link text-decoration-none stretched-link starred-link' href=/subject/?id=` + subject.subject_id + `>
+                    ` + subject.name + `</a>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <a class='list-group-item list-group-item-action' href=/subject/?id=` + subject.subject_id + `&level=1>Level 1</a>
+                    <a class='list-group-item list-group-item-action' href=/subject/?id=` + subject.subject_id + `&level=2>Level 2</a>
+                    <a class='list-group-item list-group-item-action' href=/subject/?id=` + subject.subject_id + `&level=3>Level 3</a>
+                </ul>
+               </div></div>`;
+    return outhtml
+}
+
 function displayStarred() {
     if (starred.length == 0) {
         $("#starredlist").html("<p class='text-muted'>Nothin' here!</p>");
         $("#starredHeader").html('Starred Subjects<small class="text-muted fs-6 ps-3">Hit the ' + starOutline + ' icon to star a subject</small>');
     } else {
         $("#starredHeader").html('Starred Subjects');
-        outhtml = "";
+        outhtml = ""
         starred.forEach(subject => {
-            // construct li element for each starred subject
-            outhtml += "<li class='py-1 row'><a type='button' onClick='unstarSubject("
-            outhtml += subject.subject_id.toString();
-            outhtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-3'>" + cross + "</a>";
-            outhtml += "<a class='px-0 mx-2 col link text-decoration-none' href=/subject/?id=";
-            outhtml += subject.subject_id.toString();
-            outhtml += ">";
-            outhtml += subject.name;
-            outhtml += "</a></li>"
+            outhtml += generateStarredCard(subject);
         });
         $("#starredlist").html(outhtml);
     }
@@ -120,10 +130,20 @@ function displayStarred() {
 
 function generateStandardRow(standard) {
     outhtml = ""
-    outhtml += "<tr class='clickable' onclick='linkToAssessment(" + standard.id + ")'>"
-    outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
+    i_e_class = standard.internal ? "internal_row" : "external_row";
+    if (standard.standard_number != null) {
+        outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.standard_number + ")'>"
+        outhtml += "<th scope='row'><span class='float-end'>" + standard.standard_number + "</span></th>"
+    } else {
+        outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.id + ")'>"
+        outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
+    }
     outhtml += "<td>" + standard.title + "</td>"
-    outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
+    if (standard.standard_number != null) {
+        outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
+    } else {
+        outhtml += "<td>" + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + "</td>"
+    }        
     outhtml += "<td class='text-center'>" + standard.level + "</td>"
     outhtml += "<td class='text-center'>" + standard.credits + "</td>"
     outhtml += "<td>" + (standard.internal ? "Internal" : "External") + "</td>"
@@ -193,7 +213,7 @@ async function search() {
         }
         
         if (subjects.hits.length == 0 && standards.hits.length == 0) {
-            $("#standards-results").html("<p class='text-muted mb-2'>Nothin' here!</p>")
+            $("#subjects-results").html("<p class='text-muted mb-2'>Nothin' here!</p>")
         }
         $("#search-results").css("visibility","visible");
     } else {

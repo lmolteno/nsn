@@ -5,6 +5,8 @@ const urlParams = new URLSearchParams(window.location.search); // get url parame
 if (urlParams.get('id') == null) {
     window.location = "/"; // if there's no id parameter in the url
 }
+// get level in url parameters, else null (inline ifs can be confusing sorry)
+const level = (urlParams.get('level') == null) ? null : parseInt(urlParams.get('level')); 
 const subject_id = parseInt(urlParams.get('id'));
 subject = 0;
 
@@ -14,8 +16,7 @@ const client = new MeiliSearch({
     apiKey: '',
 })
 
-// subjects stuff
-const subjindex = client.index('subjects')
+// search stuff
 const standindex = client.index('standards')
 
 // const for svg icons
@@ -57,9 +58,15 @@ async function search() {
     searchtext = $("#searchbox").val()
     
     if (searchtext.length != 0) {
-        const standards = await standindex.search(searchtext, {limit: 5})
-        const subjects = await subjindex.search(searchtext, {limit: 5})
-        if (standards['hits'].length > 0) {
+        const searched_standards = await standindex.search(searchtext, {limit: 100})
+        if (searched_standards['hits'].length > 0) {
+            var filtered = []
+            // for all of the hits, check if they're in the list of standards for this subject
+            searched_standards['hits'].forEach(result => {
+                if (standards.find(o => o.standard_number == result.id) && filtered.length < 5) {
+                    filtered.push(result)
+                }
+            })
             standardshtml =  `<h3 class="mb-1">Standards</h3>
 
                         <table class="table-bordered border-0 table table-hover">
@@ -74,42 +81,18 @@ async function search() {
                                 </tr>
                             </thead>
                             <tbody>`;
-            standards['hits'].forEach(result => {
+            filtered.forEach(result => {
                 standardshtml += generateStandardRow(result)
             });
             standardshtml += "</tbody></table>"
-            $("#standards-results").html(standardshtml)
-        } else if (subjects.hits.length != 0) {            
-            $("#standards-results").html("")
-        }
-        
-        if (subjects.hits.length > 0) {
-            subjecthtml = `<h3 class="mb-1">Subjects</h3>
-                        <table class="table table-bordered border-0">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Name</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
-            subjects['hits'].forEach(result => {
-                subjecthtml += generateSubjectRow(result)
-            });
-            subjecthtml += "</tbody></table>"
-            $("#subjects-results").html(subjecthtml)
-        } else {            
-            $("#subjects-results").html("")
-        }
-        
-        
-        if (subjects.hits.length == 0 && standards.hits.length == 0) {
-            if ($("#standards-results").html() != "<p class=\"text-muted mb-2\">Nothin' here!</p>") {
-                $("#standards-results").html("<p class='text-muted mb-2'>Nothin' here!</p>")
+            if (filtered.length == 0) {
+                standardshtml = "<p class='text-muted mb-2'>Nothin' here!</p>";
             }
+            $("#standards-results").html(standardshtml)
         }
+        
         $("#search-results").css("visibility","visible");
     } else {
-        $("#subjects-results").html("")
         $("#standards-results").html("")
         $("#search-results").css("visibility","hidden");
     }
@@ -140,7 +123,11 @@ function generateStandardRow(standard) {
         outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
     }
     outhtml += "<td>" + standard.title + "</td>"
-    outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
+    if (standard.standard_number != null) {
+        outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
+    } else {
+        outhtml += "<td>" + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + "</td>"
+    }        
     outhtml += "<td class='text-center'>" + standard.level + "</td>"
     outhtml += "<td class='text-center'>" + standard.credits + "</td>"
     outhtml += "<td>" + (standard.internal ? "Internal" : "External") + "</td>"
@@ -166,7 +153,8 @@ function updateEverything() { // populate the standards list, and the subject na
                         <th scope="col">I/E</th>
                         </tr>
                     </thead>`;
-    [1,2,3].forEach(level => { // for each level
+    var level_arr = (level == null) ? [1,2,3] : [level,]
+    level_arr.forEach(level => { // for each level allowed on the page
         outhtml += "<thead><tr><th colspan=6 class='text-center border border-dark'>Level " + level +"</th></tr></thead><tbody>"
         standards.forEach(standard => { // for each standard
             if (standard.level == level) {

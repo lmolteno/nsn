@@ -23,8 +23,8 @@
         <!-- Starred subjects -->
         <div class="container-lg border border-secondary rounded-3 mt-3" id="starred-container">
             <h3 class='pt-2' id='starredHeader'>Starred Subjects</h3>
-            <ul class="list-unstyled card-columns px-4" id="starredlist">
-            </ul>
+            <div class="row row-cols-1 row-cols-md-4 g-3 mb-3" id="starredlist">
+            </div>
         </div>
         
         <div class="container-lg rounded-3 mt-3 p-0" id="search-container">
@@ -37,9 +37,9 @@
                 <input class="form-control border-0 border-start" type="search" placeholder="Search" aria-label="Search" id='searchbox'>
             </form>
             <div class="container-lg border rounded-bottom border-top-0 pt-2" id="search-results" style='visibility:hidden;'>
-                <div id="standards-results" class="table-responsive">
-                </div>
                 <div id="subjects-results" class="table-responsive">
+                </div>
+                <div id="standards-results" class="table-responsive">
                 </div>
             </div>
         </div>

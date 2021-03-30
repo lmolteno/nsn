@@ -37,3 +37,27 @@ nav {
 
 .clickable { cursor: pointer; }
 
+.internal_row {
+    background-color: #e0f0ff;
+}
+
+.external_row {
+    background-color: /* elia:#ffe8f5*//* odin:#ffd1eb sarah:*/#c6d6e8;
+}
+
+.card-header {
+    cursor: pointer;
+}
+
+.card {
+    transition: border 0.4s;
+}
+
+.card:hover {
+    border: 1px solid var(--nzqa_blue);
+}
+
+.close-starred {
+    z-index: 2;
+    position: relative;
+}
