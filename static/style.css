@@ -7,6 +7,14 @@ nav {
     background-color: var(--nzqa_blue);
 }
 
+.navbar_brand {
+    font-family: 'Roboto', sans-serif;
+}
+
+#heading-container {
+    font-family: 'Roboto', sans-serif;
+}
+
 #main-container {
     background-color: #f2f2f2;
 }

@@ -8,7 +8,7 @@ nav {
 }
 
 #main-container {
-    background-color: #f2f2f2;
+    background-color: #f3f3f3;
 }
 
 .card-columns {
@@ -29,3 +29,10 @@ nav {
 
 .clickable { cursor: pointer; }
 
+.internal_row {
+    background-color: #e0f0ff;
+}
+
+.external_row {
+    background-color: /* elia:#ffe8f5*//* odin:#ffd1eb sarah:*/#c6d6e8;
+}

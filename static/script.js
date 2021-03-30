@@ -4,7 +4,7 @@ starred = [];
 
 // for accessing the search engine
 const client = new MeiliSearch({
-    host: window.location.toString(),
+    host: "https://" + window.location.host.toString(),
     apiKey: '',
 })
 
@@ -156,6 +156,8 @@ async function search() {
             });
             standardshtml += "</tbody></table>"
             $("#standards-results").html(standardshtml)
+        } else {
+            $("#standards-results").html("");
         }
         
         const subjects = await subjindex.search(searchtext, {limit: 5})
@@ -186,13 +188,13 @@ async function search() {
             });
             subjecthtml += "</tbody></table>"
             $("#subjects-results").html(subjecthtml)
+        } else {
+            $("#subjects-results").html("");
         }
         
-//         outhtml += standardshtml + subjecthtml + "</div>"
-//         if (subjects.hits.length == 0 && standards.hits.length == 0) {
-//             outhtml = "<p class='text-muted mb-2'>Nothin' here!</p>"
-//         }
-//         $("#search-results").html(outhtml)
+        if (subjects.hits.length == 0 && standards.hits.length == 0) {
+            $("#standards-results").html("<p class='text-muted mb-2'>Nothin' here!</p>")
+        }
         $("#search-results").css("visibility","visible");
     } else {
 //         $("#search-results").html("")

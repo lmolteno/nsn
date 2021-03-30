@@ -10,7 +10,7 @@ subject = 0;
 
 // for accessing the search engine
 const client = new MeiliSearch({
-    host: window.location.toString(),
+    host: "https://" + window.location.host.toString(),
     apiKey: '',
 })
 
@@ -58,6 +58,7 @@ async function search() {
     
     if (searchtext.length != 0) {
         const standards = await standindex.search(searchtext, {limit: 5})
+        const subjects = await subjindex.search(searchtext, {limit: 5})
         if (standards['hits'].length > 0) {
             standardshtml =  `<h3 class="mb-1">Standards</h3>
 
@@ -78,9 +79,10 @@ async function search() {
             });
             standardshtml += "</tbody></table>"
             $("#standards-results").html(standardshtml)
+        } else if (subjects.hits.length != 0) {            
+            $("#standards-results").html("")
         }
         
-        const subjects = await subjindex.search(searchtext, {limit: 5})
         if (subjects.hits.length > 0) {
             subjecthtml = `<h3 class="mb-1">Subjects</h3>
                         <table class="table table-bordered border-0">
@@ -95,16 +97,18 @@ async function search() {
             });
             subjecthtml += "</tbody></table>"
             $("#subjects-results").html(subjecthtml)
+        } else {            
+            $("#subjects-results").html("")
         }
         
-//         outhtml += standardshtml + subjecthtml + "</div>"
-//         if (subjects.hits.length == 0 && standards.hits.length == 0) {
-//             outhtml = "<p class='text-muted mb-2'>Nothin' here!</p>"
-//         }
-//         $("#search-results").html(outhtml)
+        
+        if (subjects.hits.length == 0 && standards.hits.length == 0) {
+            if ($("#standards-results").html() != "<p class=\"text-muted mb-2\">Nothin' here!</p>") {
+                $("#standards-results").html("<p class='text-muted mb-2'>Nothin' here!</p>")
+            }
+        }
         $("#search-results").css("visibility","visible");
     } else {
-//         $("#search-results").html("")
         $("#subjects-results").html("")
         $("#standards-results").html("")
         $("#search-results").css("visibility","hidden");
@@ -127,11 +131,12 @@ function generateSubjectRow(subject) {
 
 function generateStandardRow(standard) {
     outhtml = ""
+    i_e_class = standard.internal ? "internal_row" : "external_row";
     if (standard.standard_number != null) {
-        outhtml += "<tr class='clickable' onclick='linkToAssessment(" + standard.standard_number + ")'>"
+        outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.standard_number + ")'>"
         outhtml += "<th scope='row'><span class='float-end'>" + standard.standard_number + "</span></th>"
     } else {
-        outhtml += "<tr class='clickable' onclick='linkToAssessment(" + standard.id + ")'>"
+        outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.id + ")'>"
         outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
     }
     outhtml += "<td>" + standard.title + "</td>"
@@ -150,7 +155,7 @@ function updateEverything() { // populate the standards list, and the subject na
     $("#subject-name").fadeIn() // I love this so much
     outhtml = ` <div class="table-responsive">
                 <h3 class="mb-1">Standards</h3>
-                <table class="table table-bordered table-hover border-0">
+                <table class="table table-bordered table-hover bg-white border-0">
                     <thead>
                         <tr>
                         <th scope="col" class="col-1 text-end">Number</th>
@@ -160,15 +165,15 @@ function updateEverything() { // populate the standards list, and the subject na
                         <th scope="col">Credits</th>
                         <th scope="col">I/E</th>
                         </tr>
-                    </thead>
-                    <tbody>`;
+                    </thead>`;
     [1,2,3].forEach(level => { // for each level
-        outhtml += "<tr><th colspan=6 class='text-center border border-dark'>Level " + level +"</th></tr>"
+        outhtml += "<thead><tr><th colspan=6 class='text-center border border-dark'>Level " + level +"</th></tr></thead><tbody>"
         standards.forEach(standard => { // for each standard
             if (standard.level == level) {
                 outhtml += generateStandardRow(standard)
             }
         });
+        outhtml += "</tbody>";
     });
     outhtml += "</tbody></table></div>";
     $("#main-container").hide();

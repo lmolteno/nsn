@@ -68,8 +68,14 @@ def get_subjects(): # this function will parse the NCEA subjects page to find th
                     subject_name = outliers_lut[subject_name.lower()]
             else:
                 print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Ignoring {subject_name}')
-            
-        subjects.append({"name": subject_name}) # add to the subjects list
+        
+        try:
+            # ensure no duplicates
+            # the "next" here means that it will try to find the first element of the iterator 
+            # returned by the inline for loop
+            duplicate = next(subject for subject in subjects if subjects['name'] == subject_name)
+        except StopIteration:
+            subjects.append({"name": subject_name}) # add to the subjects list
             
     return subjects
 
