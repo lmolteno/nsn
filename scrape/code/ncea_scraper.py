@@ -73,7 +73,7 @@ def get_subjects(): # this function will parse the NCEA subjects page to find th
             # ensure no duplicates
             # the "next" here means that it will try to find the first element of the iterator 
             # returned by the inline for loop
-            duplicate = next(subject for subject in subjects if subjects['name'] == subject_name)
+            duplicate = next(subject for subject in subjects if subject['name'] == subject_name)
         except StopIteration:
             subjects.append({"name": subject_name}) # add to the subjects list
             
