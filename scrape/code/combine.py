@@ -57,8 +57,8 @@ def combine():
     duplicate = 0
     for scraped in s_st:
         
-        if scraped['number'] == 91154:
-            print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] I found validity!")
+        #if scraped['number'] == 91154:
+            #print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] I found validity!")
         
         # update subjects, types lists
         if scraped['subject']['name'] not in subjects:
@@ -139,8 +139,8 @@ def combine():
             duplicate += 1
             #print(f"DUPLICATE AS{scraped['number']:<5d}")
         except StopIteration: # there is no duplicate
-            if scraped['number'] == 91154:
-                print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] I'm entering validity!")
+            #if scraped['number'] == 91154:
+                #print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] I'm entering validity!")
             standards.append(outtuple)
             search_standards.append(search_standard)
 

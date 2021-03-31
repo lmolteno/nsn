@@ -68,6 +68,7 @@ def get_subjects(): # this function will parse the NCEA subjects page to find th
                     subject_name = outliers_lut[subject_name.lower()]
             else:
                 print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Ignoring {subject_name}')
+                continue
         
         try:
             # ensure no duplicates
@@ -84,11 +85,10 @@ def get_assessments(subject): # this function will parse the assessment search q
     assessments = [] # empty list that will be populated with standards
     
     subjectname = subject['name'].replace(" ", "+") # e.g. turn Digital Technologies into Digital+Technologies for the query
-    
+    print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Getting standards for {subject["name"]}')
     for level in (1,2,3): # for all the levels we're worried about
         formatted = url.format(subjname=subjectname.lower(), level=level) # put info into url format
         
-        print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Getting standards for {subject["name"]}, level {level}') # debug
         page = requests.get(formatted) # send request
         soup = BeautifulSoup(page.content.decode("utf8"), "html.parser",) # html parser init
         results = soup.find_all('tr', class_="dataHighlight") # get all the table rows that are highlighted (header rows)
@@ -109,14 +109,14 @@ def get_assessments(subject): # this function will parse the assessment search q
                 }
                 assessments.append(new_ass)
                 num_ass += 1
-        print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Found {num_ass} standards') # debug
+        print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Found {num_ass} standards in level {level}') # debug
     return assessments
 
 def scrape_and_dump(of):
     # initialise json/dictionary with assessments list and current time for the time of updating
     data = {'assessments': [], 'updated': datetime.now().strftime(f_string)} 
     for subject in get_subjects():
-        delay = random.randint(0,10)
+        delay = random.randint(5,20)
         print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting {delay}s to avoid being suspicious")
         time.sleep(delay)
         data['assessments'] += get_assessments(subject) # get assessments for all subjects
