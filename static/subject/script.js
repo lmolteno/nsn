@@ -140,6 +140,19 @@ function updateEverything() { // populate the standards list, and the subject na
     $("#subject-name").hide()
     $("#subject-name").html(subject.name);
     $("#subject-name").fadeIn() // I love this so much
+    $("#nav-breadcrumbs").hide()
+    if (level != null) {
+        $("#nav-breadcrumbs").html(`<a class="nav-link" href=/>Home</a>
+                                    <span class='nav-link disabled'>/</span>
+                                    <a class="nav-link" href=/subject/?id=` + subject_id + `>` + subject.name + `</a>
+                                    <span class='nav-link disabled'>/</span>
+                                    <a class="nav-link active" aria-current="page">Level ` + level + `</a>`);
+    } else {
+        $("#nav-breadcrumbs").html(`<a class="nav-link" href="/">Home</a>
+                                    <span class='nav-link disabled'>/</span>
+                                    <a class="nav-link active" aria-current="page">` + subject.name + `</a>`);    
+    }
+    $("#nav-breadcrumbs").fadeIn() // I love this so much
     outhtml = ` <div class="table-responsive">
                 <h3 class="mb-1">Standards</h3>
                 <table class="table table-bordered table-hover bg-white border-0">

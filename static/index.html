@@ -9,9 +9,21 @@
     </head>
     <body class='d-flex flex-column h-100'>
         <!-- Navbar -->
-        <nav class="navbar navbar-dark">
+        <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container-fluid">
                 <a class="navbar-brand" href="#">NCEA Standard Navigator</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse">
+                    <div class="navbar-nav" id='nav-breadcrumbs'>
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </div>
+                    <div class="navbar-nav ms-auto">
+                        <a class="nav-link float-end" href="/analytics/">Analytics</a>
+                        <a class="nav-link" href="/about">About</a>
+                    </div>
+                </div>
             </div>
         </nav>
         
@@ -20,14 +32,8 @@
         <div class="container-fluid py-3 bg-dark" id="heading-container">
             <h1 class="text-center display-3 align-middle text-light user-select-none">Subjects</h1>
         </div>
-
-        <!-- Starred subjects -->
-        <div class="container-lg border border-secondary rounded-3 mt-3" id="starred-container">
-            <h3 class='pt-2' id='starredHeader'>Starred Subjects</h3>
-            <div class="row row-cols-1 row-cols-md-4 g-3 mb-3" id="starredlist">
-            </div>
-        </div>
         
+        <!-- Search -->
         <div class="container-lg rounded-3 mt-3 p-0" id="search-container">
             <form class="d-flex w-auto input-group input-group-lg border rounded" autocomplete='off' onsubmit="return false;">
                 <span class="input-group-text border-0 bg-white">
@@ -42,6 +48,13 @@
                 </div>
                 <div id="standards-results" class="table-responsive">
                 </div>
+            </div>
+        </div>
+
+        <!-- Starred subjects -->
+        <div class="container-lg border border-secondary rounded-3 mt-3" id="starred-container">
+            <h3 class='pt-2' id='starredHeader'>My Subjects</h3>
+            <div class="row row-cols-1 row-cols-md-4 g-3 mb-3" id="starredlist">
             </div>
         </div>
         

@@ -117,14 +117,16 @@ function generateStarredCard(subject) {
 function displayStarred() {
     if (starred.length == 0) {
         $("#starredlist").html("<p class='text-muted'>Nothin' here!</p>");
-        $("#starredHeader").html('Starred Subjects<small class="text-muted fs-6 ps-3">Hit the ' + starOutline + ' icon to star a subject</small>');
+        $("#starredHeader").html('My Subjects<small class="text-muted fs-6 ps-3 fw-light">Hit the ' + starOutline + ' icon to add a subject here</small>');
     } else {
-        $("#starredHeader").html('Starred Subjects');
+        $("#starredHeader").html('My Subjects');
+        $("#starredlist").hide();
         outhtml = ""
         starred.forEach(subject => {
             outhtml += generateStarredCard(subject);
         });
         $("#starredlist").html(outhtml);
+        $("#starredlist").fadeIn();
     }
 }
 
