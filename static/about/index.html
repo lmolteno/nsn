@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html class='h-100'>
+    <head>
+        <title>NCEA Standard Navigator</title> <!-- this is subject to change -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"> 
+        <link href="/style.css" rel="stylesheet">
+    </head>
+    <body class='d-flex flex-column h-100'>
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">NCEA Standard Navigator</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav-links" aria-controls="nav-links" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+                <div id="nav-links" class="collapse navbar-collapse">
+                    <div class="navbar-nav" id='nav-breadcrumbs'>
+                        <a class="nav-link" href="/">Home</a>
+                    </div>
+                    <div class="navbar-nav ms-auto">
+                        <a class="nav-link float-end" href="/analytics/">Analytics</a>
+                        <a class="nav-link active" aria-current="page">About</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        
+        <main class='flex-shrink-0 bg-light'>
+            <!-- Big heading -->
+            <div class="container-fluid py-3 bg-dark" id="heading-container">
+                <h1 class="text-center display-3 align-middle text-light user-select-none">About</h1>
+            </div>
+            
+            <!-- All subjects -->
+            <div class="container-lg py-3" id="main-container">
+                <figure class='text-center'>
+                    <blockquote class="blockquote fs-4">
+                        <p>I do not like the NZQA website.</p>
+                    </blockquote>
+                    <figcaption class="blockquote-footer">
+                        My entire computer science class, synchronously
+                    </figcaption>
+                </figure>
+                <p class='text-center lead'>This project was born out of a frustration with the current NZQA website for the purposes of getting information and documents relating to standards students were being assessed on.</p>
+                <div class='row justify-content-end'>
+                    <div class='col-sm ps-3'>
+                        <p>The system to support this system is built on the following elements, all containerised through Docker, and composed through Docker Compose</p>
+                        <dl>
+                            <dt>Python with Beautiful Soup</dt>
+                            <dd>for scraping and managing where the scraped data goes.</dd>
+
+                            <dt>MeiliSearch</dt>
+                            <dd>for serving fast, typo-resistant search results for both subjects and standards.</dd>
+
+                            <dt>PostgreSQL</dt>
+                            <dd>for providing a scalable, production-quality database.</dd>
+
+                            <dt>Python with Flask</dt>
+                            <dd>for accessing and serving the data from the database to the frontend.</dd>
+                            
+                            <dt>Caddy</dt>
+                            <dd>for directing traffic and auto-SSL certificates from LetsEncrypt.</dd>
+                            
+                            <dt>GoAccess</dt>
+                            <dd>for reading Caddy logs and running a websocket, where a dashboard can be connected.</dd>
+                            
+                            <dt>HTML/CSS/JS + Bootstrap</dt>
+                            <dd>for writing and running the frontend.  </dd>
+                        </dl>
+                    <!-- <p>This journey began during exams last year. I built up an intense frustration at the number of clicks between going to the NZQA website, and the exam papers I needed for my study. I thought to myself <em>"There must be a better way!"</em> Then, after some research, I discovered that there was a dataset provided by NZQA, describing all their 106k standards that they've made since 1989. From here I'd imagined it would simply be entering this information into a database, writing a quick API to interface with that database, and serving that through a basic frontend. But lo! The dataset they provided didn't have information regarding what NCEA subject each standard fell under. So I went about my day, scraping the NZQA/NCEA subjects page for subject, then for each of those subjects, I would work through the "Search results" page for each level, building up a list of standards for each subject, that I would save in a JSON file. Then &mdash; shock! I discovered why that dataset didn't provide the subject for each standard. Standards can be a part of multiple subjects! Modifying my database to suit this, I moved forward. After many trials and tribulations, I ended up with a functioning site, with the following system diagram.</p>-->
+                    </div>
+                    <div class='col-sm'>
+                        <img src='system_diagram.png' class='img-fluid'></img> 
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="container-fluid footer mt-auto py-3 bg-light">
+            <div class="text-center">
+                <p class="text-muted">
+                    <span>Copyright © 2021 Linus Molteno</span>
+                </p>
+                <p class="small text-muted">
+                    Names may not be accurate (e.g. Reo Maori instead of Te Reo M&#257;ori) due to technical limitations.
+                </p>
+            </div>
+        </footer>
+    
+        <script src='https://cdn.jsdelivr.net/npm/meilisearch@latest/dist/bundles/meilisearch.umd.js'></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+        <script src="script.js"></script>
+    </body>
+</html>
