@@ -88,7 +88,7 @@ def get_assessments(subject): # this function will parse the assessment search q
     print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Getting standards for {subject["name"]}')
     for level in (1,2,3): # for all the levels we're worried about
         formatted = url.format(subjname=subjectname.lower(), level=level) # put info into url format
-        fn = f"../cache/{subjectname.lower()}/{level}.html"
+        fn = f"/cache/{subjectname.lower()}/{level}.html"
         
         # get text from cache, or don't
         text = ""
@@ -96,9 +96,13 @@ def get_assessments(subject): # this function will parse the assessment search q
             with open(fn, 'r') as f:
                 text = f.read()
         else: # there was no cached file
+            delay = random.randint(5,10)
+            print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting {delay}s to avoid being suspicious")
+            time.sleep(delay)
             page = requests.get(formatted) # send request
             page.raise_for_status() # raise an error on a bad status
             if os.environ.get("HARD_CACHE") == "1":
+                print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Caching')
                 os.makedirs(os.path.dirname(fn), exist_ok=True) # make directories on the way to the caching location
                 with open(fn, 'w') as f:
                     f.write(page.text) # save to file for later caching if there's a cache
@@ -131,9 +135,6 @@ def scrape_and_dump(of):
     # initialise json/dictionary with assessments list and current time for the time of updating
     data = {'assessments': [], 'updated': datetime.now().strftime(f_string)} 
     for subject in get_subjects():
-        delay = random.randint(5,20)
-        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting {delay}s to avoid being suspicious")
-        time.sleep(delay)
         data['assessments'] += get_assessments(subject) # get assessments for all subjects
 
     with open(of, 'w') as outfile:

@@ -51,8 +51,9 @@ services:
         volumes:
             - ./scrape/code:/code
             - ./scrape/output:/output
+            - ./scrape/cache:/cache
         environment:
-            FORCE_SCRAPE: 0
+            FORCE_SCRAPE: 1
             HARD_CACHE: 1
             POSTGRES_USER: nzqa
             POSTGRES_PASSWORD: nzqa

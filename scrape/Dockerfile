@@ -5,7 +5,8 @@ WORKDIR /code
 COPY requirements.txt /code/
 RUN  pip install -r requirements.txt
 COPY ./code /code/
-COPY ./output /output
+COPY ./output /output/
+COPY ./cache /cache/
 # run the python scraping script. if the current json file is older than a year, re-scrape
 # CMD python3 ncea_scraper.py
 # combine dataset and enter into the database
