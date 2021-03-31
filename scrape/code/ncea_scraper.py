@@ -88,9 +88,24 @@ def get_assessments(subject): # this function will parse the assessment search q
     print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Getting standards for {subject["name"]}')
     for level in (1,2,3): # for all the levels we're worried about
         formatted = url.format(subjname=subjectname.lower(), level=level) # put info into url format
+        fn = f"../cache/{subjectname.lower()}/{level}.html"
         
-        page = requests.get(formatted) # send request
-        soup = BeautifulSoup(page.content.decode("utf8"), "html.parser",) # html parser init
+        # get text from cache, or don't
+        text = ""
+        if os.path.isfile(fn):
+            with open(fn, 'r') as f:
+                text = f.read()
+        else: # there was no cached file
+            page = requests.get(formatted) # send request
+            page.raise_for_status() # raise an error on a bad status
+            if os.environ.get("HARD_CACHE") == "1":
+                os.makedirs(os.path.dirname(fn), exist_ok=True) # make directories on the way to the caching location
+                with open(fn, 'w') as f:
+                    f.write(page.text) # save to file for later caching if there's a cache
+            text = page.text # save page text as text
+                    
+                
+        soup = BeautifulSoup(text, "html.parser",) # html parser init
         results = soup.find_all('tr', class_="dataHighlight") # get all the table rows that are highlighted (header rows)
         num_ass = 0
         for row in results: # for all the header rows
