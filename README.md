@@ -1,7 +1,7 @@
 # NZQA Navigator
 
 A simpler navigation for the NZQA assessment resources (past papers, assessment schedules, exemplars, etc).
-NZQA have been kind enough to provide a [dataset](https://catalogue.data.govt.nz/dataset/list-of-standards-by-category-2020) for their assessment standards, which will be used as reference and updated in future years (hopefully).
+NZQA have been kind enough to provide a [dataset](https://catalogue.data.govt.nz/dataset/list-of-standards-by-category-2020) for their assessment standards, which will be used as reference and updated in future years (hopefully). As well as this, they have an _excel spreadsheet_ for their literacy/numeracy credits, [disgusting](https://www.nzqa.govt.nz/assets/qualifications-and-standards/qualifications/ncea/NCEA-subject-resources/Literacy-and-Numeracy/literacy-numeracy-assessment-standards-April-2019.xls).
 
 ## Intentions
 
