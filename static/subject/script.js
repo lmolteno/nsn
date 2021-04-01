@@ -114,7 +114,7 @@ function generateSubjectRow(subject) {
 
 function generateStandardRow(standard) {
     outhtml = ""
-    i_e_class = standard.internal ? "internal_row" : "external_row";
+    i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal ane external
     if (standard.standard_number != null) {
         outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.standard_number + ")'>"
         outhtml += "<th scope='row'><span class='float-end'>" + standard.standard_number + "</span></th>"
@@ -142,15 +142,15 @@ function updateEverything() { // populate the standards list, and the subject na
     $("#subject-name").fadeIn() // I love this so much
     $("#nav-breadcrumbs").hide()
     if (level != null) {
-        $("#nav-breadcrumbs").html(`<a class="nav-link" href=/>Home</a>
-                                    <span class='nav-link disabled'>/</span>
-                                    <a class="nav-link" href=/subject/?id=` + subject_id + `>` + subject.name + `</a>
-                                    <span class='nav-link disabled'>/</span>
-                                    <a class="nav-link active" aria-current="page">Level ` + level + `</a>`);
+        $("#nav-breadcrumbs").html(`<div class='row'><div class='col-auto pe-lg-0'><a class="nav-link" href="/">Home</a></div>
+                                    <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
+                                    <div class='col-auto p-lg-0'><a class="nav-link" href="/subject/?id=` + subject_id + `">` + subject.name + `</a></div>
+                                    <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
+                                    <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">Level ` + level + `</a></div></div>`);
     } else {
-        $("#nav-breadcrumbs").html(`<a class="nav-link" href="/">Home</a>
-                                    <span class='nav-link disabled'>/</span>
-                                    <a class="nav-link active" aria-current="page">` + subject.name + `</a>`);    
+        $("#nav-breadcrumbs").html(`<div class='row'><div class='col-auto p-lg-0'><a class="nav-link" href="/">Home</a></div>
+                                    <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
+                                    <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">` + subject.name + `</a></div></div>`);    
     }
     $("#nav-breadcrumbs").fadeIn() // I love this so much
     outhtml = ` <div class="table-responsive">
@@ -170,7 +170,23 @@ function updateEverything() { // populate the standards list, and the subject na
     level_arr.forEach(current_level => { // for each level allowed on the page
         standards_for_level = standards.filter(o => o.level == current_level);
         if (standards_for_level.length > 0) {
-            outhtml += "<thead><tr><th colspan=6 class='text-center border border-dark'>Level " + current_level +"</th></tr></thead><tbody>"
+            baseurl = `https://www.nzqa.govt.nz/ncea/assessment/search.do?query=`+subject.name.replaceAll(' ', '+')+`&level=0`+current_level+`&view=`;
+            views = [['reports', 'Schedules'], ['exams','Exams'], ['achievements', 'Standards'], ['all', 'All']]
+            outhtml += `<thead>
+            <tr>
+                <th colspan="6" class="text-center border border-dark pb-1">
+                    <div class='container px-1'>
+                    <div class="row border-bottom pb-2"><div class="col fw-bold fs-3 text-center">Level ` + current_level + `</div></div>
+                    <div class="row justify-content-center">`;
+            views.forEach(view => { //  add buttons for each view
+                outhtml += `<div class='col-auto'><a class="btn btn-link text-decoration-none" target="_blank" href="`+baseurl+view[0]+`">`+view[1]+`</a></div>`;
+            });
+            outhtml += `</div>
+                    </div>
+                </th>
+            </tr>
+            </thead>
+            <tbody>`;
             standards_for_level.forEach(standard => { // for each standard
                 outhtml += generateStandardRow(standard)
             });
