@@ -178,6 +178,7 @@ async function search() {
             });
             standardshtml += "</tbody></table>"
             $("#standards-results").html(standardshtml)
+            $("#search-results").css("visibility","visible");
         } else {
             $("#standards-results").html("");
         }
@@ -210,6 +211,7 @@ async function search() {
             });
             subjecthtml += "</tbody></table>"
             $("#subjects-results").html(subjecthtml)
+            $("#search-results").css("visibility","visible");
         } else {
             $("#subjects-results").html("");
         }
