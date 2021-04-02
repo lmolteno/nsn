@@ -160,5 +160,5 @@ if __name__ == "__main__":
             scrape_and_dump(of)
             clean()
             combine()
-        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting an hour...")
-        time.sleep(60**2) # every n seconds (60^2 is an hour)
+        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting 6 hours...")
+        time.sleep(6 * (60**2)) # every n seconds (60^2 is an hour)

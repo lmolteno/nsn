@@ -66,7 +66,7 @@ def get_subjects(): # this function will parse the NCEA subjects page to find th
             if outliers_lut[subject_name.lower()] != False: # if it isn't one we should ignore
                 if type(outliers_lut[subject_name.lower()]) == list: # if there are multiple sub-subjects
                     for subject in outliers_lut[subject_name.lower()]:
-                        subjects.append({"name": subject})
+                        subjects.append({"name": subject, "display_name": subject})
                 else: # there's only one subject
                     subject_name = outliers_lut[subject_name.lower()]
             else:
