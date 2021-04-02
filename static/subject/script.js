@@ -122,11 +122,11 @@ function generateSubjectRow(subject) {
 
 function generateStandardRow(standard) {
     outhtml = ""
-    i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal ane external
-    if (standard.standard_number != null) {
+    i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
+    if (standard.standard_number != null) { // this checks whether it's a standard from the API (with standard_number as the row)
         outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.standard_number + ")'>"
         outhtml += "<th scope='row'><span class='float-end'>" + standard.standard_number + "</span></th>"
-    } else {
+    } else { // or whether it's a standard from the meilisearch (with id as the row)
         outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.id + ")'>"
         outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
     }
@@ -136,10 +136,11 @@ function generateStandardRow(standard) {
     } else {
         outhtml += "<td>" + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + "</td>"
     }        
-    outhtml += "<td class='text-center'>" + standard.level + "</td>"
-    outhtml += "<td class='text-center'>" + standard.credits + "</td>"
-    outhtml += "<td>" + (standard.internal ? "Internal" : "External") + "</td>"
-    outhtml += "</tr>"
+    outhtml += `<td class='text-center'>` + standard.level + `</td>
+                <td class='text-center'>` + standard.credits + `</td>
+                <td>` + (standard.internal ? `Internal` : `External`) + `</td>
+            </tr>`;
+
     return outhtml
 }
 
@@ -213,5 +214,5 @@ $(document).ready(function() {
     getSubjects(); // for async requests, we have to do "thens", like promises
     $("#searchbox").val("")
     search();
-    document.getElementById("searchbox").addEventListener('input', search);
+    document.getElementById("searchbox").addEventListener('search', search);
 });
