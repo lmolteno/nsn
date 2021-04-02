@@ -122,25 +122,26 @@ function generateSubjectRow(subject) {
 
 function generateStandardRow(standard) {
     outhtml = ""
-    i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
-    if (standard.standard_number != null) { // this checks whether it's a standard from the API (with standard_number as the row)
-        outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.standard_number + ")'>"
-        outhtml += "<th scope='row'><span class='float-end'>" + standard.standard_number + "</span></th>"
-    } else { // or whether it's a standard from the meilisearch (with id as the row)
-        outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.id + ")'>"
-        outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
+    
+    num = standard.standard_number; // this checks whether it's a standard from the API (with standard_number as the row)
+    if (num == null) { // or whether it's a standard from the meilisearch (with id as the row)
+        num = standard.id;
     }
+    i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
+    
+    outhtml += `<tr class='clickable ` + i_e_class + `' data-bs-toggle="collapse" data-bs-target="#as` + num +`">`;
+    outhtml += "<th scope='row'><span class='float-end'>" + num + "</span></th>"
     outhtml += "<td>" + standard.title + "</td>"
-    if (standard.standard_number != null) {
-        outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
-    } else {
-        outhtml += "<td>" + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + "</td>"
-    }        
+    outhtml += "<td>" + ((parseInt(num) < 90000) ? "Unit" : "Achievement") + "</td>"
+
     outhtml += `<td class='text-center'>` + standard.level + `</td>
                 <td class='text-center'>` + standard.credits + `</td>
                 <td>` + (standard.internal ? `Internal` : `External`) + `</td>
             </tr>`;
-
+    // hidden content 
+    outhtml += ` <tr>
+            <td colspan="6" class="p-0"><div id="as`+num+`" class="collapse">I am AS`+num+`</div></td>
+        </tr>`;
     return outhtml
 }
 
@@ -179,7 +180,7 @@ function updateEverything() { // populate the standards list, and the subject na
     level_arr.forEach(current_level => { // for each level allowed on the page
         standards_for_level = standards.filter(o => o.level == current_level);
         if (standards_for_level.length > 0) {
-            baseurl = `https://www.nzqa.govt.nz/ncea/assessment/search.do?query=`+subject.name.replaceAll(' ', '+')+`&level=0`+current_level+`&view=`;
+            baseurl = `https://www.nzqa.govt.nz/ncea/assessment/search.do?query=`+subject.name.replace(/\ /g, '+')+`&level=0`+current_level+`&view=`;
             views = [['reports', 'Schedules'], ['exams','Exams'], ['achievements', 'Standards'], ['all', 'All']]
             outhtml += `<thead>
             <tr>
