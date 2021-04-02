@@ -147,19 +147,19 @@ function generateStandardRow(standard) {
 function updateEverything() { // populate the standards list, and the subject name
     subject = subjects.find(o => o.subject_id == subject_id)
     $("#subject-name").hide()
-    $("#subject-name").html(subject.name);
+    $("#subject-name").html(subject.display_name);
     $("#subject-name").fadeIn() // I love this so much
     $("#nav-breadcrumbs").hide()
     if (level != null) {
         $("#nav-breadcrumbs").html(`<div class='row'><div class='col-auto pe-lg-0'><a class="nav-link" href="/">Home</a></div>
                                     <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
-                                    <div class='col-auto p-lg-0'><a class="nav-link" href="/subject/?id=` + subject_id + `">` + subject.name + `</a></div>
+                                    <div class='col-auto p-lg-0'><a class="nav-link" href="/subject/?id=` + subject_id + `">` + subject.display_name + `</a></div>
                                     <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
                                     <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">Level ` + level + `</a></div></div>`);
     } else {
         $("#nav-breadcrumbs").html(`<div class='row'><div class='col-auto p-lg-0'><a class="nav-link" href="/">Home</a></div>
                                     <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
-                                    <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">` + subject.name + `</a></div></div>`);    
+                                    <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">` + subject.display_name + `</a></div></div>`);    
     }
     $("#nav-breadcrumbs").fadeIn() // I love this so much
     outhtml = ` <div class="table-responsive">

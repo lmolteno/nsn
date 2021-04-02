@@ -170,7 +170,7 @@ def combine():
         password=os.environ.get("POSTGRES_PASSWORD"))
     
     # convert list of tuples into list of dictionaries
-    search_subjects = [{"id": str(index), "name": subj_name} for index, subj_name in enumerate(subjects)]
+    search_subjects = [{"id": str(index), "name": subj_name[0], "display_name": subj_name[1]} for index, subj_name in enumerate(subjects)]
     
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Entering subjects and standards into Meilisearch")
 
@@ -183,9 +183,9 @@ def combine():
     with conn.cursor() as curs:
         # insert types ([*enumerate(types)] turns ['a','b'] to [(0,'a'), (1,'b')], assigning indicies)
         # for the subjects, which is a tuple, we need to make a better list from [0, (a,b)] to [0, a, b]
-        flattened_subjects = list(flatten([*enumerate(subjects)]))
+        flattened_subjects = [list(flatten(sublist)) for sublist in [*enumerate(subjects)]]
         curs.executemany("INSERT INTO standard_types (type_id, name)                   VALUES (%s,%s);", [*enumerate(types)])
-        curs.executemany("INSERT INTO subjects       (subject_id, name, display_name)  VALUES (%s,%s);", flattened_subjects)
+        curs.executemany("INSERT INTO subjects       (subject_id, name, display_name)  VALUES (%s,%s,%s);", flattened_subjects)
         curs.executemany("INSERT INTO fields         (field_id, name)                  VALUES (%s,%s);", [*enumerate(fields)])
         curs.executemany("INSERT INTO subfields      (subfield_id, name)               VALUES (%s,%s);", [*enumerate(subfields)])
         curs.executemany("INSERT INTO domains        (domain_id, name)                 VALUES (%s,%s);", [*enumerate(domains)])

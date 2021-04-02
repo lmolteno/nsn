@@ -60,7 +60,7 @@ function generateSubjectLI(subject) {
     outhtml += "<a class='col link text-decoration-none px-0 mx-2' href=/subject/?id=";
     outhtml += subject.subject_id.toString();
     outhtml += ">";
-    outhtml += subject.name;
+    outhtml += subject.display_name;
     outhtml += "</a></li>"
     return outhtml
 }
@@ -181,7 +181,7 @@ async function search() {
                 } else {
                     subjecthtml += starOutline + "</a>";
                 }       
-                subjecthtml += "<a href='/subject/?id=" + result.id + "' class='text-decoration-none link'>" + result.name + "</a></td>"
+                subjecthtml += "<a href='/subject/?id=" + result.id + "' class='text-decoration-none link'>" + result.display_name + "</a></td>"
                 subjecthtml += "</tr>"
             });
             subjecthtml += "</tbody></table>"
