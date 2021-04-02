@@ -218,12 +218,12 @@ async function search() {
             $("#subjects-results").html("")
             $("#standards-results").html("")
             $("#search-results").css("visibility","hidden");
+        } else {
+            if (subjects.hits.length == 0 && standards.hits.length == 0) {
+                $("#subjects-results").html("<p class='text-muted mb-2'>Nothin' here!</p>")
+                $("#search-results").css("visibility","visible");
+            }
         }
-        
-        if (subjects.hits.length == 0 && standards.hits.length == 0) {
-            $("#subjects-results").html("<p class='text-muted mb-2'>Nothin' here!</p>")
-        }
-        $("#search-results").css("visibility","visible");
     } else {
 //         $("#search-results").html("")
         $("#subjects-results").html("")
