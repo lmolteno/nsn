@@ -157,31 +157,6 @@ async function search() {
     searchtext = $("#searchbox").val()
     
     if (searchtext.length != 0) {
-        const standards = await standindex.search(searchtext, {limit: 5})
-        if (standards['hits'].length > 0 & $("#searchbox").val().length > 0) {
-            standardshtml =  `<h3 class="mb-1">Standards</h3>
-
-                        <table class="table-bordered border-0 table table-hover">
-                            <thead>
-                                <tr>
-                                <th scope="col" class="col-1 text-end">Number</th>
-                                <th scope="col" class="col-9">Title</th>
-                                <th scope="col">Type</th>
-                                <th scope="col">Level</th>
-                                <th scope="col">Credits</th>
-                                <th scope="col">I/E</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
-            standards['hits'].forEach(result => {
-                standardshtml += generateStandardRow(result)
-            });
-            standardshtml += "</tbody></table>"
-            $("#standards-results").html(standardshtml)
-            $("#search-results").css("visibility","visible");
-        } else {
-            $("#standards-results").html("");
-        }
         
         const subjects = await subjindex.search(searchtext, {limit: 5})
         if (subjects.hits.length > 0 & $("#searchbox").val().length > 0) {
@@ -214,6 +189,32 @@ async function search() {
             $("#search-results").css("visibility","visible");
         } else {
             $("#subjects-results").html("");
+        }
+        
+        const standards = await standindex.search(searchtext, {limit: 5})
+        if (standards['hits'].length > 0 & $("#searchbox").val().length > 0) {
+            standardshtml =  `<h3 class="mb-1">Standards</h3>
+
+                        <table class="table-bordered border-0 table table-hover">
+                            <thead>
+                                <tr>
+                                <th scope="col" class="col-1 text-end">Number</th>
+                                <th scope="col" class="col-9">Title</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Level</th>
+                                <th scope="col">Credits</th>
+                                <th scope="col">I/E</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+            standards['hits'].forEach(result => {
+                standardshtml += generateStandardRow(result)
+            });
+            standardshtml += "</tbody></table>"
+            $("#standards-results").html(standardshtml)
+            $("#search-results").css("visibility","visible");
+        } else {
+            $("#standards-results").html("");
         }
         
         if ($("#searchbox").val().length == 0) { // recheck the box after all the awaits, just in case things have changed (#3)

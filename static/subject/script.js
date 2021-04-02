@@ -89,6 +89,7 @@ async function search() {
                 standardshtml = "<p class='text-muted mb-2'>Nothin' here!</p>";
             }
             $("#standards-results").html(standardshtml)
+            $("#search-results").css("visibility","visible");
         }
         
                 
