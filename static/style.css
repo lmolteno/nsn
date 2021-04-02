@@ -3,6 +3,11 @@
   --white: #ffffff;
 }
 
+body {
+    font-family: 'Roboto', sans-serif;
+    font-weight: lighter;
+}
+
 .navbar {
     background-color: var(--nzqa_blue);
     border-bottom: 5px solid #d22127;

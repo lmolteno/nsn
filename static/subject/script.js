@@ -91,7 +91,14 @@ async function search() {
             $("#standards-results").html(standardshtml)
         }
         
-        $("#search-results").css("visibility","visible");
+                
+        if ($("#searchbox").val().length == 0) { // recheck the box after all the awaits, just in case things have changed (#3)
+            $("#subjects-results").html("")
+            $("#standards-results").html("")
+            $("#search-results").css("visibility","hidden");
+        } else {
+            $("#search-results").css("visibility","visible");
+        }
     } else {
         $("#standards-results").html("")
         $("#search-results").css("visibility","hidden");

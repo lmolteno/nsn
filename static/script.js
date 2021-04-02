@@ -158,7 +158,7 @@ async function search() {
     
     if (searchtext.length != 0) {
         const standards = await standindex.search(searchtext, {limit: 5})
-        if (standards['hits'].length > 0) {
+        if (standards['hits'].length > 0 & $("#searchbox").val().length > 0) {
             standardshtml =  `<h3 class="mb-1">Standards</h3>
 
                         <table class="table-bordered border-0 table table-hover">
@@ -183,7 +183,7 @@ async function search() {
         }
         
         const subjects = await subjindex.search(searchtext, {limit: 5})
-        if (subjects.hits.length > 0) {
+        if (subjects.hits.length > 0 & $("#searchbox").val().length > 0) {
             subjecthtml = `<h3 class="mb-1">Subjects</h3>
                         <table class="table table-bordered border-0">
                             <thead>
@@ -212,6 +212,12 @@ async function search() {
             $("#subjects-results").html(subjecthtml)
         } else {
             $("#subjects-results").html("");
+        }
+        
+        if ($("#searchbox").val().length == 0) { // recheck the box after all the awaits, just in case things have changed (#3)
+            $("#subjects-results").html("")
+            $("#standards-results").html("")
+            $("#search-results").css("visibility","hidden");
         }
         
         if (subjects.hits.length == 0 && standards.hits.length == 0) {
