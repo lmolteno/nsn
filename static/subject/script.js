@@ -1,6 +1,11 @@
 // globals
 subjects = [];
 standards = [];
+
+fields = [];
+subfields = [];
+domains = [];
+
 const urlParams = new URLSearchParams(window.location.search); // get url parameters
 if (urlParams.get('id') == null) {
     window.location = "/"; // if there's no id parameter in the url
@@ -47,6 +52,20 @@ function getStandards(then=function(){a=1}) { // get the list of standards for t
         if (data.success) {
             console.log("Successfully gathered " + data.standards.length.toString() + " standards");
             standards = data.standards;
+            getStructure(); // run the next function
+        } else {
+            alert("Failure to get standards. Try reloading. If the problem persists, email linus@molteno.net");
+        }
+    }); 
+}
+
+function getStructure() {
+    $.get("/api/structure", (data) => {
+        if (data.success) {
+            console.log("Successfully gathered " + data.fields.length + " fields, " + data.subfields.length + " subfields, " + data.domains.length + " domains");
+            fields = data.fields;
+            subfields = data.subfields;
+            domains = data.domains;
             updateEverything(); // run the next function
         } else {
             alert("Failure to get standards. Try reloading. If the problem persists, email linus@molteno.net");
@@ -69,7 +88,7 @@ async function search() {
             })
             standardshtml =  `<h3 class="mb-1">Standards</h3>
 
-                        <table class="table-bordered border-0 table table-hover">
+                        <table class="table table-bordered table-hover bg-white">
                             <thead>
                                 <tr>
                                 <th scope="col" class="col-1 text-end">Number</th>
@@ -120,7 +139,7 @@ function generateSubjectRow(subject) {
     return outhtml
 }
 
-function generateStandardRow(standard) {
+function generateStandardRow(standard, hidden_stuff=false) {
     outhtml = ""
     
     num = standard.standard_number; // this checks whether it's a standard from the API (with standard_number as the row)
@@ -138,10 +157,21 @@ function generateStandardRow(standard) {
                 <td class='text-center'>` + standard.credits + `</td>
                 <td>` + (standard.internal ? `Internal` : `External`) + `</td>
             </tr>`;
-    // hidden content 
-    outhtml += ` <tr>
-            <td colspan="6" class="p-0"><div id="as`+num+`" class="collapse">I am AS`+num+`</div></td>
-        </tr>`;
+    
+    // hidden content (field, subfield, domain, version)
+    field = fields.find(o => o.field_id == standard.field_id)
+    subfield = subfields.find(o => o.subfield_id == standard.subfield_id)
+    domain = domains.find(o => o.domain_id == standard.domain_id)
+    
+    outhtml += `</tbody><thead><tr class='hidden-content'>
+            <td colspan="6" class="p-0 hidden-content">
+                <div id="as`+num+`" class="hidden-content collapse">
+                    <div class='m-2'>
+                    ` + field.name + ` > ` + subfield.name + ` > ` + domain.name + `
+                    </div>
+                </div>
+            </td>
+        </tr></thead><tbody>`;
     return outhtml
 }
 
@@ -165,7 +195,7 @@ function updateEverything() { // populate the standards list, and the subject na
     $("#nav-breadcrumbs").fadeIn() // I love this so much
     outhtml = ` <div class="table-responsive">
                 <h3 class="mb-1">Standards</h3>
-                <table class="table table-bordered table-hover bg-white border-0">
+                <table class="table table-bordered table-hover bg-white">
                     <thead>
                         <tr>
                         <th scope="col" class="col-1 text-end">Number</th>
@@ -213,7 +243,7 @@ function updateEverything() { // populate the standards list, and the subject na
 
 $(document).ready(function() {
     getSubjects(); // for async requests, we have to do "thens", like promises
-    $("#searchbox").val("")
-    search();
-    document.getElementById("searchbox").addEventListener('search', search);
+    $("#searchbox").val("");
+    search(); // initialise search results
+    document.getElementById("searchbox").addEventListener('input', search); // when something is input, search
 });

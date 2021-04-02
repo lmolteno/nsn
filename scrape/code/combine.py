@@ -128,7 +128,10 @@ def combine():
                            "title": title,
                            "level": level,
                            "credits": credits,
-                           "internal": internal}
+                           "internal": internal,
+                           "field_id": field_id,
+                           "subfield_id": subfield_id,
+                           "domain_id": domain_id}
         
         # the same order as the definition in sql for ease of insertion
         outtuple = (standard_number, title, internal, type_id, version, level, credits, field_id, subfield_id, domain_id)
