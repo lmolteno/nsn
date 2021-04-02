@@ -59,6 +59,9 @@ def get_subjects(): # this function will parse the NCEA subjects page to find th
         # this next line was bad, not good.
         # if 'levels' in item.a['href']: # if the subject is what we would generally call a subject (if they link normally)
         subject_name = unidecode(item.a.text) # this is an accent-remover
+        
+        display_name = subject_name
+        
         if subject_name.lower() in outliers_lut.keys(): # check if the subject is in the LUT
             if outliers_lut[subject_name.lower()] != False: # if it isn't one we should ignore
                 if type(outliers_lut[subject_name.lower()]) == list: # if there are multiple sub-subjects
@@ -76,7 +79,7 @@ def get_subjects(): # this function will parse the NCEA subjects page to find th
             # returned by the inline for loop
             duplicate = next(subject for subject in subjects if subject['name'] == subject_name)
         except StopIteration:
-            subjects.append({"name": subject_name}) # add to the subjects list
+            subjects.append({"name": subject_name, "display_name": display_name}) # add to the subjects list
             
     return subjects
 

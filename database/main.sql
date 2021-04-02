@@ -1,6 +1,7 @@
 CREATE TABLE subjects (
  subject_id INT PRIMARY KEY,
- name VARCHAR
+ name VARCHAR NOT NULL,
+ display_name VARCHAR NOT NULL
 );
 
 CREATE TABLE standard_types (
@@ -34,6 +35,8 @@ CREATE TABLE standards (
  field_id INT,
  subfield_id INT,
  domain_id INT,
+ literacy BOOL,
+ numeracy BOOL,
  CONSTRAINT fk_standard_type
   FOREIGN KEY(type_id) 
    REFERENCES standard_types(type_id),

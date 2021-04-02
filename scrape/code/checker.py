@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from ncea_scraper import scrape_and_dump, of, f_string
 from combine import combine     
 import psycopg2
+import psycopg2.extras
 
 def clean():
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Cleaning database")
@@ -38,9 +39,9 @@ def is_empty():
                 user=os.environ.get("POSTGRES_USER"),
                 password=os.environ.get("POSTGRES_PASSWORD"))
             empty = False
-            with conn.cursor() as curs:
+            with conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as curs:
                 curs.execute("SELECT COUNT(*) FROM subjects;")
-                count = curs.fetchone()[0]
+                count = curs.fetchone()['count']
                 empty = count == 0
             conn.close()
             success = True
@@ -59,18 +60,65 @@ def test():
                 database=os.environ.get("POSTGRES_DB"),
                 user=os.environ.get("POSTGRES_USER"),
                 password=os.environ.get("POSTGRES_PASSWORD"))
-            empty = False
-            with conn.cursor() as curs:
+            with conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as curs:
                 curs.execute('''SELECT COUNT(*) FROM standards 
                                 INNER JOIN standard_types 
                                 ON standard_types.type_id = standards.type_id 
                                 WHERE standards.standard_number < 90000 
                                 AND standard_types.name LIKE '%Achievement%';''')
-                count = curs.fetchone()[0]
+                count = curs.fetchone()['count']
                 passing = passing and count == 0 # handle for if passing is already false (for implementation of future tests)
+                
+                # this tests whether or not the database is rendering column names properly
+                structure = {"fields": [], "subfields": [], "domains": []}
+                curs.execute('SELECT * FROM fields;')
+                structure['fields'] = curs.fetchall()
+                curs.execute('SELECT * FROM subfields;')
+                structure['subfields'] = curs.fetchall()
+                curs.execute('SELECT * FROM domains;')
+                structure['domains'] = curs.fetchall()
+                
+                # casting as set means order doesn't matter for comparison
+                for field in structure['fields']:
+                    expected = ["name", "field_id"]
+                    current = set(field.keys()) == set(expected)
+                    if not current:
+                        passing = False
+                        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Failed field keys")
+                        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Expected {expected}, got {list(field.keys())}")
+                        break
+                for subfield in structure['subfields']:
+                    expected = ["name", "subfield_id"]
+                    current = set(subfield.keys()) == set(expected)
+                    if not current:
+                        passing = False
+                        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Failed subfield keys")
+                        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Expected {expected}, got {list(subfield.keys())}")
+                        break
+                for domain in structure['domains']:
+                    expected = ["name", "domain_id"]
+                    current = set(domain.keys()) == set(expected)
+                    if not current:
+                        passing = False
+                        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Failed domain keys")
+                        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Expected {expected}, got {list(domain.keys())}")
+                        break
+                
+                curs.execute('SELECT * FROM subjects;')
+                subjects = curs.fetchall()
+                
+                for subject in subjects:
+                    expected = ['name', 'subject_id', 'display_name']
+                    current = set(subject.keys()) == set(expected)
+                    if not current:
+                        passing = False
+                        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Failed subject keys")
+                        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Expected {expected}, got {list(subject.keys())}")
+                        break
+                
             conn.close()
-            success = True
-            return empty
+            success = True # for connection
+            return passing
         except psycopg2.OperationalError:
             time.sleep(5)
 
@@ -99,6 +147,14 @@ if __name__ == "__main__":
                     combine()
                 else:
                     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Nothing to be done, up-to-date scrape data")
+                    
+                # run testing on database
+                if not test(): # if testing returns false
+                    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Database failed tests!")
+                    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Cleaning!")
+                    clean()
+                    combine()
+                    
         else:
             print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] No file exists, scraping data.")
             scrape_and_dump(of)

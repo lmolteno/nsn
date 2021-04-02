@@ -1,11 +1,13 @@
 # this file will combine the data from the nzqa dataset, as well as the scraped json data.
 import json
+import requests
 from urllib.request import urlopen
 import pandas as pd
 import psycopg2
 import os
 from datetime import datetime
 import meilisearch # for entering in search data
+from pandas.core.common import flatten
 
 replacement_words = [
     ("M?ori", "Maori"),
@@ -26,8 +28,20 @@ def combine():
 
 
     # import and re-format the csv dataset provided by nzqa
-    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Downloading NZQA Dataset")
-    ds_df = pd.read_csv(online_url) # DataSet DataFrame
+    # implement caching!
+    nzqafn = "../cache/nzqa.csv"
+    if os.path.isfile(nzqafn):
+        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Using cached NZQA Dataset")
+    else:
+        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Downloading NZQA Dataset")
+        page = requests.get(online_url) # send request
+        page.raise_for_status() # raise an error on a bad status
+        print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Caching')
+        os.makedirs(os.path.dirname(nzqafn), exist_ok=True) # make directories on the way to the caching location
+        with open(nzqafn, 'w') as f:
+            f.write(page.text) # save to file for later caching if there's a cache
+        
+    ds_df = pd.read_csv(nzqafn)
     ds_df.columns = ['title','number','type','version','level','credits','status','v_status','field','subfield','domain'] # rename columns to ones that don't have spaces
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Parsing...")
     for index,row in ds_df.iterrows():
@@ -61,9 +75,10 @@ def combine():
             #print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] I found validity!")
         
         # update subjects, types lists
-        if scraped['subject']['name'] not in subjects:
-            subjects.append(scraped['subject']['name'])
-        subject_id = subjects.index(scraped['subject']['name'])
+        subject_tuple = (scraped['subject']['name'], scraped['subject']['display_name'])
+        if subject_tuple not in subjects:
+            subjects.append(subject_tuple)
+        subject_id = subjects.index(subject_tuple)
         subject_standards.append((subject_id, scraped['number'])) # add join between subject and standard
         
         scraped_type = "Achievement" if scraped['achievement'] else "Unit" # conversion from bool to strings    
@@ -167,11 +182,13 @@ def combine():
     # enter info
     with conn.cursor() as curs:
         # insert types ([*enumerate(types)] turns ['a','b'] to [(0,'a'), (1,'b')], assigning indicies)
-        curs.executemany("INSERT INTO standard_types (type_id, name)     VALUES (%s,%s);", [*enumerate(types)])
-        curs.executemany("INSERT INTO subjects       (subject_id, name)  VALUES (%s,%s);", [*enumerate(subjects)])
-        curs.executemany("INSERT INTO fields         (field_id, name)    VALUES (%s,%s);", [*enumerate(fields)])
-        curs.executemany("INSERT INTO subfields      (subfield_id, name) VALUES (%s,%s);", [*enumerate(subfields)])
-        curs.executemany("INSERT INTO domains        (domain_id, name)   VALUES (%s,%s);", [*enumerate(domains)])
+        # for the subjects, which is a tuple, we need to make a better list from [0, (a,b)] to [0, a, b]
+        flattened_subjects = list(flatten([*enumerate(subjects)]))
+        curs.executemany("INSERT INTO standard_types (type_id, name)                   VALUES (%s,%s);", [*enumerate(types)])
+        curs.executemany("INSERT INTO subjects       (subject_id, name, display_name)  VALUES (%s,%s);", flattened_subjects)
+        curs.executemany("INSERT INTO fields         (field_id, name)                  VALUES (%s,%s);", [*enumerate(fields)])
+        curs.executemany("INSERT INTO subfields      (subfield_id, name)               VALUES (%s,%s);", [*enumerate(subfields)])
+        curs.executemany("INSERT INTO domains        (domain_id, name)                 VALUES (%s,%s);", [*enumerate(domains)])
         
         curs.executemany('''INSERT INTO standards (
             standard_number,
