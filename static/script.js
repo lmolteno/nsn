@@ -2,11 +2,6 @@
 subjects = [];
 starred = [];
 
-fields = [];
-subfields = [];
-domains = [];
-
-
 // for accessing the search engine
 const client = new MeiliSearch({
     host: "https://" + window.location.host.toString(),
@@ -38,20 +33,6 @@ function getSubjects(then=function(){a=1}) { // update the local list of subject
             alert("Failure to get subjects. Try reloading. If the problem persists, email linus@molteno.net");
         }
     });
-}
-
-function getStructure(then=function(){a=1}) {
-    $.get("/api/structure", (data) => {
-        if (data.success) {
-            console.log("Successfully gathered " + data.fields.length + " fields, " + data.subfields.length + " subfields, " + data.domains.length + " domains");
-            fields = data.fields;
-            subfields = data.subfields;
-            domains = data.domains;
-            then(); // run the next function
-        } else {
-            alert("Failure to get structure. Try reloading. If the problem persists, email linus@molteno.net");
-        }
-    }); 
 }
 
 function displaySubjects() { // display the current list of subjects
@@ -149,41 +130,29 @@ function displayStarred() {
     }
 }
 
-function generateStandardRow(standard, hidden_stuff=false) {
+function generateStandardRow(standard) {
     outhtml = ""
-    
-    num = standard.standard_number; // this checks whether it's a standard from the API (with standard_number as the row)
-    if (num == null) { // or whether it's a standard from the meilisearch (with id as the row)
-        num = standard.id;
+    i_e_class = standard.internal ? "internal_row" : "external_row";
+    if (standard.standard_number != null) {
+        outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.standard_number + ")'>"
+        outhtml += "<th scope='row'><span class='float-end'>" + standard.standard_number + "</span></th>"
+    } else {
+        outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.id + ")'>"
+        outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
     }
-    i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
-    
-    outhtml += `<tr class='clickable ` + i_e_class + `' data-bs-toggle="collapse" data-bs-target="#as` + num +`">`;
-    outhtml += "<th scope='row'><span class='float-end'>" + num + "</span></th>"
     outhtml += "<td>" + standard.title + "</td>"
-    outhtml += "<td>" + ((parseInt(num) < 90000) ? "Unit" : "Achievement") + "</td>"
-
-    outhtml += `<td class='text-center'>` + standard.level + `</td>
-                <td class='text-center'>` + standard.credits + `</td>
-                <td>` + (standard.internal ? `Internal` : `External`) + `</td>
-            </tr>`;
-    
-    // hidden content (field, subfield, domain, version)
-    field = fields.find(o => o.field_id == standard.field_id)
-    subfield = subfields.find(o => o.subfield_id == standard.subfield_id)
-    domain = domains.find(o => o.domain_id == standard.domain_id)
-    
-    outhtml += `</tbody><thead><tr class='hidden-content'>
-            <td colspan="6" class="p-0 hidden-content">
-                <div id="as`+num+`" class="hidden-content collapse">
-                    <div class='m-2'>
-                    ` + field.name + ` > ` + subfield.name + ` > ` + domain.name + `
-                    </div>
-                </div>
-            </td>
-        </tr></thead><tbody>`;
+    if (standard.standard_number != null) {
+        outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
+    } else {
+        outhtml += "<td>" + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + "</td>"
+    }        
+    outhtml += "<td class='text-center'>" + standard.level + "</td>"
+    outhtml += "<td class='text-center'>" + standard.credits + "</td>"
+    outhtml += "<td>" + (standard.internal ? "Internal" : "External") + "</td>"
+    outhtml += "</tr>"
     return outhtml
 }
+
 async function search() {
     searchtext = $("#searchbox").val()
     
@@ -192,7 +161,7 @@ async function search() {
         const subjects = await subjindex.search(searchtext, {limit: 5})
         if (subjects.hits.length > 0 & $("#searchbox").val().length > 0) {
             subjecthtml = `<h3 class="mb-1">Subjects</h3>
-                        <table class="table table-bordered bg-white">
+                        <table class="table table-bordered border-0">
                             <thead>
                                 <tr>
                                     <th scope="col">Name</th>
@@ -226,7 +195,7 @@ async function search() {
         if (standards['hits'].length > 0 & $("#searchbox").val().length > 0) {
             standardshtml =  `<h3 class="mb-1">Standards</h3>
 
-                        <table class="table table-bordered table-hover bg-white">
+                        <table class="table-bordered border-0 table table-hover">
                             <thead>
                                 <tr>
                                 <th scope="col" class="col-1 text-end">Number</th>
@@ -276,7 +245,6 @@ $(document).ready(function() {
     getStarred(then=displayStarred); // reference the local storage to find the starred subjects
     // disable the enter key going to a new url in the search box
     $("#searchbox").val("") // reset value
-    getStructure(then=function() {    
-        document.getElementById("searchbox").addEventListener('input', search); // when something is input 
-    }); // initialise search results and field, subfield, domain
+    search(); // initialise search results
+    document.getElementById("searchbox").addEventListener('input', search); // when something is input, search
 });

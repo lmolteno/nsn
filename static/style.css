@@ -79,27 +79,3 @@ body {
 #about-list li {
     display: block;
 }
-
-tr.clickable {
-    border-bottom:0;
-}
-
-div.hidden-content {
-    padding: 0rem !important;
-    border: 0;
-}
-
-tr.hidden-content {
-    border: 0;
-}
-
-div.hidden-content.show,div.hidden-content.collapsing {
-    border-top: 1px solid black;
-}
-
-table {
-    border-color: #000 !important;
-}
-thead:last-of-type {
-    border-bottom: 1px solid black;
-}
