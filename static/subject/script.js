@@ -157,7 +157,7 @@ function updateEverything() { // populate the standards list, and the subject na
                                     <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
                                     <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">Level ` + level + `</a></div></div>`);
     } else {
-        $("#nav-breadcrumbs").html(`<div class='row'><div class='col-auto p-lg-0'><a class="nav-link" href="/">Home</a></div>
+        $("#nav-breadcrumbs").html(`<div class='row'><div class='col-auto pe-lg-0'><a class="nav-link" href="/">Home</a></div>
                                     <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
                                     <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">` + subject.display_name + `</a></div></div>`);    
     }

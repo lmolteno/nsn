@@ -79,3 +79,7 @@ body {
 #about-list li {
     display: block;
 }
+
+.navbar-brand {
+    font-weight: normal;
+}

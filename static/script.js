@@ -120,13 +120,13 @@ function displayStarred() {
         $("#starredHeader").html('My Subjects<small class="text-muted fs-6 ps-3 fw-light">Hit the ' + starOutline + ' icon to add a subject here</small>');
     } else {
         $("#starredHeader").html('My Subjects');
-        $("#starredlist").hide();
+//         $("#starredlist").hide();
         outhtml = ""
         starred.forEach(subject => {
             outhtml += generateStarredCard(subject);
         });
         $("#starredlist").html(outhtml);
-        $("#starredlist").fadeIn();
+//         $("#starredlist").fadeIn();
     }
 }
 
