@@ -133,22 +133,22 @@ function displayStarred() {
 function generateStandardRow(standard) {
     outhtml = ""
     i_e_class = standard.internal ? "internal_row" : "external_row";
-    if (standard.standard_number != null) {
-        outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.standard_number + ")'>"
-        outhtml += "<th scope='row'><span class='float-end'>" + standard.standard_number + "</span></th>"
-    } else {
-        outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.id + ")'>"
-        outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
-    }
+    
+    outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.id + ")'>"
+    outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
+
     outhtml += "<td>" + standard.title + "</td>"
-    if (standard.standard_number != null) {
-        outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
-    } else {
-        outhtml += "<td>" + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + "</td>"
-    }        
+    outhtml += "<td>" + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + "</td>"
     outhtml += "<td class='text-center'>" + standard.level + "</td>"
     outhtml += "<td class='text-center'>" + standard.credits + "</td>"
+    
+    // literacy / numeracy
+    outhtml += "<td class='text-center'>" + (standard.literacy ? "Y" : "N") + "</td>"
+    outhtml += "<td class='text-center'>" + (standard.numeracy ? "Y" : "N") + "</td>"
+    
+    // internal or external
     outhtml += "<td>" + (standard.internal ? "Internal" : "External") + "</td>"
+
     outhtml += "</tr>"
     return outhtml
 }
@@ -203,6 +203,8 @@ async function search() {
                                 <th scope="col">Type</th>
                                 <th scope="col">Level</th>
                                 <th scope="col">Credits</th>
+                                <th scope="col">Literacy</th>
+                                <th scope="col">Numeracy</th>
                                 <th scope="col">I/E</th>
                                 </tr>
                             </thead>

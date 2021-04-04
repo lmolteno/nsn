@@ -185,7 +185,9 @@ def combine():
                            "title": title,
                            "level": level,
                            "credits": credits,
-                           "internal": internal}
+                           "literacy": literacy,
+                           "numeracy": numeracy,
+                           "internal": internal}   
         
         # the same order as the definition in sql for ease of insertion
         outdict = {"standard_number": standard_number, "title":title, "internal":internal, "type_id":type_id, "version":version, "level":level, "credits":credits, "field_id":field_id, "subfield_id":subfield_id, "domain_id":domain_id, "literacy":literacy, "numeracy":numeracy}

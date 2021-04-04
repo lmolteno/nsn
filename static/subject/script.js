@@ -55,10 +55,11 @@ function getStandards(then=function(){a=1}) { // get the list of standards for t
 }
 
 async function search() {
+    console.log("Searching!");
     searchtext = $("#searchbox").val()
     
     if (searchtext.length != 0) {
-        const searched_standards = await standindex.search(searchtext, {limit: 100})
+        searched_standards = await standindex.search(searchtext, {limit: 100})
         if (searched_standards['hits'].length > 0) {
             var filtered = []
             // for all of the hits, check if they're in the list of standards for this subject
@@ -77,12 +78,14 @@ async function search() {
                                 <th scope="col">Type</th>
                                 <th scope="col">Level</th>
                                 <th scope="col">Credits</th>
+                                <th scope="col">Literacy</th>
+                                <th scope="col">Numeracy</th>
                                 <th scope="col">I/E</th>
                                 </tr>
                             </thead>
                             <tbody>`;
             filtered.forEach(result => {
-                standardshtml += generateStandardRow(result)
+                standardshtml += generateSearchStandardRow(result)
             });
             standardshtml += "</tbody></table>"
             if (filtered.length == 0) {
@@ -120,34 +123,37 @@ function generateSubjectRow(subject) {
     return outhtml
 }
 
-function generateStandardRow(standard) {
+function generateSearchStandardRow(standard) {
     outhtml = ""
-    i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
-    if (standard.standard_number != null) { // this checks whether it's a standard from the API (with standard_number as the row)
-        outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.standard_number + ")'>"
-        outhtml += "<th scope='row'><span class='float-end'>" + standard.standard_number + "</span></th>"
-    } else { // or whether it's a standard from the meilisearch (with id as the row)
-        outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.id + ")'>"
-        outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
-    }
-    outhtml += "<td>" + standard.title + "</td>"
-    if (standard.standard_number != null) {
-        outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
-    } else {
-        outhtml += "<td>" + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + "</td>"
-    }        
-    outhtml += `<td class='text-center'>` + standard.level + `</td>
-                <td class='text-center'>` + standard.credits + `</td>
-                <td>` + (standard.internal ? `Internal` : `External`) + `</td>
-            </tr>`;
+    i_e_class = standard.internal ? "internal_row" : "external_row";
+    
+    outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.id + ")'>"
+    outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
 
+    outhtml += "<td>" + standard.title + "</td>"
+    outhtml += "<td>" + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + "</td>"
+    outhtml += "<td class='text-center'>" + standard.level + "</td>"
+    outhtml += "<td class='text-center'>" + standard.credits + "</td>"
+    
+    // literacy / numeracy
+    outhtml += "<td class='text-center'>" + (standard.literacy ? "Y" : "N") + "</td>"
+    outhtml += "<td class='text-center'>" + (standard.numeracy ? "Y" : "N") + "</td>"
+    
+    // internal or external
+    outhtml += "<td>" + (standard.internal ? "Internal" : "External") + "</td>"
+
+    outhtml += "</tr>"
     return outhtml
 }
+
 
 function updateEverything() { // populate the standards list, and the subject name
     subject = subjects.find(o => o.subject_id == subject_id)
     $("#subject-name").hide()
     $("#subject-name").html(subject.display_name);
+    
+    $("#searchbox").attr("placeholder", "Search " + subject.display_name + " standards");
+    
     $("#subject-name").fadeIn() // I love this so much
     $("#nav-breadcrumbs").hide()
     if (level != null) {
@@ -170,8 +176,9 @@ function updateEverything() { // populate the standards list, and the subject na
                         <th scope="col" class="col-1 text-end">Number</th>
                         <th scope="col" class="col-9">Title</th>
                         <th scope="col">Type</th>
-                        <th scope="col">Level</th>
                         <th scope="col">Credits</th>
+                        <th scope="col">Literacy</th>
+                        <th scope="col">Numeracy</th>
                         <th scope="col">I/E</th>
                         </tr>
                     </thead>`;
@@ -183,7 +190,7 @@ function updateEverything() { // populate the standards list, and the subject na
             views = [['reports', 'Schedules'], ['exams','Exams'], ['achievements', 'Standards'], ['all', 'All']]
             outhtml += `<thead>
             <tr>
-                <th colspan="6" class="text-center border border-dark pb-1">
+                <th colspan="7" class="text-center border border-dark pb-1">
                     <div class='container px-1'>
                     <div class="row border-bottom pb-2"><div class="col fw-bold fs-3 text-center">Level ` + current_level + `</div></div>
                     <div class="row justify-content-center">`;
@@ -197,7 +204,19 @@ function updateEverything() { // populate the standards list, and the subject na
             </thead>
             <tbody>`;
             standards_for_level.forEach(standard => { // for each standard
-                outhtml += generateStandardRow(standard)
+                i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
+
+                outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.standard_number + ")'>"
+                outhtml += "<th scope='row'><span class='float-end'>" + standard.standard_number + "</span></th>"
+
+                outhtml += "<td>" + standard.title + "</td>"
+
+                outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
+                outhtml += `<td class='text-center'>` + standard.credits + `</td>
+                            <td class='text-center'>` + (standard.literacy ? "Y" : "N") + `</td>
+                            <td class='text-center'>` + (standard.numeracy ? "Y" : "N") + `</td>
+                            <td>` + (standard.internal ? `Internal` : `External`) + `</td>
+                            </tr>`;
             });
             outhtml += "</tbody>";
         } else {
@@ -214,5 +233,5 @@ $(document).ready(function() {
     getSubjects(); // for async requests, we have to do "thens", like promises
     $("#searchbox").val("")
     search();
-    document.getElementById("searchbox").addEventListener('search', search);
+    document.getElementById("searchbox").addEventListener('input', search); // when something is input, search
 });
