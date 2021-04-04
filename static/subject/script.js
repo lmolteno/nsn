@@ -186,7 +186,7 @@ function updateEverything() { // populate the standards list, and the subject na
     level_arr.forEach(current_level => { // for each level allowed on the page
         standards_for_level = standards.filter(o => o.level == current_level);
         if (standards_for_level.length > 0) {
-            baseurl = `https://www.nzqa.govt.nz/ncea/assessment/search.do?query=`+subject.name.replaceAll(' ', '+')+`&level=0`+current_level+`&view=`;
+            baseurl = `https://www.nzqa.govt.nz/ncea/assessment/search.do?query=`+subject.name.replace(/\ /g, '+')+`&level=0`+current_level+`&view=`;
             views = [['reports', 'Schedules'], ['exams','Exams'], ['achievements', 'Standards'], ['all', 'All']]
             outhtml += `<thead>
             <tr>
