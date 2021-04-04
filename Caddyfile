@@ -1,8 +1,8 @@
-#{
-#	acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
-#}
+{
+	acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
 
-localhost {
+nsn.molteno.org {
 	encode gzip
 	file_server {
 		root /static/	
