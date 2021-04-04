@@ -49,7 +49,39 @@ def combine():
         if row['status']  == "Registered" and row['v_status'] == "Current": # check that the standard is worth holding on to
             ds_st.append(dict(row))
 
-    print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Combining the two, basing on {len(s_st)} standards')
+    # get the literacy/numeracy xls spreadsheet
+    litnum_url = "https://www.nzqa.govt.nz/assets/qualifications-and-standards/qualifications/ncea/NCEA-subject-resources/Literacy-and-Numeracy/literacy-numeracy-assessment-standards-April-2019.xls"
+    litnum_fn = "../cache/litnum.xls"
+    if os.path.isfile(litnum_fn): # if it's cached, use it
+        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Using cached Literacy and Numeracy data")
+    else: # download it
+        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Downloading Literacy and Numeracy data")
+        page = requests.get(litnum_url) # send request
+        page.raise_for_status() # raise an error on a bad status
+        print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Caching')
+        os.makedirs(os.path.dirname(litnum_fn), exist_ok=True) # make directories on the way to the caching location
+        with open(litnum_fn, 'wb') as f:
+            f.write(page.content) # save to file for later caching if there's a cache
+    
+    # read it with pandas
+    ln_df = pd.read_excel(litnum_fn, header=1) # header=1 because the header is on the second row
+    # 'Registered' is the standard number
+    # 'Title' is the title, with macrons!
+    # 'Literacy' is either Y or blank
+    # 'Numeracy' is either Y or blank
+    # 'Status' is either 'Expiring', 'Registered', or 'Expired'
+    ln_dict = {} # this dict will be filled with key-value pairs for sn: {'literacy': bool, 'numeracy': bool}
+    print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Parsing...')
+    for index, row in ln_df.iterrows():
+        sn = int(row['Registered'])
+        title = row['Title']
+        literacy = row['Literacy'] == "Y"
+        numeracy = row['Numeracy'] == "Y"
+        status = row['Status']
+        if status == 'Registered':
+            ln_dict[sn] = {'literacy': literacy, 'numeracy': numeracy}
+    
+    print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Combining the three, basing on {len(s_st)} standards')
     # join the two, getting all the assessments from the json object and assigning them a field, subfield, and domain
     # also check that the two datasets match, print and debug where they don't
     standards = [] # output list of tuple objects for each standard
@@ -61,7 +93,7 @@ def combine():
     types = []
     subject_standards = [] # join table between subjects and standards
     
-    # for meilei
+    # for meili
     search_standards = [] # list of standards to be populated for search only
     # will contain id (standard_number), title, level, credits, subject name
 
@@ -70,9 +102,6 @@ def combine():
     singular  = 0
     duplicate = 0
     for scraped in s_st:
-        
-        #if scraped['number'] == 91154:
-            #print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] I found validity!")
         
         # update subjects, types lists
         subject_tuple = (scraped['subject']['name'], scraped['subject']['display_name'])
@@ -96,6 +125,19 @@ def combine():
         field_id        = None 
         subfield_id     = None
         domain_id       = None
+        # if they aren't mentioned in the xls, they must be false
+        literacy        = False
+        numeracy        = False
+        
+        # handle literacy and numeracy
+        try:
+            info = ln_dict[standard_number]
+            literacy = info['literacy']
+            numeracy = info['numeracy']
+        except KeyError:
+            # it isn't mentioned
+            literacy = False
+            numeracy = False
         
         # do the replacement for the LUT of replaced words
         for word, replacement in replacement_words:
@@ -146,17 +188,17 @@ def combine():
                            "internal": internal}
         
         # the same order as the definition in sql for ease of insertion
-        outtuple = (standard_number, title, internal, type_id, version, level, credits, field_id, subfield_id, domain_id)
+        outdict = {"standard_number": standard_number, "title":title, "internal":internal, "type_id":type_id, "version":version, "level":level, "credits":credits, "field_id":field_id, "subfield_id":subfield_id, "domain_id":domain_id, "literacy":literacy, "numeracy":numeracy}
         
         # ensure no duplication
         try:
-            aaaa = next(standard for standard in standards if standard[0] == outtuple[0]) # if it can already be found
+            aaaa = next(standard for standard in standards if standard['standard_number'] == outdict['standard_number']) # if it can already be found
             duplicate += 1
             #print(f"DUPLICATE AS{scraped['number']:<5d}")
         except StopIteration: # there is no duplicate
             #if scraped['number'] == 91154:
                 #print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] I'm entering validity!")
-            standards.append(outtuple)
+            standards.append(outdict)
             search_standards.append(search_standard)
 
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Entering data")
@@ -190,18 +232,18 @@ def combine():
         curs.executemany("INSERT INTO subfields      (subfield_id, name)               VALUES (%s,%s);", [*enumerate(subfields)])
         curs.executemany("INSERT INTO domains        (domain_id, name)                 VALUES (%s,%s);", [*enumerate(domains)])
         
-        curs.executemany('''INSERT INTO standards (
-            standard_number,
-            title,
-            internal,
-            type_id,
-            version,
-            level,
-            credits,
-            field_id,
-            subfield_id,
-            domain_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);''', standards)
+        # insert a dict into a table
+        # this should be easier, oh my god
+        cols = list(standards[0].keys())
+
+        vals = [[standard[x] for x in cols] for standard in standards]
+        vals_str_list = ["%s"] * len(vals[0])
+        vals_str = ", ".join(vals_str_list)
+
+        curs.executemany("INSERT INTO standards ({cols}) VALUES ({vals_str})".format(
+                    cols = ", ".join(cols), vals_str = vals_str), vals)
         
+        # insert relational jointable for link between standards and subjects
         curs.executemany("INSERT INTO standard_subject (subject_id, standard_number) VALUES (%s,%s);", subject_standards)
         print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Committing {len(standards)} standards")
         conn.commit()

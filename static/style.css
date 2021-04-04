@@ -1,5 +1,6 @@
 :root {
   --nzqa_blue: #00709e;
+  --nzqa_red: #d22127;
   --white: #ffffff;
 }
 
@@ -10,7 +11,7 @@ body {
 
 .navbar {
     background-color: var(--nzqa_blue);
-    border-bottom: 5px solid #d22127;
+    border-bottom: 5px solid var(--nzqa_red);
 }
 
 .navbar_brand {
