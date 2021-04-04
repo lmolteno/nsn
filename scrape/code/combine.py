@@ -75,8 +75,8 @@ def combine():
     for index, row in ln_df.iterrows():
         sn = int(row['Registered'])
         title = row['Title']
-        literacy = row['Literacy'] == "Y"
-        numeracy = row['Numeracy'] == "Y"
+        literacy = str(row['Literacy']).upper().strip() == "Y"
+        numeracy = str(row['Numeracy']).upper().strip() == "Y"
         status = row['Status']
         if status == 'Registered':
             ln_dict[sn] = {'literacy': literacy, 'numeracy': numeracy}
