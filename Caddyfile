@@ -3,6 +3,7 @@
 }
 
 nsn.molteno.org {
+	encode gzip
 	file_server {
 		root /static/	
 	}
