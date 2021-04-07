@@ -73,8 +73,8 @@ async function search() {
                         <table class="table-bordered border-0 table table-hover">
                             <thead>
                                 <tr>
-                                <th scope="col" class="col-1 text-end">Number</th>
-                                <th scope="col" class="col-9">Title</th>
+                                <th scope="col" class="col text-end">Number</th>
+                                <th scope="col" class="col">Title</th>
                                 <th scope="col">Type</th>
                                 <th scope="col">Level</th>
                                 <th scope="col">Credits</th>
@@ -91,6 +91,10 @@ async function search() {
             if (filtered.length == 0) {
                 standardshtml = "<p class='text-muted mb-2'>Nothin' here!</p>";
             }
+            $("#standards-results").html(standardshtml)
+            $("#search-results").css("visibility","visible");
+        } else {
+            standardshtml = "<p class='text-muted mb-2'>Nothin' here!</p>";
             $("#standards-results").html(standardshtml)
             $("#search-results").css("visibility","visible");
         }
@@ -135,8 +139,11 @@ function generateSearchStandardRow(standard) {
     outhtml += "<td class='text-center'>" + standard.level + "</td>"
     outhtml += "<td class='text-center'>" + standard.credits + "</td>"
     
-    // literacy / numeracy
-    outhtml += "<td class='text-center'>" + (standard.literacy ? "Y" : "N") + "</td>"
+    // Literacy / numeracy
+    outhtml += `<td>
+                    <span class='float-start'>` + (standard.reading ? "R" : "N") + `</span>
+                    <span class='float-end'>  ` + (standard.writing ? "W" : "N") + `</span>
+                </td>`;
     outhtml += "<td class='text-center'>" + (standard.numeracy ? "Y" : "N") + "</td>"
     
     // internal or external
@@ -173,13 +180,13 @@ function updateEverything() { // populate the standards list, and the subject na
                 <table class="table table-bordered table-hover bg-white border-0">
                     <thead>
                         <tr>
-                        <th scope="col" class="col-1 text-end">Number</th>
-                        <th scope="col" class="col-9">Title</th>
+                        <th scope="col" class="col text-end">Number</th>
+                        <th scope="col" class="col">Title</th>
                         <th scope="col">Type</th>
                         <th scope="col">Credits</th>
                         <th scope="col">Literacy</th>
                         <th scope="col">Numeracy</th>
-                        <th scope="col">I/E</th>
+                        <th scope="col">Int/Ext</th>
                         </tr>
                     </thead>`;
     var level_arr = (level == null) ? [1,2,3] : [level,]
@@ -213,7 +220,7 @@ function updateEverything() { // populate the standards list, and the subject na
 
                 outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
                 outhtml += `<td class='text-center'>` + standard.credits + `</td>
-                            <td class='text-center'>` + (standard.literacy ? "Y" : "N") + `</td>
+                            <td><span class='float-start'>` + (standard.reading ? "R" : "N") + "</span><span class='float-end'>" + (standard.writing ? "W" : "N") + `</span></td>
                             <td class='text-center'>` + (standard.numeracy ? "Y" : "N") + `</td>
                             <td>` + (standard.internal ? `Internal` : `External`) + `</td>
                             </tr>`;

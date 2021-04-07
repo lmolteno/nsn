@@ -25,7 +25,7 @@ CREATE TABLE domains (
 );
 
 CREATE TABLE standards (
- standard_number INT PRIMARY KEY,
+ standard_number INT UNIQUE PRIMARY KEY,
  title VARCHAR NOT NULL,
  internal BOOL NOT NULL,
  type_id INT,
