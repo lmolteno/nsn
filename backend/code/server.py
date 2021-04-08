@@ -33,7 +33,7 @@ class DBManager:
     
     def get_standards(self):
         rec = []
-        sql = """SELECT standards.standard_number,
+        sql = """SELECT DISTINCT standards.standard_number,
                     title,
                     name AS subject_name,
                     level,
@@ -41,28 +41,10 @@ class DBManager:
                     type_id,
                     version,
                     credits,
-                    field_id,
-                    subfield_id,
-                    domain_id,
-                    subjects.subject_id AS subject_id FROM standards
-                 INNER JOIN standard_subject
-                 ON standard_subject.standard_number=standards.standard_number
-                 INNER JOIN subjects
-                 ON standard_subject.subject_id=subjects.subject_id;"""
-        self.cursor.execute(sql)
-        rec = self.cursor.fetchall()
-        return rec
-    
-    def get_standards_from_subject(self, subject_id):
-        rec = []
-        sql = """SELECT standards.standard_number,
-                    title,
-                    name AS subject_name,
-                    level,
-                    internal,
-                    type_id,
-                    version,
-                    credits,
+                    reading,
+                    writing,
+                    literacy,
+                    numeracy,
                     field_id,
                     subfield_id,
                     domain_id,
@@ -71,6 +53,40 @@ class DBManager:
                  ON standard_subject.standard_number=standards.standard_number
                  INNER JOIN subjects
                  ON standard_subject.subject_id=subjects.subject_id
+                 INNER JOIN ncea_litnum
+                 ON standards.standard_number=ncea_litnum.standard_number
+                 INNER JOIN ue_literacy
+                 ON standards.standard_number=ue_literacy.standard_number;"""
+        self.cursor.execute(sql)
+        rec = self.cursor.fetchall()
+        return rec
+    
+    def get_standards_from_subject(self, subject_id):
+        rec = []
+        sql = """SELECT DISTINCT standards.standard_number,
+                    title,
+                    name AS subject_name,
+                    level,
+                    internal,
+                    type_id,
+                    version,
+                    credits,
+                    reading,
+                    writing,
+                    literacy,
+                    numeracy,
+                    field_id,
+                    subfield_id,
+                    domain_id,
+                    subjects.subject_id AS subject_id FROM standards
+                 INNER JOIN standard_subject
+                 ON standard_subject.standard_number=standards.standard_number
+                 INNER JOIN subjects
+                 ON standard_subject.subject_id=subjects.subject_id
+                 INNER JOIN ncea_litnum
+                 ON standards.standard_number=ncea_litnum.standard_number
+                 INNER JOIN ue_literacy
+                 ON standards.standard_number=ue_literacy.standard_number
                  WHERE subjects.subject_id = %s;"""
         self.cursor.execute(sql, (subject_id,))
         rec = self.cursor.fetchall()

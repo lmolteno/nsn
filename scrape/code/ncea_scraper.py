@@ -119,6 +119,8 @@ def get_assessments(subject): # this function will parse the assessment search q
             a_tags = len(row.find_all('td')[0].find_all('a')) # find how many a tags there are
             num, title, credits, external = row.find_all('strong') # find the bolded text
             #if a_tags < 2: # the assessment hasn't expired (an extra <a> tag is added when it has expired that links to the review page) (this is actually false)
+            if "expiring" in str(row):
+                print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] {num_ass} is expiring') # debug
             if "expired" not in str(row):
                 new_ass = { # populate dictionary
                     'level': level, # the level the assessment applies to

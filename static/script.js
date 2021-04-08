@@ -106,9 +106,9 @@ function generateStarredCard(subject) {
     outhtml = "<div class='col'><div class='card'>"
     outhtml += `<div class='card-header' style="transform: rotate(0);">
                     <div class='close-starred'><a type='button' onClick='unstarSubject(` + subject.subject_id + `, this)'
-                       class='col-1 btn float-end btn-sm p-0'>` + cross + `</a></div>
+                       class='col btn float-end btn-sm p-0'>` + cross + `</a></div>
                     <a class='link text-decoration-none stretched-link starred-link' href=/subject/?id=` + subject.subject_id + `>
-                    ` + subject.name + `</a>
+                    ` + subject.display_name + `</a>
                 </div>
                 <ul class="list-group list-group-flush">
                     <a class='list-group-item list-group-item-action' href=/subject/?id=` + subject.subject_id + `&level=1>Level 1</a>
@@ -138,22 +138,24 @@ function displayStarred() {
 function generateStandardRow(standard) {
     outhtml = ""
     i_e_class = standard.internal ? "internal_row" : "external_row";
-    if (standard.standard_number != null) {
-        outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.standard_number + ")'>"
-        outhtml += "<th scope='row'><span class='float-end'>" + standard.standard_number + "</span></th>"
-    } else {
-        outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.id + ")'>"
-        outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
-    }
+    
+    outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.id + ")'>"
+    outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
+
     outhtml += "<td>" + standard.title + "</td>"
-    if (standard.standard_number != null) {
-        outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
-    } else {
-        outhtml += "<td>" + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + "</td>"
-    }        
+    outhtml += "<td>" + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + "</td>"
     outhtml += "<td class='text-center'>" + standard.level + "</td>"
     outhtml += "<td class='text-center'>" + standard.credits + "</td>"
+    
+    // Literacy / numeracy
+    outhtml += `<td>
+                    <span class='float-start'>` + (standard.reading ? "R" : "N") + `</span>
+                    <span class='float-end'>  ` + (standard.writing ? "W" : "N") + `</span>
+                </td>`;    outhtml += "<td class='text-center'>" + (standard.numeracy ? "Y" : "N") + "</td>"
+    
+    // internal or external
     outhtml += "<td>" + (standard.internal ? "Internal" : "External") + "</td>"
+
     outhtml += "</tr>"
     return outhtml
 }
@@ -178,7 +180,7 @@ async function search() {
                 subjecthtml += "<td>"
                 subjecthtml += "<a type='button' onClick='starSubject("
                 subjecthtml += result.id;
-                subjecthtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-3'>";
+                subjecthtml += ", this)' class='col btn float-start btn-sm p-0 pe-3'>";
                 // check if the subject is starred or not
                 is_starred = starred.find(s => s.subject_id === parseInt(result.id))
                 if (is_starred) {
@@ -203,11 +205,13 @@ async function search() {
                         <table class="table-bordered border-0 table table-hover">
                             <thead>
                                 <tr>
-                                <th scope="col" class="col-1 text-end">Number</th>
-                                <th scope="col" class="col-9">Title</th>
+                                <th scope="col" class="col text-end">Number</th>
+                                <th scope="col" class="col">Title</th>
                                 <th scope="col">Type</th>
                                 <th scope="col">Level</th>
                                 <th scope="col">Credits</th>
+                                <th scope="col">Literacy</th>
+                                <th scope="col">Numeracy</th>
                                 <th scope="col">I/E</th>
                                 </tr>
                             </thead>
