@@ -38,6 +38,15 @@ function getSubjects(then=function(){a=1}) { // update the local list of subject
 function displaySubjects() { // display the current list of subjects
     console.log("Displaying " + subjects.length.toString() + " subjects"); 
     outhtml = "" // this will be filled with list elements
+    subjects.sort(function(x, y) { // sort alphabetically
+        if (x.display_name < y.display_name) {
+            return -1;
+        }
+        if (x.display_name > y.display_name) {
+            return 1;
+        }
+        return 0;
+    });
     subjects.forEach(subject => {
         outhtml += generateSubjectLI(subject);
     });
