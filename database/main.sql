@@ -1,26 +1,26 @@
 CREATE TABLE subjects (
- subject_id INT PRIMARY KEY,
+ subject_id INT UNIQUE PRIMARY KEY,
  name VARCHAR NOT NULL,
  display_name VARCHAR NOT NULL
 );
 
 CREATE TABLE standard_types (
- type_id INT PRIMARY KEY,
+ type_id INT UNIQUE PRIMARY KEY,
  name VARCHAR
 );
 
 CREATE TABLE fields (
- field_id INT PRIMARY KEY,
+ field_id INT UNIQUE PRIMARY KEY,
  name VARCHAR
 );
 
 CREATE TABLE subfields (
- subfield_id INT PRIMARY KEY,
+ subfield_id INT UNIQUE PRIMARY KEY,
  name VARCHAR
 );
 
 CREATE TABLE domains (
- domain_id INT PRIMARY KEY,
+ domain_id INT UNIQUE PRIMARY KEY,
  name VARCHAR
 );
 
@@ -50,7 +50,7 @@ CREATE TABLE standards (
 );
 
 CREATE TABLE ncea_litnum (
- standard_number INT NOT NULL,
+ standard_number INT UNIQUE NOT NULL,
  literacy BOOL,
  numeracy BOOL,
  CONSTRAINT fk_ncea_sn
@@ -60,7 +60,7 @@ CREATE TABLE ncea_litnum (
 );
 
 CREATE TABLE ue_literacy (
- standard_number INT NOT NULL,
+ standard_number INT UNIQUE NOT NULL,
  reading BOOL,
  writing BOOL,
  CONSTRAINT fk_ue_sn

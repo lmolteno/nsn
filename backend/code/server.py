@@ -91,7 +91,45 @@ class DBManager:
         self.cursor.execute(sql, (subject_id,))
         rec = self.cursor.fetchall()
         return rec
-
+    
+    def get_standard_info(self, standard_number):
+        get_basic  = """SELECT standard_number,
+                        title,
+                        internal,
+                        standard_types.name AS type,
+                        version,
+                        level,
+                        credits,
+                        fields.name AS field,
+                        subfields.name AS subfield,
+                        domains.name AS domain
+                        FROM standards
+                        INNER JOIN standard_types ON standard_types.type_id = standards.type_id
+                        INNER JOIN fields ON fields.field_id = standards.field_id
+                        INNER JOIN subfields ON subfields.subfield_id = standards.subfield_id
+                        INNER JOIN domains on domains.domain_id = standards.domain_id
+                        WHERE standard_number = %s;"""
+        get_subjects = """SELECT subjects.subject_id AS subject_id, name, display_name FROM subjects
+                          INNER JOIN standard_subject ON subjects.subject_id = standard_subject.subject_id
+                          WHERE standard_subject.standard_number = %s;"""
+        get_ncea_litnum = "SELECT literacy, numeracy FROM ncea_litnum WHERE standard_number = %s;"
+        get_ue_literacy = "SELECT reading, writing FROM ue_literacy WHERE standard_number = %s;"
+        # later, add achivement standard year, etc. post-the-big-scrape
+        outdict = {}
+        # get basic info`
+        self.cursor.execute(get_basic, (standard_number,))
+        outdict['basic_info'] = self.cursor.fetchone()
+        # get subjects that the standard is associated with
+        self.cursor.execute(get_subjects, (standard_number,))
+        outdict['subjects'] = self.cursor.fetchall()
+        # get literacy/numeracy status
+        self.cursor.execute(get_ncea_litnum, (standard_number,))
+        outdict['ncea_litnum'] = self.cursor.fetchone()
+        # get reading/writing status
+        self.cursor.execute(get_ue_literacy, (standard_number,))
+        outdict['ue_literacy'] = self.cursor.fetchone()
+        
+        return outdict
 
 server = Flask(__name__)
 conn = None
@@ -104,13 +142,29 @@ def api_standards():
     # Check if a subject ID was provided as part of the URL.
     # If no ID is provided, get all standards
     if 'subject' in request.args:
-        subject_id = int(request.args['subject'])
+        subject_id = request.args['subject']
+        try:
+            subject_id = int(subject_id)
+        except ValueError: # they didn't provide an integer
+            return jsonify({"success": False, "error": "You must provide an integer subject_id"})
         
         standards = conn.get_standards_from_subject(subject_id)
         if len(standards) > 0:
             return jsonify({"success": True, "standards": standards})
         else:
             return jsonify({"success": False, "error": "No standards exist for that subject"})
+        
+    elif 'number' in request.args: # check if there's a specific standard they're asking for
+        standard_number = request.args['number']
+        try:
+            standard_number = int(standard_number)
+        except ValueError:
+            return jsonify({"success": False, "error": "You must provide an integer standard number"})
+        
+        info = conn.get_standard_info(standard_number)
+        if len(info['subjects']) > 0: # every standard that exists is associated with at least one subject
+            return jsonify({'success': True} | info) # merge the success: true with the info provided from the connection
+        
     else: # get all standards
         standards = conn.get_standards()
         if len(standards) > 0:
@@ -144,7 +198,6 @@ def api_structure():
         return jsonify({**{"success": True}, **structure}) # join the two dictionaries together
     else:
         return jsonify({"success": False, "error": "Structure information is not present in the database. Contact linus@molteno.net"})
-
 
 if __name__ == '__main__':
     server.run(port=3000)
