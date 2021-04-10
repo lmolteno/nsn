@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html class='h-100'>
+    <head>
+        <title>NCEA Standard Navigator</title> <!-- this is subject to change -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"> 
+        <link href="/style.css" rel="stylesheet">
+            
+        <!-- favicons -->
+        <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+        <link rel="manifest" href="/favicon/site.webmanifest">
+            
+    </head>
+    <body class='d-flex flex-column h-100'>
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">NCEA Standard Navigator</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav-links" aria-controls="nav-links" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+                <div id="nav-links" class="collapse navbar-collapse">
+                    <div class="navbar-nav" id='nav-breadcrumbs'>
+                       
+
+                    </div>
+                    <div class="navbar-nav ms-auto">
+                        <a class="nav-link float-end" href="/analytics/">Analytics</a>
+                        <a class="nav-link" href="/about">About</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Big heading -->
+        <div class="container-fluid py-3 bg-dark" id="heading-container">
+            <h1 class="text-center display-3 align-middle text-light user-select-none" id="standard-number">&#x200b;</h1> <!-- the &#x200b; keeps the space tall, to make the loading of the standard name less jarring --> 
+            <h3 class="text-center display-6 align-middle text-light user-select-none" id="standard-title">&#x200b;</h3>
+        </div>
+        
+        <!-- Main container for information -->
+        <div class="container-lg border border-secondary rounded-3 my-3 pt-3" id="main-container">
+            
+            <a class='btn btn-primary w-100 mb-3' id='nzqa-link'>NZQA Documents</a>
+        
+            <div class='row row-cols-1 row-cols-md-3 g-3 mb-3'>
+                <div class='col'>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Information</h3>
+                        </div>
+                        <table class="table table-bordered mb-0">
+                            <tbody>
+                                <tr class='border-top-0'>
+                                    <td class="border-top-0 border-start-0">Level</td>
+                                    <td class="border-top-0 border-end-0" id='level-num'>&#x200b;</td>
+                                </tr>
+                                <tr>
+                                    <td>Credits</th>
+                                    <td class="border-end-0" id='credit-num'>&#x200b;</td>
+                                </tr>
+                                <tr class="border-bottom-0">
+                                    <td class="border-bottom-0 border-start-0">Version</td>
+                                    <td class="border-bottom-0 border-end-0" id='version-num'>&#x200b;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class='col'>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Literacy and Numeracy</h3>
+                        </div>
+                        <table class="table table-bordered mb-0">
+                            <tbody>
+                                <tr class='border-top-0'>
+                                    <td class="border-top-0 border-start-0">NCEA Literacy</td>
+                                    <td class="border-top-0 border-end-0" id='literacy-bool'>&#x200b;</td>
+                                </tr>
+                                <tr>
+                                    <td>NCEA/UE Numeracy</td>
+                                    <td class="border-end-0" id='numeracy-bool'>&#x200b;</td>
+                                </tr>
+                                <tr>
+                                    <td>UE Reading</td>
+                                    <td class="border-end-0" id='reading-bool'>&#x200b;</td>
+                                </tr>
+                                <tr class="border-bottom-0">
+                                    <td class="border-bottom-0 border-start-0">UE Writing</td>
+                                    <td class="border-bottom-0 border-end-0" id='writing-bool'>&#x200b;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class='col'>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Subjects</h3>
+                        </div>
+                        <ul class='list-group list-group-flush' id='subject-list'>
+                            <a class='list-group-item'>&#x200b;</a>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        
+        <!-- Footer -->
+        <footer class="container-fluid footer mt-auto py-3 bg-light">
+        <div class="text-center">
+            <p class="text-muted">
+                <span>Copyright © 2021 Linus Molteno</span>
+            </p>
+            <p class="small text-muted">
+                Names may not be accurate (e.g. Te Reo Maori instead of Te Reo M&#257;ori) due to technical limitations.
+            </p>
+        </div>
+        </footer>
+    
+        <script src='/libs/meilisearch.umd.js'></script>
+        <script src="/libs/jquery-3.6.0.min.js"></script>
+        <script src="/libs/bootstrap.bundle.min.js"></script>
+        <script src="script.js"></script>
+    </body>
+</html>

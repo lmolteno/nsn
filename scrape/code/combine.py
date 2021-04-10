@@ -201,12 +201,16 @@ def combine():
             # this really isn't a problem
             # i don't know what to do to make it do nothing
             a = 1 # mmhm. relevant.
-        ncea_litnum.append(ncea_row)
+            
+        try:
+            dup = next(litnum for litnum in ncea_litnum if litnum["standard_number"] == ncea_row["standard_number"]) # make number match
+        except StopIteration:
+            ncea_litnum.append(ncea_row)
         
         # handle UE literacy
         ue_row = {'standard_number': standard_number,
                   'reading': False,
-                  'writing': False}   
+                  'writing': False}
         try:
             info = uelit_dict[standard_number]
             ue_row = {'standard_number': standard_number,
@@ -214,8 +218,11 @@ def combine():
                       'writing': info['writing']}
         except KeyError:
             a = 1
-            
-        ue_lit.append(ue_row)
+        
+        try:
+            dup = next(lit for lit in ue_lit if lit["standard_number"] == ue_row["standard_number"]) # make number match
+        except StopIteration:
+            ue_lit.append(ue_row)
             
         # do the replacement for the LUT of replaced words
         for word, replacement in replacement_words:

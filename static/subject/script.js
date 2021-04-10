@@ -114,8 +114,8 @@ async function search() {
 }
 
 function linkToAssessment(number) {
-    nzqaurl = "https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber=" + number.toString()
-    window.open(nzqaurl, '_blank')
+    url = "https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber=" + number.toString()
+//     window.open(nzqaurl, '_blank')
 }
 
 function generateSubjectRow(subject) {
@@ -213,16 +213,25 @@ function updateEverything() { // populate the standards list, and the subject na
             standards_for_level.forEach(standard => { // for each standard
                 i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
 
-                outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.standard_number + ")'>"
-                outhtml += "<th scope='row'><span class='float-end'>" + standard.standard_number + "</span></th>"
+                outhtml += "<tr class='clickable " + i_e_class + "'>"
+                outhtml += `<th scope='row' style='position: relative;'>
+                <a href='/standard/?num=` + standard.standard_number + `' class='stretched-link link'></a>
+                <span class='float-end'>` + standard.standard_number + "</span></th>"
 
-                outhtml += "<td>" + standard.title + "</td>"
+                outhtml += `<td style='position: relative;'>
+                <a href='/standard/?num=` + standard.standard_number + `' class='stretched-link link'></a>` + standard.title + "</td>"
 
-                outhtml += "<td>" + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
-                outhtml += `<td class='text-center'>` + standard.credits + `</td>
-                            <td><span class='float-start'>` + (standard.reading ? "R" : "N") + "</span><span class='float-end'>" + (standard.writing ? "W" : "N") + `</span></td>
-                            <td class='text-center'>` + (standard.numeracy ? "Y" : "N") + `</td>
-                            <td>` + (standard.internal ? `Internal` : `External`) + `</td>
+                outhtml += `<td style='position: relative;'>
+                <a href='/standard/?num=` + standard.standard_number + `' class='stretched-link link'></a>` + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
+                outhtml += `<td class='text-center' style='position: relative;'>
+                <a href='/standard/?num=` + standard.standard_number + `' class='stretched-link link'></a>` + standard.credits + `</td>
+                            <td style='position: relative;'>
+                <a href='/standard/?num=` + standard.standard_number + `' class='stretched-link link'></a><span class='float-start'>` + (standard.reading ? "R" : "N") + `</span>
+                            <span class='float-end'>` + (standard.writing ? "W" : "N") + `</span></td>
+                            <td class='text-center' style='position: relative;'>
+                <a href='/standard/?num=` + standard.standard_number + `' class='stretched-link link'></a>` + (standard.numeracy ? "Y" : "N") + `</td>
+                            <td style='position: relative;'>
+                <a href='/standard/?num=` + standard.standard_number + `' class='stretched-link link'></a>` + (standard.internal ? `Internal` : `External`) + `</td>
                             </tr>`;
             });
             outhtml += "</tbody>";

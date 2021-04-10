@@ -103,7 +103,7 @@ function getStarred(then=None) {
 
 function generateStarredCard(subject) {
     // construct card element for each starred subject
-    outhtml = "<div class='col'><div class='card'>"
+    outhtml = "<div class='col starred-card'><div class='card'>"
     outhtml += `<div class='card-header' style="transform: rotate(0);">
                     <div class='close-starred'><a type='button' onClick='unstarSubject(` + subject.subject_id + `, this)'
                        class='col btn float-end btn-sm p-0'>` + cross + `</a></div>
