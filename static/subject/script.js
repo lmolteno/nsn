@@ -236,7 +236,7 @@ function updateEverything() { // populate the standards list, and the subject na
             });
             outhtml += "</tbody>";
         } else {
-            outhtml += "<thead><tr><th colspan=6 class='text-center border border-dark'>No standards for Level " + current_level +"</th></tr></thead>";
+            outhtml += "<thead><tr><th colspan=7 class='text-center border border-dark'>No standards for Level " + current_level +"</th></tr></thead>";
         }
     });
     outhtml += "</tbody></table></div>";
