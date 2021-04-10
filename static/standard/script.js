@@ -130,6 +130,8 @@ function updateEverything() { // populate EVERYTHING hehe
     $('#credit-num').html(standard.basic_info.credits);
     $('#version-num').html(standard.basic_info.version);
     
+    // update nzqa link with href to correct bit of site
+    $("#nzqa-link").attr("href", "https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber=" + standard_number);
     
     $('#subject-list').fadeIn();
     $('#standard-number').fadeIn()

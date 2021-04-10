@@ -16,20 +16,19 @@ body {
 
 .navbar_brand {
     font-family: 'Roboto', sans-serif;
+    font-weight: normal;
 }
 
 #heading-container {
     font-family: 'Roboto', sans-serif;
 }
 
-#main-container {
-/*     background-color: #f2f2f2; */
-}
-
+/* for big screens, 3 columns of subjects */
 .card-columns {
    column-count: 3;
 }
 
+/* smol screens */
 @media screen and (max-width: 768px) {
     .card-columns {
         column-count: 1;
@@ -43,6 +42,7 @@ body {
 
 }
 
+/* mid-size screens */
 @media screen and (min-width: 768px) and (max-width: 992px) {
     .card-columns {
         column-count: 2;
@@ -55,8 +55,11 @@ body {
 
 }
 
+/* general class to make the cursor be pointy when over something i want to be interactive */
 .clickable { cursor: pointer; }
 
+
+/* colour distinction between internal and external rows */
 .internal_row {
     background-color: #e0f0ff;
 }
@@ -65,6 +68,7 @@ body {
     background-color: /* elia:#ffe8f5*//* odin:#ffd1eb sarah:*/#c6d6e8;
 }
 
+/* make the card have a blue border on hover */
 .starred-card .card .card-header {
     cursor: pointer;
 }
@@ -73,27 +77,16 @@ body {
     transition: border 0.4s;
 }
 
-.starred-card .card:hover {
+.starred-card .card:hover { 
     border: 1px solid var(--nzqa_blue);
 }
 
 .close-starred {
-    z-index: 2;
+    z-index: 2; /* put on top of stretch link to subject */
     position: relative;
 }
 
-#about-list li:before {
-    content: "›";
-    float: left;
-    margin-top: -1px;
-    margin-left: -17px;
-    color: #b7b7b7;
-}
-
-#about-list li {
-    display: block;
-}
-
-.navbar-brand {
-    font-weight: normal;
+/* on standards page, make the big nzqa link the nzqa colour */
+#nzqa-link {
+    background-color: var(--nzqa_blue);
 }
