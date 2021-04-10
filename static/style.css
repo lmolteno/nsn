@@ -34,12 +34,25 @@ body {
     .card-columns {
         column-count: 1;
     }
+
+    
+    .standard-card .card {
+        margin-bottom: 2em;
+    }
+
+
 }
 
 @media screen and (min-width: 768px) and (max-width: 992px) {
     .card-columns {
         column-count: 2;
     }
+    
+
+    .standard-card .card {
+        margin-bottom: 2em;
+    }
+
 }
 
 .clickable { cursor: pointer; }
@@ -52,15 +65,15 @@ body {
     background-color: /* elia:#ffe8f5*//* odin:#ffd1eb sarah:*/#c6d6e8;
 }
 
-.card-header {
+.starred-card .card .card-header {
     cursor: pointer;
 }
 
-.card {
+.starred-card .card {
     transition: border 0.4s;
 }
 
-.card:hover {
+.starred-card .card:hover {
     border: 1px solid var(--nzqa_blue);
 }
 
