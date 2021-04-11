@@ -104,10 +104,10 @@ class DBManager:
                         subfields.name AS subfield,
                         domains.name AS domain
                         FROM standards
-                        INNER JOIN standard_types ON standard_types.type_id = standards.type_id
-                        INNER JOIN fields ON fields.field_id = standards.field_id
-                        INNER JOIN subfields ON subfields.subfield_id = standards.subfield_id
-                        INNER JOIN domains on domains.domain_id = standards.domain_id
+                        LEFT JOIN standard_types ON standard_types.type_id = standards.type_id
+                        LEFT JOIN fields ON fields.field_id = standards.field_id
+                        LEFT JOIN subfields ON subfields.subfield_id = standards.subfield_id
+                        LEFT JOIN domains on domains.domain_id = standards.domain_id
                         WHERE standard_number = %s;"""
         get_subjects = """SELECT subjects.subject_id AS subject_id, name, display_name FROM subjects
                           INNER JOIN standard_subject ON subjects.subject_id = standard_subject.subject_id

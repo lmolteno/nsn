@@ -113,11 +113,6 @@ async function search() {
     }
 }
 
-function linkToAssessment(number) {
-    url = "https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber=" + number.toString()
-//     window.open(nzqaurl, '_blank')
-}
-
 function generateSubjectRow(subject) {
     outhtml = ""
     outhtml += "<tr>"
@@ -129,28 +124,49 @@ function generateSubjectRow(subject) {
 
 function generateSearchStandardRow(standard) {
     outhtml = ""
-    i_e_class = standard.internal ? "internal_row" : "external_row";
-    
-    outhtml += "<tr class='clickable " + i_e_class + "' onclick='linkToAssessment(" + standard.id + ")'>"
-    outhtml += "<th scope='row'><span class='float-end'>" + standard.id + "</span></th>"
+    i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
 
-    outhtml += "<td>" + standard.title + "</td>"
-    outhtml += "<td>" + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + "</td>"
-    outhtml += "<td class='text-center'>" + standard.level + "</td>"
-    outhtml += "<td class='text-center'>" + standard.credits + "</td>"
+    outhtml += "<tr class='clickable " + i_e_class + "'>" // initialise row
+    // add <th> (header) styled standard number with link to the standard page
+    outhtml += `    <th scope='row' style='position: relative;'>
+                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        <span class='float-end'>` + standard.id + `</span>
+                    </th>`
     
-    // Literacy / numeracy
-    outhtml += `<td>
-                    <span class='float-start'>` + (standard.reading ? "R" : "N") + `</span>
-                    <span class='float-end'>  ` + (standard.writing ? "W" : "N") + `</span>
-                </td>`;
-    outhtml += "<td class='text-center'>" + (standard.numeracy ? "Y" : "N") + "</td>"
-    
-    // internal or external
-    outhtml += "<td>" + (standard.internal ? "Internal" : "External") + "</td>"
-
-    outhtml += "</tr>"
+    // add all the other information in <td> styled boxes
+    outhtml += `    <td style='position: relative;'>
+                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ` + standard.title + `
+                    </td>
+                    <td style='position: relative;'>
+                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ` + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + `
+                    </td>
+                    <td class='text-center' style='position: relative;'>
+                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ` + standard.credits + `
+                    </td>
+                    <td style='position: relative;'>
+                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        <span class='float-start'>` + (standard.reading ? "R" : "N") + `</span>
+                        <span class='float-end'>` + (standard.writing ? "W" : "N") + `</span>
+                    </td>
+                    <td class='text-center' style='position: relative;'>
+                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ` + (standard.numeracy ? "Y" : "N") + `
+                    </td>
+                    <td style='position: relative;'>
+                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ` + (standard.internal ? `Internal` : `External`) + `
+                    </td>
+                </tr>`;
     return outhtml
+}
+
+function generateStandardRow(standard) {
+    standard['id'] = standard['standard_number']
+    return generateSearchStandardRow(standard); // the only difference between a search-standard and a not one is the id
+    // replaced with the standard number 
 }
 
 
@@ -211,32 +227,11 @@ function updateEverything() { // populate the standards list, and the subject na
             </thead>
             <tbody>`;
             standards_for_level.forEach(standard => { // for each standard
-                i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
-
-                outhtml += "<tr class='clickable " + i_e_class + "'>"
-                outhtml += `<th scope='row' style='position: relative;'>
-                <a href='/standard/?num=` + standard.standard_number + `' class='stretched-link link'></a>
-                <span class='float-end'>` + standard.standard_number + "</span></th>"
-
-                outhtml += `<td style='position: relative;'>
-                <a href='/standard/?num=` + standard.standard_number + `' class='stretched-link link'></a>` + standard.title + "</td>"
-
-                outhtml += `<td style='position: relative;'>
-                <a href='/standard/?num=` + standard.standard_number + `' class='stretched-link link'></a>` + ((parseInt(standard.standard_number) < 90000) ? "Unit" : "Achievement") + "</td>"
-                outhtml += `<td class='text-center' style='position: relative;'>
-                <a href='/standard/?num=` + standard.standard_number + `' class='stretched-link link'></a>` + standard.credits + `</td>
-                            <td style='position: relative;'>
-                <a href='/standard/?num=` + standard.standard_number + `' class='stretched-link link'></a><span class='float-start'>` + (standard.reading ? "R" : "N") + `</span>
-                            <span class='float-end'>` + (standard.writing ? "W" : "N") + `</span></td>
-                            <td class='text-center' style='position: relative;'>
-                <a href='/standard/?num=` + standard.standard_number + `' class='stretched-link link'></a>` + (standard.numeracy ? "Y" : "N") + `</td>
-                            <td style='position: relative;'>
-                <a href='/standard/?num=` + standard.standard_number + `' class='stretched-link link'></a>` + (standard.internal ? `Internal` : `External`) + `</td>
-                            </tr>`;
+                outhtml += generateStandardRow(standard);
             });
             outhtml += "</tbody>";
         } else {
-            outhtml += "<thead><tr><th colspan=6 class='text-center border border-dark'>No standards for Level " + current_level +"</th></tr></thead>";
+            outhtml += "<thead><tr><th colspan=7 class='text-center border border-dark'>No standards for Level " + current_level +"</th></tr></thead>";
         }
     });
     outhtml += "</tbody></table></div>";
