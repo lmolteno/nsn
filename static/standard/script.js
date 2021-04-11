@@ -128,7 +128,10 @@ function updateEverything() { // populate EVERYTHING hehe
     // update information table
     $('#level-num').html(standard.basic_info.level);
     $('#credit-num').html(standard.basic_info.credits);
-    $('#version-num').html(standard.basic_info.version);
+    $('#version-num').html(standard.basic_info.version == null ? "Unknown" : standard.basic_info.version );
+    // set internal/external colour
+//     $("#internal-external").addClass(standard.basic_info.internal ? "internal_row" : "external_row")
+    $('#internal-external').html(standard.basic_info.internal ? "Internal" : "External");
     
     // update nzqa link with href to correct bit of site
     $("#nzqa-link").attr("href", "https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber=" + standard_number);

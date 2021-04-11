@@ -61,11 +61,11 @@ body {
 
 /* colour distinction between internal and external rows */
 .internal_row {
-    background-color: #e0f0ff;
+    background-color: #e0f0ff !important;
 }
 
 .external_row {
-    background-color: /* elia:#ffe8f5*//* odin:#ffd1eb sarah:*/#c6d6e8;
+    background-color: /* elia:#ffe8f5*//* odin:#ffd1eb sarah:*/#c6d6e8 !important;
 }
 
 /* make the card have a blue border on hover */

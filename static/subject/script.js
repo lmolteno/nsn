@@ -113,11 +113,6 @@ async function search() {
     }
 }
 
-function linkToAssessment(number) {
-    url = "https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber=" + number.toString()
-//     window.open(nzqaurl, '_blank')
-}
-
 function generateSubjectRow(subject) {
     outhtml = ""
     outhtml += "<tr>"
@@ -131,25 +126,39 @@ function generateSearchStandardRow(standard) {
     outhtml = ""
     i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
 
-    outhtml += "<tr class='clickable " + i_e_class + "'>"
-    outhtml += `<th scope='row' style='position: relative;'>
-    <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
-    <span class='float-end'>` + standard.id + "</span></th>"
-
-    outhtml += `<td style='position: relative;'>
-    <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>` + standard.title + "</td>"
-
-    outhtml += `<td style='position: relative;'>
-    <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>` + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + "</td>"
-    outhtml += `<td class='text-center' style='position: relative;'>
-    <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>` + standard.credits + `</td>
-                <td style='position: relative;'>
-    <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a><span class='float-start'>` + (standard.reading ? "R" : "N") + `</span>
-                <span class='float-end'>` + (standard.writing ? "W" : "N") + `</span></td>
-                <td class='text-center' style='position: relative;'>
-    <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>` + (standard.numeracy ? "Y" : "N") + `</td>
-                <td style='position: relative;'>
-    <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>` + (standard.internal ? `Internal` : `External`) + `</td>
+    outhtml += "<tr class='clickable " + i_e_class + "'>" // initialise row
+    // add <th> (header) styled standard number with link to the standard page
+    outhtml += `    <th scope='row' style='position: relative;'>
+                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        <span class='float-end'>` + standard.id + `</span>
+                    </th>`
+    
+    // add all the other information in <td> styled boxes
+    outhtml += `    <td style='position: relative;'>
+                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ` + standard.title + `
+                    </td>
+                    <td style='position: relative;'>
+                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ` + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + `
+                    </td>
+                    <td class='text-center' style='position: relative;'>
+                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ` + standard.credits + `
+                    </td>
+                    <td style='position: relative;'>
+                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        <span class='float-start'>` + (standard.reading ? "R" : "N") + `</span>
+                        <span class='float-end'>` + (standard.writing ? "W" : "N") + `</span>
+                    </td>
+                    <td class='text-center' style='position: relative;'>
+                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ` + (standard.numeracy ? "Y" : "N") + `
+                    </td>
+                    <td style='position: relative;'>
+                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ` + (standard.internal ? `Internal` : `External`) + `
+                    </td>
                 </tr>`;
     return outhtml
 }
