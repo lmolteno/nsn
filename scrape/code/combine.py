@@ -312,10 +312,7 @@ def combine():
         
         # the rest of the information goes straight into the dict
         resource['category'] = category_id # replace with int pointer to id of category
-        if not resource['year'].isdigit(): # sometimes the year isn't what i expect (unit standards)
-            print(resource['year'])
-        else:
-            resources.append(resource)
+        resources.append(resource)
 
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Entering all data")
 
