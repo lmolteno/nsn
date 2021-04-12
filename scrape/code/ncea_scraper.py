@@ -135,7 +135,8 @@ def get_assessments(subject): # this function will parse the assessment search q
             num, title, credits, external = row.find_all('strong') # find the bolded text
             #if a_tags < 2: # the assessment hasn't expired (an extra <a> tag is added when it has expired that links to the review page) (this is actually false)
             if "expiring" in str(row):
-                print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] {num_ass} is expiring') # debug
+                a=1 # do nothing
+                #print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] {num_ass} is expiring') # debug
             if "expired" not in str(row):
                 new_ass = { # populate dictionary
                     'level': level, # the level the assessment applies to
@@ -152,9 +153,10 @@ def get_assessments(subject): # this function will parse the assessment search q
     return assessments
 
 def get_resources(standard_number):
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Getting resources for {standard_number}") 
     url = f"https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber={standard_number}"
 
-    fn = f"standards/{standard_number}.html" # name for cached file
+    fn = f"../cache/resources/{standard_number}.html" # name for cached file
     text = ""
     
     if os.path.isfile(fn):
@@ -163,7 +165,7 @@ def get_resources(standard_number):
     else: # there was no cached file
         delay = random.randint(5,10)
         print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting {delay}s to avoid being suspicious")
-        #time.sleep(delay)
+        time.sleep(delay)
         page = requests.get(url) # send request
         page.raise_for_status() # raise an error on a bad status
         if os.environ.get("HARD_CACHE") == "1":
@@ -217,11 +219,10 @@ def scrape_and_dump(of):
         data['assessments'] += get_assessments(subject) # get assessments for all subjects
     
     for assessment in data['assessments']: # these should be called standards
-        data['resources'] += get_resources(assessment['number']
+        data['resources'] += get_resources(assessment['number'])
 
     with open(of, 'w') as outfile:
         json.dump(data, outfile) # write to file
 
 if __name__ == "__main__": # if the module isn't imported
-    print("not doin nothing")
-    #get_papers(90878)) # french one for testing audio/transcripts
+    print(get_resources(90878)) # french one for testing audio/transcripts
