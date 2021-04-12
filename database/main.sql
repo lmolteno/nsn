@@ -97,5 +97,9 @@ CREATE TABLE resources (
  CONSTRAINT fk_resource_category
   FOREIGN KEY(category)
    REFERENCES resource_categories(category_id)
+   ON DELETE CASCADE,
+ CONSTRAINT fk_resource_sn
+  FOREIGN KEY(standard_number)
+   REFERENCES standards(standard_number)
    ON DELETE CASCADE
 );
