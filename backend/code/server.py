@@ -130,6 +130,20 @@ class DBManager:
         outdict['ue_literacy'] = self.cursor.fetchone()
         
         return outdict
+    
+    def get_resources(self, standard_number):
+        sql = """SELECT standard_number,
+                        year,
+                        title,
+                        resource_categories.name AS category,
+                        nzqa_url,
+                        filepath FROM resources
+                 INNER JOIN resource_categories 
+                 ON resource_categories.category_id = resources.category
+                 WHERE standard_number = %s;"""
+        self.cursor.execute(sql, (standard_number,))
+        resources = self.cursor.fetchall()
+        return resources
 
 server = Flask(__name__)
 conn = None
@@ -164,6 +178,8 @@ def api_standards():
         info = conn.get_standard_info(standard_number)
         if len(info['subjects']) > 0: # every standard that exists is associated with at least one subject
             return jsonify({'success': True} | info) # merge the success: true with the info provided from the connection
+        else:
+            return jsonify({'success': False, "error": "This standard does not appear to be in the database"})
         
     else: # get all standards
         standards = conn.get_standards()
@@ -184,7 +200,28 @@ def api_subjects():
         return jsonify({"success": True, "subjects": subjects})
     else:
         return jsonify({"success": False, "error": "No subjects are present in the database. Contact linus@molteno.net"})
-    
+
+@server.route('/api/resources', methods=['GET'])
+def api_resources():
+    global conn
+    if not conn:
+        conn = DBManager()
+    # get all resources for a standard
+    if 'number' in request.args:
+        standard_number = request.args['number']
+        try:
+            standard_number = int(standard_number)
+        except ValueError:
+            return jsonify({"success": False, "error": "You must provide an integer standard number"})
+        
+        resources = conn.get_resources(standard_number)
+        if len(resources) > 0:
+            return jsonify({"success": True, "resources": resources})
+        else:
+            return jsonify({"success": False, "error": "No resources seem to be available for this standard. If this seems wrong, contact linus@molteno.net"})
+    else:
+        return jsonify({"success": False, "error": "You must provide a standard number in the request arguments"})
+
 # get the information about the structure of classification of the standards
 # fields, subfields, domains
 @server.route('/api/structure', methods=['GET'])
@@ -194,10 +231,12 @@ def api_structure():
         conn = DBManager()
 
     structure = conn.get_structure_info()
-    if len(structure['fields'])        > 0 and len(structure['subfields']) > 0 and len(structure['domains'])   > 0:
+    if len(structure['fields']) > 0 and len(structure['subfields']) > 0 and len(structure['domains']) > 0:
         return jsonify({**{"success": True}, **structure}) # join the two dictionaries together
     else:
         return jsonify({"success": False, "error": "Structure information is not present in the database. Contact linus@molteno.net"})
+    
+
 
 if __name__ == '__main__':
     server.run(port=3000)

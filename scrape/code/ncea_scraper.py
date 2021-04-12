@@ -221,7 +221,7 @@ def get_resources(standard_number):
             "nzqa_url": full_url,
             "filepath": file_path
         }
-        
+                
         resources.append(resource_dict)
     return resources
         

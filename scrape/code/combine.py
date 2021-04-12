@@ -304,6 +304,7 @@ def combine():
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Processing {len(s_re)} resources...")
     categories = [] # list of categories to go into the database
     resources = [] # list of resource dicts to go into the database
+    duplicate = 0 # counter for duplicates that i resolve
     for resource in s_re:
         # update list of categories
         if resource['category'] not in categories:
@@ -312,8 +313,19 @@ def combine():
         
         # the rest of the information goes straight into the dict
         resource['category'] = category_id # replace with int pointer to id of category
-        resources.append(resource)
+        
+        #check for duplicate URLs
+        try:
+            dupe = next(prev for prev in resources if 
+                            prev['nzqa_url'] == resource['nzqa_url'] and 
+                            prev['year'] == resource['year'] and
+                            prev['standard_number'] == resource['standard_number'] and
+                            prev['category'] == resource['category'])
+            duplicate += 1
+        except StopIteration: # there is no duplicate, so it reaches the stopiteration endpoint
+            resources.append(resource)
 
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Resolved {duplicate} duplicates")
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Entering all data")
 
     # Enter the data

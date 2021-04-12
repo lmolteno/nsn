@@ -1,6 +1,7 @@
 // globals
 standard = {};
 standard_number = null;
+resources = [];
 starred = [];
 const urlParams = new URLSearchParams(window.location.search); // get url parameters
 if (urlParams.get('num') == null) {
@@ -24,9 +25,18 @@ const cross = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fi
 function getInfo(then=function(){a=1}) { // get the information regarding the standard with the ID from the URL
     $.get("/api/standards?number=" + standard_number.toString(), (data) => {
         if (data.success) {
-            console.log(data)
+            console.log("Successfully gathered information about the standard.")
             standard = data;
-            updateEverything(); // run the next function
+            $.get("/api/resources?number=" + standard_number, (resources_data) => {
+                if (resources_data.success) {
+                    console.log("Succesfully gathered resources for the standard");
+                    console.log(resources_data.resources);
+                    resources = resources_data.resources
+                    updateEverything(); // run the next function
+                } else {
+                    alert("Failure to get resources. Try reloading. If the problem persists, email linus@molteno.net");
+                }
+            });
         } else {
             alert("Failure to get standard info. Try reloading. If the problem persists, email linus@molteno.net");
         }

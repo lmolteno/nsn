@@ -9,7 +9,18 @@ import psycopg2.extras
 
 def clean():
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Cleaning database")
-    tables = ['subjects','standards','fields','subfields','domains','standard_types','standard_subject']
+    tables = [
+            'domains',
+            'fields',
+            'ncea_litnum',
+            'resource_categories',
+            'resources',
+            'standard_subject',
+            'standard_types',
+            'standards',
+            'subfields',
+            'subjects',
+            'ue_literacy']
     success = False # error handling for while the Postgres is starting
     while not success:
         try:
@@ -127,7 +138,7 @@ if __name__ == "__main__":
     while True:
         if os.path.isfile(of): # check if the output file exists
             with open(of) as outfile:
-                print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Loading file")
+                print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Loading scraped data...")
                 data = json.load(outfile)
                 lastupdated = datetime.strptime(data['updated'], f_string)
                 # add a year to the previous time and see if it's less than now (i'm not too worried about leap years)
