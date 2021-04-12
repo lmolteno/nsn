@@ -25,8 +25,8 @@ outliers_lut = {
                     "Processing Technologies",
                     "Technology - General Education"],
     "tikanga-a-iwi": "Tikanga a Iwi",
-    ## WEIRD POLYTECHY ONES TO IGNORE
-    "business studies": False,
+    ## WEIRD POLYTECHY ONES TO IGNORE (false means ignore)
+    "business studies": False, # ignore this because there's already agribusiness
     "business & management": False,
     "core skills": False,
     "driver license (class 1)": False, # this could be changed later, as there are actually standards in a weird format, i just cant be bothered rn
@@ -109,10 +109,25 @@ def get_assessments(subject): # this function will parse the assessment search q
                 os.makedirs(os.path.dirname(fn), exist_ok=True) # make directories on the way to the caching location
                 with open(fn, 'w') as f:
                     f.write(page.text) # save to file for later caching if there's a cache
+            text = page.text # save page text as texttext = ""
+        if os.path.isfile(fn):
+            with open(fn, 'r') as f:
+                text = f.read()
+        else: # there was no cached file
+            delay = random.randint(5,10)
+            print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting {delay}s to avoid being suspicious")
+            time.sleep(delay)
+            page = requests.get(formatted) # send request
+            page.raise_for_status() # raise an error on a bad status
+            if os.environ.get("HARD_CACHE") == "1":
+                print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Caching')
+                os.makedirs(os.path.dirname(fn), exist_ok=True) # make directories on the way to the caching location
+                with open(fn, 'w') as f:
+                    f.write(page.text) # save to file for later caching if there's a cache
             text = page.text # save page text as text
                     
                 
-        soup = BeautifulSoup(text, "html.parser",) # html parser init
+        soup = BeautifulSoup(text, "html.parser") # html parser init
         results = soup.find_all('tr', class_="dataHighlight") # get all the table rows that are highlighted (header rows)
         num_ass = 0
         for row in results: # for all the header rows
@@ -136,15 +151,77 @@ def get_assessments(subject): # this function will parse the assessment search q
         print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Found {num_ass} standards in level {level}') # debug
     return assessments
 
+def get_resources(standard_number):
+    url = f"https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber={standard_number}"
+
+    fn = f"standards/{standard_number}.html" # name for cached file
+    text = ""
+    
+    if os.path.isfile(fn):
+        with open(fn, 'r') as f:
+            text = f.read()
+    else: # there was no cached file
+        delay = random.randint(5,10)
+        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting {delay}s to avoid being suspicious")
+        #time.sleep(delay)
+        page = requests.get(url) # send request
+        page.raise_for_status() # raise an error on a bad status
+        if os.environ.get("HARD_CACHE") == "1":
+            print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Caching')
+            os.makedirs(os.path.dirname(fn), exist_ok=True) # make directories on the way to the caching location
+            with open(fn, 'w') as f:
+                f.write(page.text) # save to file for later caching if there's a cache
+        text = page.text # save page text as text to the local variable
+        
+    soup = BeautifulSoup(text, "html.parser") # html parser init
+    
+    resources = [] # list of resources
+    
+    # for handling pdf <a> tags
+    a_tags = soup.find_all('a', class_='pdf') # they handily have the pdf class
+    for a_tag in a_tags:
+        # the structure of the html around the links is such:
+        # <tr>
+        #  <td>Title of thingy</td>
+        #  <td>
+        #   <a class='pdf' href='thingy.pdf'></a>
+        #   <a class='doc' href='thingy.doc'></a>
+        #  </td>
+        # </tr>
+        # so given the <a class='pdf'> tag, we go to the parent of it's parent, then the _first_ td, then the text of that, and strip it. WE DO NOT CARE ABOUT THE DOCS IT'S OBJECTIVELY SILLY :(
+        title = a_tag.parent.parent.td.text.strip() # what a nightmare of a line
+        base  = "https://www.nzqa.govt.nz"
+        link  = a_tag['href'] # this is where the link goes to
+
+        category = link.split("/")[3].strip() # the third directory thingy, the name of the category
+        year = link.split("/")[4].strip() # the fourth directory thingy
+        file_path = link[len("/nqfdocs/ncea-resource/"):] # cut off the constant beginning (i think this is how i'll do the caching)
+        full_url = base + link # the full nzqa link
+        
+        resource_dict = {
+            "standard_number": standard_number,
+            "category": category, # this is not the id, as the db expects, this should be handled later.
+            "year": year,
+            "title": title,
+            "nzqa_url": full_url,
+            "filepath": file_path
+        }
+        
+        resources.append(resource_dict)
+    return resources
+        
 def scrape_and_dump(of):
     # initialise json/dictionary with assessments list and current time for the time of updating
-    data = {'assessments': [], 'updated': datetime.now().strftime(f_string)} 
+    data = {'assessments': [], 'updated': datetime.now().strftime(f_string), 'resources': []} 
     for subject in get_subjects():
         data['assessments'] += get_assessments(subject) # get assessments for all subjects
+    
+    for assessment in data['assessments']: # these should be called standards
+        data['resources'] += get_resources(assessment['number']
 
     with open(of, 'w') as outfile:
         json.dump(data, outfile) # write to file
 
 if __name__ == "__main__": # if the module isn't imported
-    print(get_subjects())
-    print(get_assessments({"name": "Biology"}))
+    print("not doin nothing")
+    #get_papers(90878)) # french one for testing audio/transcripts
