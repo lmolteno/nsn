@@ -153,7 +153,20 @@ def get_assessments(subject): # this function will parse the assessment search q
     return assessments
 
 def get_resources(standard_number):
-    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Getting resources for {standard_number}") 
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Getting resources for {standard_number}")
+    
+    if standard_number < 90000: # if it's a unit standard
+        # there's only ever one resource (i'm pretty sure)
+        outdict = {
+            "standard_number": standard_number,
+            "category": "unit", # this is not the id, as the db expects, this should be handled later.
+            "year": 0, # there isn't a year for unit standards, equivalent to None
+            "title": "Unit standard",
+            "nzqa_url": f"https://www.nzqa.govt.nz/nqfdocs/units/pdf/{standard_number}.pdf",
+            "filepath": f"units/pdf/{standard_number}.pdf"
+        }
+        return [outdict]
+    
     url = f"https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber={standard_number}"
 
     fn = f"../cache/resources/{standard_number}.html" # name for cached file
@@ -180,7 +193,7 @@ def get_resources(standard_number):
     resources = [] # list of resources
     
     # for handling pdf <a> tags
-    a_tags = soup.find_all('a', class_='pdf') # they handily have the pdf class
+    a_tags = soup.find_all('a', class_='pdf') + soup.find_all('a', class_='archive') # they handily have the pdf and archive classes
     for a_tag in a_tags:
         # the structure of the html around the links is such:
         # <tr>
@@ -197,7 +210,7 @@ def get_resources(standard_number):
 
         category = link.split("/")[3].strip() # the third directory thingy, the name of the category
         year = link.split("/")[4].strip() # the fourth directory thingy
-        file_path = link[len("/nqfdocs/ncea-resource/"):] # cut off the constant beginning (i think this is how i'll do the caching)
+        file_path = link[len("/nqfdocs/"):] # cut off the constant beginning (i think this is how i'll do the caching)
         full_url = base + link # the full nzqa link
         
         resource_dict = {
@@ -225,4 +238,4 @@ def scrape_and_dump(of):
         json.dump(data, outfile) # write to file
 
 if __name__ == "__main__": # if the module isn't imported
-    print(get_resources(90878)) # french one for testing audio/transcripts
+    print(get_resources(15020)) # french one for testing audio/transcripts

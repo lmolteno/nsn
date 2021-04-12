@@ -81,3 +81,21 @@ CREATE TABLE standard_subject (
    REFERENCES subjects(subject_id)
     ON DELETE CASCADE
 );
+
+CREATE TABLE resource_categories (
+ category_id INT UNIQUE NOT NULL PRIMARY KEY,
+ name VARCHAR
+);
+
+CREATE TABLE resources (
+ standard_number INT NOT NULL,
+ category INT NOT NULL,
+ year INT,
+ title VARCHAR NOT NULL,
+ nzqa_url VARCHAR NOT NULL,
+ filepath VARCHAR NOT NULL,
+ CONSTRAINT fk_resource_category
+  FOREIGN KEY(category)
+   REFERENCES resource_categories(category_id)
+   ON DELETE CASCADE
+);
