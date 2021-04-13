@@ -58,8 +58,8 @@ def get_subjects(): # this function will parse the NCEA subjects page to find th
     for item in results: # for all the list items
         # this next line was bad, not good.
         # if 'levels' in item.a['href']: # if the subject is what we would generally call a subject (if they link normally)
+        url_name = item.a.href
         subject_name = unidecode(item.a.text) # this is an accent-remover
-        
         display_name = subject_name
         
         if subject_name.lower() in outliers_lut.keys(): # check if the subject is in the LUT
@@ -152,7 +152,8 @@ def get_assessments(subject): # this function will parse the assessment search q
         print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Found {num_ass} standards in level {level}') # debug
     return assessments
 
-def get_resources(standard_number):
+def get_resources(standard):
+    standard_number = standard['number']
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Getting resources for {standard_number}")
     
     if standard_number < 90000: # if it's a unit standard
@@ -166,7 +167,7 @@ def get_resources(standard_number):
             "filepath": f"units/pdf/{standard_number}.pdf"
         }
         return [outdict]
-    
+    # code past the return will only be reached if it's not a unit standard (an achievement standard)
     url = f"https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber={standard_number}"
 
     fn = f"../cache/resources/{standard_number}.html" # name for cached file
@@ -232,7 +233,7 @@ def scrape_and_dump(of):
         data['assessments'] += get_assessments(subject) # get assessments for all subjects
     
     for assessment in data['assessments']: # these should be called standards
-        data['resources'] += get_resources(assessment['number'])
+        data['resources'] += get_resources(assessment)
 
     with open(of, 'w') as outfile:
         json.dump(data, outfile) # write to file

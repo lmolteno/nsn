@@ -44,9 +44,7 @@
         
         <!-- Main container for information -->
         <div class="container-lg border border-secondary rounded-3 my-3 pt-3" id="main-container">
-            
-            <a class='btn btn-primary w-100 mb-3 nzqa-link' id='all-docs-link'>All NZQA Documents</a>
-        
+                    
             <div class='row row-cols-1 row-cols-md-3 g-3 mb-3'>
                 <div class='col'>
                     <div class="card">
@@ -121,7 +119,7 @@
                 <div class='d-flex mx--1'>
                     <h3 class='ps-3 flex-grow-1 my-2'>Resources</h3>
                     <div class='d-flex' id='sort-selector-div'>
-                        <p class='my-auto me-3'>Year</p>
+                        <p class='my-auto me-3'>By Year</p>
                         <div class="my-auto float-end">
                             <!-- Rounded switch -->
                             <label class="switch">
@@ -129,10 +127,18 @@
                                 <span class="slider round"></span>
                             </label>
                         </div>
-                        <p class='my-auto mx-3'>Category</p>
+                        <p class='my-auto mx-3'>By Category</p>
                     </div>
                 </div>
                 <hr class='m-0' />
+                <div class='row mt-2 row-cols-1 row-cols-md-2 p-0 g-2 w-100 text-center'>
+                    <div class='col'>
+                        <a class='btn btn-primary link w-100 nzqa-link' id='all-docs-link'>All NZQA Documents</a>
+                    </div>
+                    <div class='col'>
+                        <a class='btn btn-primary link w-100 nzqa-link' id='recent-standard-doc'>&#x200b;</a>
+                    </div>
+                </div>
                 <div id='resources-container' class='row row-cols-1 row-cols-md-3 g-3 mt-0 mb-3'>
                 </div>
             </div>
