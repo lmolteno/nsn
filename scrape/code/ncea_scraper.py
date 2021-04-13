@@ -56,10 +56,11 @@ def get_subjects(): # this function will parse the NCEA subjects page to find th
     subjects = [] # empty list will be populated with subjects
     
     for item in results: # for all the list items
-        # this next line was bad, not good.
-        # if 'levels' in item.a['href']: # if the subject is what we would generally call a subject (if they link normally)
-        url_name = item.a.href
-        subject_name = unidecode(item.a.text) # this is an accent-remover
+        url_name = item.a['href']
+        # if the url name has levels/ at the end, remove it
+        url_name = url_name.replace("levels/", "")
+        # remove accents from the subject name with unidecode
+        subject_name = unidecode(item.a.text)
         display_name = subject_name
         
         if subject_name.lower() in outliers_lut.keys(): # check if the subject is in the LUT
@@ -79,7 +80,7 @@ def get_subjects(): # this function will parse the NCEA subjects page to find th
             # returned by the inline for loop
             duplicate = next(subject for subject in subjects if subject['name'] == subject_name)
         except StopIteration:
-            subjects.append({"name": subject_name, "display_name": display_name}) # add to the subjects list
+            subjects.append({"name": subject_name, "display_name": display_name, "url": url_name}) # add to the subjects list
             
     return subjects
 
@@ -225,12 +226,70 @@ def get_resources(standard):
                 
         resources.append(resource_dict)
     return resources
+
+def get_annotated_exemplars(subject):
+    url = f"{subject['url']}annotated-exemplars/"
+    subject_fn = subject['name'].replace(" ","+")
+    fn = f"../cache/resources/annotated-exemplars/{subject_fn}.html" # name for cached file
+    text = ""
+    
+    if os.path.isfile(fn):
+        with open(fn, 'r') as f:
+            text = f.read()
+            if text == "404": # there ain't nothin' here
+                return []
+    else: # there was no cached file
+        delay = random.randint(5,10)
+        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting {delay}s to avoid being suspicious")
+        time.sleep(delay)
+        page = requests.get(url) # send request
+        if page.status_code == 404:
+            if os.environ.get("HARD_CACHE") == 1:
+                # write to the file with a "404" string to show that nothing's there
+                with open(fn, 'w') as f:
+                    f.write("404")
+            return [] # no resources for internal annotated exemplars
+        # if there is stuff
+        if os.environ.get("HARD_CACHE") == "1":
+            print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Caching')
+            os.makedirs(os.path.dirname(fn), exist_ok=True) # make directories on the way to the caching location
+            with open(fn, 'w') as f:
+                f.write(page.text) # save to file for later caching if there's a cache
+        text = page.text # save page text as text to the local variable
+    
         
+    soup = BeautifulSoup(text, "html.parser") # html parser init
+    
+    resources = [] # list of resources
+    
+    # this method of finding the link to the annotated exemplars means that there will be some level 4 standards, 
+    main_div = soup.find("div", {'id':"mainPage"})
+    list_items = main_div.find_all("li")
+    a_tags = [a_tag for list_item in list_items for a_tag in list_item.find_all("a")] # this is a mess
+    for a_tag in a_tags:
+        print(a_tag.text, a_tag['href'])
+        
+        
+        # each a-tag represents a resource with the category of annotated-exemplars, or that's what i'm calling it
+        outdict = {
+            "standard_number": int(a_tag.text[2:]), # remove the "AS" or "US" at the beginning
+            "title": "Annotated exemplar",
+            "nzqa_url": "https://www.nzqa.govt.nz" + a_tag['href'], # add the baseurl of nzqa.govt.nz
+            "file_path": None, # there isn't a file path because it's not a pdf
+            "year": 0, # there isn't an associated year
+            "category": "annotated-exemplars"
+        }
+
+        resources.append(outdict)
+    
+    return resources
+
 def scrape_and_dump(of):
     # initialise json/dictionary with assessments list and current time for the time of updating
     data = {'assessments': [], 'updated': datetime.now().strftime(f_string), 'resources': []} 
     for subject in get_subjects():
         data['assessments'] += get_assessments(subject) # get assessments for all subjects
+        data['resources'] += get_annotated_exemplars(subject) # get annotated exemplars for all subjects
     
     for assessment in data['assessments']: # these should be called standards
         data['resources'] += get_resources(assessment)
@@ -239,4 +298,4 @@ def scrape_and_dump(of):
         json.dump(data, outfile) # write to file
 
 if __name__ == "__main__": # if the module isn't imported
-    print(get_resources(15020)) # french one for testing audio/transcripts
+    print(get_annotated_exemplars({"name": "Biology", "display_name": "Biology", "url": "https://www.nzqa.govt.nz/ncea/subjects/biology/"})) # french one for testing audio/transcripts
