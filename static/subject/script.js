@@ -76,7 +76,6 @@ async function search() {
                                 <th scope="col" class="col text-end">Number</th>
                                 <th scope="col" class="col">Title</th>
                                 <th scope="col">Type</th>
-                                <th scope="col">Level</th>
                                 <th scope="col">Credits</th>
                                 <th scope="col">Literacy</th>
                                 <th scope="col">Numeracy</th>

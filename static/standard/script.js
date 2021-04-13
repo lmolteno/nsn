@@ -3,6 +3,7 @@ standard = {};
 standard_number = null;
 resources = [];
 starred = [];
+sortbycategory = false; // sorting of resource
 const urlParams = new URLSearchParams(window.location.search); // get url parameters
 if (urlParams.get('num') == null) {
     window.location = "/"; // if there's no id parameter in the url
@@ -108,6 +109,116 @@ function generateSubjectLI(subject) {
     return outhtml
 }
 
+function getResourcesList() {
+    console.log("Updating resource list")
+    outhtml = ""
+    if (standard_number < 90000) { // unit standards only have one document
+        if (resources.length == 1) {
+            console.log("Updating for unit standard");
+            resource = resources[0]
+            outhtml += `</div> <!-- close row -->
+                    <div class='row m-auto mb-3 p-0 w-100 text-center'>
+                        <a class='btn btn-primary link mt-3 nzqa-link' href='${resource.nzqa_url}'>${resource.title}</a>
+                    </div>`;
+            $("#resources-container").removeAttr("class")
+        } else {
+            
+        }
+    } else { // achievement standard
+        if (sortbycategory) {
+            all_categories = new Set();
+            most_recent_achievement = null;    // for getting the most recent achievement standard
+            resources.forEach((resource) => { 
+                 if (resource.year > most_recent_achievement) {
+                    most_recent_achievement = resource;
+                }
+                all_categories.add(resource.category) // sets only contain unique elements, duplicates are removed
+            });
+            
+            // add the link to the most recent achievement standard
+            if (most_recent_achievement != null) {
+                outhtml += `</div> <!-- close row -->
+                    <div class='row m-auto p-0 w-100 text-center'>
+                        <a class='btn btn-primary link mt-3 nzqa-link' href='${most_recent_achievement.nzqa_url}'>${most_recent_achievement.title}</a>
+                    </div>
+                    <div class='row row-cols-1 row-cols-md-3 g-3 mt-0 mb-3'> <!-- open row again -->`;
+                // set the big container so it doesn't try to force a 1/3 size column
+                $("#resources-container").removeAttr("class")
+            }
+            
+            all_categories.forEach((category) => {
+                resources_for_category = resources.filter((resource) => (resource.category == category))
+                category_names = {
+                    "achievements": "Achievement Standards",
+                    "reports": "Assessment Reports",
+                    "exams": "Exams",
+                    "exemplars": "Exemplars",
+                    "schedules": "Assessment Schedules",
+                    "unit": "Unit Standards",
+                    "pep": "Profiles of Expected Performance"
+                }
+                // add card for each cateogry
+                outhtml += `<div class='col'>    
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class='mb-0'>${category_names[category]}</h3>
+                                    </div>
+                                    <ul class='list-group list-group-flush'>`
+                resources_for_category.forEach((resource) => {
+                    // add link for each resource
+                    outhtml += `<a class='list-group-item' href='${resource.nzqa_url}'>${resource.title}</a>`
+                                        
+                });
+                outhtml += `        </ul>
+                                </div>
+                            </div>`
+            });
+            
+        } else {
+            all_years = new Set()
+            most_recent_achievement = null; // for getting the most recent achievement standard
+            resources.forEach((resource) => {
+                if (resource.year > most_recent_achievement && resource.category == "achievements") {
+                    most_recent_achievement = resource;
+                } else { // only add them if they aren't accounted for with the achievement standard
+                    all_years.add(resource.year) // sets only contain unique elements, duplicates are removed
+                }
+            });
+            
+            // add the link to the most recent achievement standard
+            if (most_recent_achievement != null) {
+                outhtml += `</div> <!-- close row -->
+                    <div class='row m-auto p-0 w-100 text-center'>
+                        <a class='btn btn-primary link mt-3 nzqa-link' href='${most_recent_achievement.nzqa_url}'>${most_recent_achievement.title}</a>
+                    </div>
+                    <div class='row row-cols-1 row-cols-md-3 g-3 mt-0 mb-3'> <!-- open row again -->`;
+                // set the big container so it doesn't try to force a 1/3 size column
+                $("#resources-container").removeAttr("class")
+            }
+            
+            all_years.forEach((year) => {
+                resources_for_year = resources.filter((resource) => (resource.year == year && resource != most_recent_achievement))
+                // add card for each year
+                outhtml += `<div class='col'>    
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class='mb-0'>${year}</h3>
+                                    </div>
+                                    <ul class='list-group list-group-flush'>`
+                resources_for_year.forEach((resource) => {
+                    // add link for each resource
+                    outhtml += `<a class='list-group-item' href='${resource.nzqa_url}'>${resource.title}</a>`
+                                        
+                });
+                outhtml += `        </ul>
+                                </div>
+                            </div>`
+            });
+        }
+    }
+    return outhtml
+}
+
 function updateEverything() { // populate EVERYTHING hehe
     
     standard_num_text = (standard_number > 90000 ? "AS" : "US") + standard_number; // e.g. AS91902 or US2345 depending on achievement vs unit
@@ -144,7 +255,11 @@ function updateEverything() { // populate EVERYTHING hehe
     $('#internal-external').html(standard.basic_info.internal ? "Internal" : "External");
     
     // update nzqa link with href to correct bit of site
-    $("#nzqa-link").attr("href", "https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber=" + standard_number);
+    $("#all-docs-link").attr("href", "https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber=" + standard_number);
+    
+    $("#resources-container").hide();
+    $("#resources-container").html(getResourcesList());
+    $("#resources-container").fadeIn();
     
     $('#subject-list').fadeIn();
     $('#standard-number').fadeIn()
@@ -153,7 +268,21 @@ function updateEverything() { // populate EVERYTHING hehe
     $("#main-container").fadeIn();    
 }
 
+function sort_handler() {
+    sortbycategory = $(this).is(':checked'); // set sort to whether this is checked or not
+
+    $("#resources-container").fadeOut('normal', () => {
+        $("#resources-container").html(getResourcesList()); // update list of resources
+        $("#resources-container").fadeIn();
+    });
+}
+
 $(document).ready(function() {
-    getInfo(); // for async requests, we have to do "thens", like promises
-    
+    if (standard_number >= 90000) {
+        sortbycategory = $('#sort-selector').is(':checked'); // set sort to whether this is checked or not
+        $("#sort-selector").on("change", sort_handler);
+    } else {
+        $("#sort-selector-div").addClass('d-none');
+    }
+    getInfo();
 });
