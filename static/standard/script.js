@@ -112,13 +112,29 @@ function generateSubjectLI(subject) {
 function getResourcesList() {
     console.log("Updating resource list")
     outhtml = ""
+    if (standard.basic_info.internal) {
+        // check and see if there's an annotated exemplar
+        exemplar = resources.find(el => el.category == 'annotated-exemplars')
+        if (exemplar == undefined) {
+            // disable button
+            $("#annotated-exemplar-link").addClass('disabled');
+        } else {
+            $("#annotated-exemplar-link").attr('href', exemplar.nzqa_url);
+        }
+    } else {
+        $("#annotated-exemplar-div").fadeOut();
+        $("#annotated-exemplar-div").hide();
+        $("#links-row").removeClass("row-cols-md-3");
+        $("#links-row").addClass("row-cols-md-2");
+        
+    }
     if (standard_number < 90000) { // unit standards only have one document
         if (resources.length == 1) {
             console.log("Updating for unit standard");
             resource = resources[0]
             // add the link to the most unit standard
-            $("#recent-standard-doc").html("Unit Standard");
-            $("#recent-standard-doc").attr("href", resource.nzqa_url);
+            $("#recent-standard-link").html("Unit Standard");
+            $("#recent-standard-link").attr("href", resource.nzqa_url);
         } else {
             
         }
@@ -135,8 +151,8 @@ function getResourcesList() {
             
             // add the link to the most recent achievement standard
             if (most_recent_achievement != null) {
-                $("#recent-standard-doc").html("Most Recent Achievement Standard");
-                $("#recent-standard-doc").attr("href", most_recent_achievement.nzqa_url);
+                $("#recent-standard-link").html("Most Recent Achievement Standard");
+                $("#recent-standard-link").attr("href", most_recent_achievement.nzqa_url);
             }
             
             all_categories.forEach((category) => {
@@ -148,7 +164,8 @@ function getResourcesList() {
                     "exemplars": "Exemplars",
                     "schedules": "Assessment Schedules",
                     "unit": "Unit Standards",
-                    "pep": "Profiles of Expected Performance"
+                    "pep": "Profiles of Expected Performance",
+                    "annotated-exemplars": "Annotated Exemplars"
                 }
                 // add card for each cateogry
                 outhtml += `<div class='col'>    
@@ -174,13 +191,15 @@ function getResourcesList() {
                 if (resource.year > most_recent_achievement && resource.category == "achievements") {
                     most_recent_achievement = resource;
                 }
-                all_years.add(resource.year) // sets only contain unique elements, duplicates are removed
+                if (resource.year != 0) {
+                    all_years.add(resource.year) // sets only contain unique elements, duplicates are removed
+                }
             });
             
             // add the link to the most recent achievement standard
             if (most_recent_achievement != null) {
-                $("#recent-standard-doc").html("Most Recent Achievement Standard");
-                $("#recent-standard-doc").attr("href", most_recent_achievement.nzqa_url);
+                $("#recent-standard-link").html("Most Recent Achievement Standard");
+                $("#recent-standard-link").attr("href", most_recent_achievement.nzqa_url);
             }
             // iterate over the sorted, reversed list of years (sets can't be sorted, so i moved it to an array)
             Array.from(all_years).sort().reverse().forEach((year) => {
