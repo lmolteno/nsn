@@ -123,6 +123,7 @@ function displayStarred() {
     if (starred.length == 0) {
         $("#starredlist").html("<p class='text-muted'>Nothin' here!</p>");
         $("#starredHeader").html('My Subjects<small class="text-muted fs-6 ps-3 fw-light">Hit the ' + starOutline + ' icon to add a subject here</small>');
+        $("#starredHeader svg").addClass("mb-1");
     } else {
         $("#starredHeader").html('My Subjects');
 //         $("#starredlist").hide();
@@ -154,6 +155,10 @@ function generateStandardRow(standard) {
                     <td style='position: relative;'>
                         <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
                         ` + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + `
+                    </td>
+                    <td class='text-center' style='position: relative;'>
+                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ` + standard.level + `
                     </td>
                     <td class='text-center' style='position: relative;'>
                         <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>

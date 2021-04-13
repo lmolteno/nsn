@@ -76,7 +76,6 @@ async function search() {
                                 <th scope="col" class="col text-end">Number</th>
                                 <th scope="col" class="col">Title</th>
                                 <th scope="col">Type</th>
-                                <th scope="col">Level</th>
                                 <th scope="col">Credits</th>
                                 <th scope="col">Literacy</th>
                                 <th scope="col">Numeracy</th>
@@ -208,6 +207,7 @@ function updateEverything() { // populate the standards list, and the subject na
     var level_arr = (level == null) ? [1,2,3] : [level,]
     level_arr.forEach(current_level => { // for each level allowed on the page
         standards_for_level = standards.filter(o => o.level == current_level);
+        standards_for_level = standards_for_level.sort((a,b) => (a.standard_number > b.standard_number) - (a.standard_number < b.standard_number)); // sort by standard_number
         if (standards_for_level.length > 0) {
             baseurl = `https://www.nzqa.govt.nz/ncea/assessment/search.do?query=`+subject.name.replace(/\ /g, '+')+`&level=0`+current_level+`&view=`;
             views = [['reports', 'Schedules'], ['exams','Exams'], ['achievements', 'Standards'], ['all', 'All']]

@@ -46,14 +46,16 @@ def get_dataset():
 
 def get_scraped():
     s_st  = [] # empty list to be filled with Scraped STandards 
+    s_re = [] # empty list to be filled with Scraped REsources
     scraped_fn = "/output/ncea_standards.json"
 
     # import in json file of scraped data
     with open(scraped_fn) as json_file:
         scraped = json.load(json_file)
         s_st = scraped['assessments']
+        s_re = scraped['resources']
         
-    return s_st
+    return s_st, s_re
 
 def get_ncea_litnum():
     
@@ -131,7 +133,7 @@ def get_ue_lit():
 
 def combine():
     
-    s_st = get_scraped()
+    s_st, s_re = get_scraped()
     ds_st = get_dataset()
     ln_dict = get_ncea_litnum()
     uelit_dict = get_ue_lit()
@@ -295,9 +297,42 @@ def combine():
         except StopIteration: # there is no duplicate
             standards.append(outdict)
             search_standards.append(search_standard)
-
-    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Entering data")
+    
     print(f"Resolved:\n{duplicate:>3d} {'Duplicates':>15s}\n{mismatch:>3d} {'Mismatches':>15s}\n{singular:>3d} {'Singulars':>15s}")
+    
+    # Resource handling
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Processing {len(s_re)} resources...")
+    categories = [] # list of categories to go into the database
+    resources = [] # list of resource dicts to go into the database
+    duplicate = 0 # counter for duplicates that i resolve
+    for resource in s_re:
+        # first verify that the resource references a standard that exists (not level 4)
+        try:
+            standard = next(standard for standard in standards if standard['standard_number'] == resource['standard_number'])
+        except StopIteration: # none such standard exists
+            continue # skip
+
+        # update list of categories
+        if resource['category'] not in categories:
+            categories.append(resource['category'])
+        category_id = categories.index(resource['category'])
+        
+        # the rest of the information goes straight into the dict
+        resource['category'] = category_id # replace with int pointer to id of category
+        
+        #check for duplicate
+        try:
+            dupe = next(prev for prev in resources if 
+                            prev['nzqa_url'] == resource['nzqa_url'] and 
+                            prev['year'] == resource['year'] and
+                            prev['standard_number'] == resource['standard_number'] and
+                            prev['category'] == resource['category'])
+            duplicate += 1
+        except StopIteration: # there is no duplicate, so it reaches the stopiteration endpoint
+            resources.append(resource)
+
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Resolved {duplicate} duplicates")
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Entering all data")
 
     # Enter the data
     conn = psycopg2.connect(host="db", # this is because docker! cool!
@@ -351,7 +386,19 @@ def combine():
         curs.executemany("INSERT INTO ncea_litnum (standard_number, literacy, numeracy) VALUES (%s,%s,%s);", ncea_vals)
         curs.executemany("INSERT INTO ue_literacy (standard_number, reading , writing ) VALUES (%s,%s,%s);", ue_vals)
         
-        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Committing {len(standards)} standards")
+        # handle the resources and the cateogires
+        curs.executemany("INSERT INTO resource_categories (category_id, name) VALUES (%s, %s);", [*enumerate(categories)])
+        # convert list of dicts to list of tuples with the right order
+        resource_tuples = [(
+            r['standard_number'],
+            r['category'],
+            r['year'],
+            r['title'],
+            r['nzqa_url'],
+            r['filepath']) for r in resources]
+        curs.executemany("INSERT INTO resources (standard_number, category, year, title, nzqa_url, filepath) VALUES (%s,%s,%s, %s,%s,%s);", resource_tuples)
+        
+        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Committing...")
         conn.commit()
 
     conn.close()

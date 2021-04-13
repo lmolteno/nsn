@@ -25,8 +25,8 @@ outliers_lut = {
                     "Processing Technologies",
                     "Technology - General Education"],
     "tikanga-a-iwi": "Tikanga a Iwi",
-    ## WEIRD POLYTECHY ONES TO IGNORE
-    "business studies": False,
+    ## WEIRD POLYTECHY ONES TO IGNORE (false means ignore)
+    "business studies": False, # ignore this because there's already agribusiness
     "business & management": False,
     "core skills": False,
     "driver license (class 1)": False, # this could be changed later, as there are actually standards in a weird format, i just cant be bothered rn
@@ -56,17 +56,18 @@ def get_subjects(): # this function will parse the NCEA subjects page to find th
     subjects = [] # empty list will be populated with subjects
     
     for item in results: # for all the list items
-        # this next line was bad, not good.
-        # if 'levels' in item.a['href']: # if the subject is what we would generally call a subject (if they link normally)
-        subject_name = unidecode(item.a.text) # this is an accent-remover
-        
+        url_name = "https://www.nzqa.govt.nz" + item.a['href'] # add base url
+        # if the url name has levels/ at the end, remove it
+        url_name = url_name.replace("levels/", "")
+        # remove accents from the subject name with unidecode
+        subject_name = unidecode(item.a.text)
         display_name = subject_name
         
         if subject_name.lower() in outliers_lut.keys(): # check if the subject is in the LUT
             if outliers_lut[subject_name.lower()] != False: # if it isn't one we should ignore
                 if type(outliers_lut[subject_name.lower()]) == list: # if there are multiple sub-subjects
                     for subject in outliers_lut[subject_name.lower()]:
-                        subjects.append({"name": subject, "display_name": subject})
+                        subjects.append({"name": subject, "display_name": subject, "url": url_name}) # add to the subjects list
                 else: # there's only one subject
                     subject_name = outliers_lut[subject_name.lower()]
             else:
@@ -79,7 +80,7 @@ def get_subjects(): # this function will parse the NCEA subjects page to find th
             # returned by the inline for loop
             duplicate = next(subject for subject in subjects if subject['name'] == subject_name)
         except StopIteration:
-            subjects.append({"name": subject_name, "display_name": display_name}) # add to the subjects list
+            subjects.append({"name": subject_name, "display_name": display_name, "url": url_name}) # add to the subjects list
             
     return subjects
 
@@ -109,10 +110,25 @@ def get_assessments(subject): # this function will parse the assessment search q
                 os.makedirs(os.path.dirname(fn), exist_ok=True) # make directories on the way to the caching location
                 with open(fn, 'w') as f:
                     f.write(page.text) # save to file for later caching if there's a cache
+            text = page.text # save page text as texttext = ""
+        if os.path.isfile(fn):
+            with open(fn, 'r') as f:
+                text = f.read()
+        else: # there was no cached file
+            delay = random.randint(5,10)
+            print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting {delay}s to avoid being suspicious")
+            time.sleep(delay)
+            page = requests.get(formatted) # send request
+            page.raise_for_status() # raise an error on a bad status
+            if os.environ.get("HARD_CACHE") == "1":
+                print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Caching')
+                os.makedirs(os.path.dirname(fn), exist_ok=True) # make directories on the way to the caching location
+                with open(fn, 'w') as f:
+                    f.write(page.text) # save to file for later caching if there's a cache
             text = page.text # save page text as text
                     
                 
-        soup = BeautifulSoup(text, "html.parser",) # html parser init
+        soup = BeautifulSoup(text, "html.parser") # html parser init
         results = soup.find_all('tr', class_="dataHighlight") # get all the table rows that are highlighted (header rows)
         num_ass = 0
         for row in results: # for all the header rows
@@ -120,7 +136,8 @@ def get_assessments(subject): # this function will parse the assessment search q
             num, title, credits, external = row.find_all('strong') # find the bolded text
             #if a_tags < 2: # the assessment hasn't expired (an extra <a> tag is added when it has expired that links to the review page) (this is actually false)
             if "expiring" in str(row):
-                print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] {num_ass} is expiring') # debug
+                a=1 # do nothing
+                #print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] {num_ass} is expiring') # debug
             if "expired" not in str(row):
                 new_ass = { # populate dictionary
                     'level': level, # the level the assessment applies to
@@ -136,15 +153,152 @@ def get_assessments(subject): # this function will parse the assessment search q
         print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Found {num_ass} standards in level {level}') # debug
     return assessments
 
+def get_resources(standard):
+    standard_number = standard['number']
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Getting resources for {standard_number}")
+    
+    if standard_number < 90000: # if it's a unit standard
+        # there's only ever one resource (i'm pretty sure)
+        outdict = {
+            "standard_number": standard_number,
+            "category": "unit", # this is not the id, as the db expects, this should be handled later.
+            "year": 0, # there isn't a year for unit standards, equivalent to None
+            "title": "Unit standard",
+            "nzqa_url": f"https://www.nzqa.govt.nz/nqfdocs/units/pdf/{standard_number}.pdf",
+            "filepath": f"units/pdf/{standard_number}.pdf"
+        }
+        return [outdict]
+    # code past the return will only be reached if it's not a unit standard (an achievement standard)
+    url = f"https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber={standard_number}"
+
+    fn = f"../cache/resources/{standard_number}.html" # name for cached file
+    text = ""
+    
+    if os.path.isfile(fn):
+        with open(fn, 'r') as f:
+            text = f.read()
+    else: # there was no cached file
+        delay = random.randint(5,10)
+        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting {delay}s to avoid being suspicious")
+        time.sleep(delay)
+        page = requests.get(url) # send request
+        page.raise_for_status() # raise an error on a bad status
+        if os.environ.get("HARD_CACHE") == "1":
+            print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Caching')
+            os.makedirs(os.path.dirname(fn), exist_ok=True) # make directories on the way to the caching location
+            with open(fn, 'w') as f:
+                f.write(page.text) # save to file for later caching if there's a cache
+        text = page.text # save page text as text to the local variable
+        
+    soup = BeautifulSoup(text, "html.parser") # html parser init
+    
+    resources = [] # list of resources
+    
+    # for handling pdf <a> tags
+    a_tags = soup.find_all('a', class_='pdf') + soup.find_all('a', class_='archive') # they handily have the pdf and archive classes
+    for a_tag in a_tags:
+        # the structure of the html around the links is such:
+        # <tr>
+        #  <td>Title of thingy</td>
+        #  <td>
+        #   <a class='pdf' href='thingy.pdf'></a>
+        #   <a class='doc' href='thingy.doc'></a>
+        #  </td>
+        # </tr>
+        # so given the <a class='pdf'> tag, we go to the parent of it's parent, then the _first_ td, then the text of that, and strip it. WE DO NOT CARE ABOUT THE DOCS IT'S OBJECTIVELY SILLY :(
+        title = a_tag.parent.parent.td.text.strip() # what a nightmare of a line
+        base  = "https://www.nzqa.govt.nz"
+        link  = a_tag['href'] # this is where the link goes to
+
+        category = link.split("/")[3].strip() # the third directory thingy, the name of the category
+        year = link.split("/")[4].strip() # the fourth directory thingy
+        file_path = link[len("/nqfdocs/"):] # cut off the constant beginning (i think this is how i'll do the caching)
+        full_url = base + link # the full nzqa link
+        
+        resource_dict = {
+            "standard_number": standard_number,
+            "category": category, # this is not the id, as the db expects, this should be handled later.
+            "year": year,
+            "title": title,
+            "nzqa_url": full_url,
+            "filepath": file_path
+        }
+                
+        resources.append(resource_dict)
+    return resources
+
+def get_annotated_exemplars(subject):
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Getting annotated exemplars for {subject['name']}")
+    url = f"{subject['url']}annotated-exemplars/"
+    subject_fn = subject['name'].replace(" ","+")
+    fn = f"../cache/resources/annotated-exemplars/{subject_fn}.html" # name for cached file
+    text = ""
+    
+    if os.path.isfile(fn):
+        with open(fn, 'r') as f:
+            text = f.read()
+            if text == "404": # there ain't nothin' here
+                print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Encountered 404")
+                return []
+    else: # there was no cached file
+        delay = random.randint(5,10)
+        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting {delay}s to avoid being suspicious")
+        time.sleep(delay)
+        page = requests.get(url) # send request
+        if page.status_code == 404:
+            if os.environ.get("HARD_CACHE") == 1:
+                print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Encountered 404")
+                # write to the file with a "404" string to show that nothing's there
+                with open(fn, 'w') as f:
+                    f.write("404")
+            return [] # no resources for internal annotated exemplars
+        # if there is stuff
+        if os.environ.get("HARD_CACHE") == "1":
+            print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Caching')
+            os.makedirs(os.path.dirname(fn), exist_ok=True) # make directories on the way to the caching location
+            with open(fn, 'w') as f:
+                f.write(page.text) # save to file for later caching if there's a cache
+        text = page.text # save page text as text to the local variable
+    
+        
+    soup = BeautifulSoup(text, "html.parser") # html parser init
+    
+    resources = [] # list of resources
+    
+    # this method of finding the link to the annotated exemplars means that there will be some level 4 standards, 
+    main_div = soup.find("div", {'id':"mainPage"})
+    list_items = main_div.find_all("li")
+    a_tags = [a_tag for list_item in list_items for a_tag in list_item.find_all("a")] # this is a mess
+    for a_tag in a_tags:
+        print(a_tag.text, a_tag['href'])
+        
+        
+        # each a-tag represents a resource with the category of annotated-exemplars, or that's what i'm calling it
+        outdict = {
+            "standard_number": int(a_tag.text[2:]), # remove the "AS" or "US" at the beginning
+            "title": "Annotated exemplar",
+            "nzqa_url": "https://www.nzqa.govt.nz" + a_tag['href'], # add the baseurl of nzqa.govt.nz
+            "filepath": None, # there isn't a file path because it's not a pdf
+            "year": 0, # there isn't an associated year
+            "category": "annotated-exemplars"
+        }
+
+        resources.append(outdict)
+    
+    return resources
+
 def scrape_and_dump(of):
     # initialise json/dictionary with assessments list and current time for the time of updating
-    data = {'assessments': [], 'updated': datetime.now().strftime(f_string)} 
+    data = {'assessments': [], 'updated': datetime.now().strftime(f_string), 'resources': []} 
     for subject in get_subjects():
         data['assessments'] += get_assessments(subject) # get assessments for all subjects
+        data['resources'] += get_annotated_exemplars(subject) # get annotated exemplars for all subjects
+    
+    for assessment in data['assessments']: # these should be called standards
+        data['resources'] += get_resources(assessment)
 
     with open(of, 'w') as outfile:
         json.dump(data, outfile) # write to file
 
 if __name__ == "__main__": # if the module isn't imported
-    print(get_subjects())
-    print(get_assessments({"name": "Biology"}))
+    print(get_annotated_exemplars({"name": "Biology", "display_name": "Biology", "url": "https://www.nzqa.govt.nz/ncea/subjects/biology/"})) # french one for testing audio/transcripts
