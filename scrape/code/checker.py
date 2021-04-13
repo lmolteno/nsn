@@ -10,6 +10,7 @@ import psycopg2.extras
 def clean():
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Cleaning database")
     tables = [
+            'standards',
             'domains',
             'fields',
             'ncea_litnum',
@@ -17,7 +18,6 @@ def clean():
             'resources',
             'standard_subject',
             'standard_types',
-            'standards',
             'subfields',
             'subjects',
             'ue_literacy']

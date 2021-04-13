@@ -56,7 +56,7 @@ def get_subjects(): # this function will parse the NCEA subjects page to find th
     subjects = [] # empty list will be populated with subjects
     
     for item in results: # for all the list items
-        url_name = item.a['href']
+        url_name = "https://www.nzqa.govt.nz" + item.a['href'] # add base url
         # if the url name has levels/ at the end, remove it
         url_name = url_name.replace("levels/", "")
         # remove accents from the subject name with unidecode
@@ -67,7 +67,7 @@ def get_subjects(): # this function will parse the NCEA subjects page to find th
             if outliers_lut[subject_name.lower()] != False: # if it isn't one we should ignore
                 if type(outliers_lut[subject_name.lower()]) == list: # if there are multiple sub-subjects
                     for subject in outliers_lut[subject_name.lower()]:
-                        subjects.append({"name": subject, "display_name": subject})
+                        subjects.append({"name": subject, "display_name": subject, "url": url_name}) # add to the subjects list
                 else: # there's only one subject
                     subject_name = outliers_lut[subject_name.lower()]
             else:
@@ -228,6 +228,7 @@ def get_resources(standard):
     return resources
 
 def get_annotated_exemplars(subject):
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Getting annotated exemplars for {subject['name']}")
     url = f"{subject['url']}annotated-exemplars/"
     subject_fn = subject['name'].replace(" ","+")
     fn = f"../cache/resources/annotated-exemplars/{subject_fn}.html" # name for cached file
@@ -237,6 +238,7 @@ def get_annotated_exemplars(subject):
         with open(fn, 'r') as f:
             text = f.read()
             if text == "404": # there ain't nothin' here
+                print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Encountered 404")
                 return []
     else: # there was no cached file
         delay = random.randint(5,10)
@@ -245,6 +247,7 @@ def get_annotated_exemplars(subject):
         page = requests.get(url) # send request
         if page.status_code == 404:
             if os.environ.get("HARD_CACHE") == 1:
+                print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Encountered 404")
                 # write to the file with a "404" string to show that nothing's there
                 with open(fn, 'w') as f:
                     f.write("404")
@@ -275,7 +278,7 @@ def get_annotated_exemplars(subject):
             "standard_number": int(a_tag.text[2:]), # remove the "AS" or "US" at the beginning
             "title": "Annotated exemplar",
             "nzqa_url": "https://www.nzqa.govt.nz" + a_tag['href'], # add the baseurl of nzqa.govt.nz
-            "file_path": None, # there isn't a file path because it's not a pdf
+            "filepath": None, # there isn't a file path because it's not a pdf
             "year": 0, # there isn't an associated year
             "category": "annotated-exemplars"
         }

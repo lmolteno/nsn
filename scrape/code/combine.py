@@ -306,6 +306,12 @@ def combine():
     resources = [] # list of resource dicts to go into the database
     duplicate = 0 # counter for duplicates that i resolve
     for resource in s_re:
+        # first verify that the resource references a standard that exists (not level 4)
+        try:
+            standard = next(standard for standard in standards if standard['standard_number'] == resource['standard_number'])
+        except StopIteration: # none such standard exists
+            continue # skip
+
         # update list of categories
         if resource['category'] not in categories:
             categories.append(resource['category'])
@@ -314,7 +320,7 @@ def combine():
         # the rest of the information goes straight into the dict
         resource['category'] = category_id # replace with int pointer to id of category
         
-        #check for duplicate URLs
+        #check for duplicate
         try:
             dupe = next(prev for prev in resources if 
                             prev['nzqa_url'] == resource['nzqa_url'] and 

@@ -93,7 +93,7 @@ CREATE TABLE resources (
  year INT,
  title VARCHAR NOT NULL,
  nzqa_url VARCHAR NOT NULL,
- filepath VARCHAR NOT NULL,
+ filepath VARCHAR,
  CONSTRAINT fk_resource_category
   FOREIGN KEY(category)
    REFERENCES resource_categories(category_id)
