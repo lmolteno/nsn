@@ -143,17 +143,17 @@ function displayStarred() {
         outhtml += `</tbody>`;
         // add row of totals to footer
         outhtml += `<tfoot>
-                        <tr>
-                            <th colspan=5>
-                                <span class='float-end me-3'>Totals:</span>
+                        <tr class='border-bottom-0'>
+                            <th colspan=5 class='border-start-0'>
+                                <span class='float-end me-2'>Totals:</span>
                             </th>
-                            <td>${total_credits}</td>
+                            <td class='text-center'>${total_credits}</td>
                             <td>
                                 <span class='float-start'>${total_reading}</span>
                                 <span class='float-end'>  ${total_writing}</span>
                             </td>
-                            <td>${total_numeracy}</td>
-                            <td>
+                            <td class='text-center'>${total_numeracy}</td>
+                            <td class='border-end-0'>
                                 
                             </td>
                         </tr>
