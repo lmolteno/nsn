@@ -101,38 +101,32 @@ function getStarred(then=None) {
     then();
 }
 
-function generateStarredCard(subject) {
-    // construct card element for each starred subject
-    outhtml = "<div class='col starred-card'><div class='card'>"
-    outhtml += `<div class='card-header' style="transform: rotate(0);">
-                    <div class='close-starred'><a type='button' onClick='unstarSubject(` + subject.subject_id + `, this)'
-                       class='col btn float-end btn-sm p-0'>` + cross + `</a></div>
-                    <a class='link text-decoration-none stretched-link starred-link' href=/subject/?id=` + subject.subject_id + `>
-                    ` + subject.display_name + `</a>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <a class='list-group-item list-group-item-action' href=/subject/?id=` + subject.subject_id + `&level=1>Level 1</a>
-                    <a class='list-group-item list-group-item-action' href=/subject/?id=` + subject.subject_id + `&level=2>Level 2</a>
-                    <a class='list-group-item list-group-item-action' href=/subject/?id=` + subject.subject_id + `&level=3>Level 3</a>
-                </ul>
-               </div></div>`;
+function generateStarredCard(standard) {
+    // construct row for each starred standard
+    outhtml = ""
     return outhtml
 }
 
 function displayStarred() {
     if (starred.length == 0) {
         $("#starredlist").html("<p class='text-muted'>Nothin' here!</p>");
-        $("#starredHeader").html('My Subjects<small class="text-muted fs-6 ps-3 fw-light">Hit the ' + starOutline + ' icon to add a subject here</small>');
+        $("#starredHeader").html('My Standards<small class="text-muted fs-6 ps-3 fw-light">Hit the ' + starOutline + ' icon on a standard to add it here</small>');
         $("#starredHeader svg").addClass("mb-1");
     } else {
-        $("#starredHeader").html('My Subjects');
-//         $("#starredlist").hide();
+        $("#starredHeader").html('My Standards');
         outhtml = ""
-        starred.forEach(subject => {
-            outhtml += generateStarredCard(subject);
+        // starred is a list of standards, we want to organise by subject then level
+        // this is a minimum spanning tree of the tree of:
+        //        subject1 subject2
+        //            |       |
+        //          level   level
+        //             \     / 
+        //            standard
+        // put this in the future, for now we will just have it in the table
+        starred.forEach(standard => {
+            outhtml += generateStarredRow(standard);
         });
         $("#starredlist").html(outhtml);
-//         $("#starredlist").fadeIn();
     }
 }
 
