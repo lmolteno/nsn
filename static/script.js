@@ -63,7 +63,7 @@ function generateSubjectLI(subject) {
 
 function starStandard(standard_number, element) {
     standard = potentially_starred.find(s => s.standard_number == standard_number)
-    
+    console.log(`Adding ${standard_number}`);
     if (starred.find(s => s.standard_number === standard_number)) { // already starred
         index = starred.findIndex(s => s.standard_number == standard_number); // get index
         element.innerHTML = starOutline; // replace with outline
@@ -77,8 +77,9 @@ function starStandard(standard_number, element) {
     search();
 }
 
-function unstarStandard(standard_number, element) { // for removing the starred subject, with the event from the starred list
-    index = starred.findIndex(s => s.standard_number === standard_number); // get index
+function unstarStandard(standard_number, element) { // for removing the starred standard
+    console.log(`Removing ${standard_number}`);
+    index = starred.findIndex(s => s.standard_number == standard_number); // get index
     starred.splice(index, 1); // remove from array
     window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
     displayStarred(); // update display
@@ -125,13 +126,47 @@ function displayStarred() {
                         </tr>
                     </thead>
                     <tbody>`;
+        // for totals footer
+        total_credits = 0
+        total_reading = 0
+        total_writing = 0
+        total_numeracy = 0
         starred.sort((a,b) => (a.standard_number > b.standard_number) - (a.standard_number < b.standard_number)).forEach(standard => {
-            standard.id = standard.standard_number
+            standard.id = standard.standard_number // to suit the search-configured row generation function
+            total_credits  += standard.credits;
+            total_reading  += standard.reading  ? standard.credits : 0;
+            total_writing  += standard.writing  ? standard.credits : 0;
+            total_numeracy += standard.numeracy ? standard.credits : 0;
+            
             outhtml += generateStandardRow(standard);
         });
         outhtml += `</tbody>`;
+        // add row of totals to footer
+        outhtml += `<tfoot>
+                        <tr>
+                            <th colspan=5>
+                                <span class='float-end me-3'>Totals:</span>
+                            </th>
+                            <td>${total_credits}</td>
+                            <td>
+                                <span class='float-start'>${total_reading}</span>
+                                <span class='float-end'>  ${total_writing}</span>
+                            </td>
+                            <td>${total_numeracy}</td>
+                            <td>
+                                
+                            </td>
+                        </tr>
+                    </tfoot>`;
         $("#starredlist").html(outhtml);
     }
+}
+
+function clearStarred() {
+    window.localStorage.setItem('starred', JSON.stringify([])); // initialise with empty array
+    starred = [];
+    displayStarred();
+    search();
 }
 
 function generateStandardRow(standard) {
