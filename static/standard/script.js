@@ -69,13 +69,12 @@ function unstarSubject(subject_id, element) { // for removing the starred subjec
     displaySubjects();
 }
 
-function getStarred(then=None) {
+function getStarred() {
     if (window.localStorage.getItem('starred')) { // if this has been done before
         starred = JSON.parse(window.localStorage.getItem('starred')); // update from browser storage (which only stores strings)
     } else {
         window.localStorage.setItem('starred', JSON.stringify(starred)); // initialise with empty array
     }
-    then();
 }
 
 function updateSubjects() {
