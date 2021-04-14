@@ -1,6 +1,7 @@
 // globals
 subjects = [];
 starred = [];
+potentially_starred = []; // this is list of the standards that are stored in memory in case they become starred (from search results)
 
 // for accessing the search engine
 const client = new MeiliSearch({
@@ -8,7 +9,7 @@ const client = new MeiliSearch({
     apiKey: '',
 })
 
-// subjects stuff
+// init search indices
 const subjindex = client.index('subjects')
 const standindex = client.index('standards')
 
@@ -50,49 +51,41 @@ function displaySubjects() { // display the current list of subjects
 }
 
 function generateSubjectLI(subject) {
-    // construct li element for each subject with a star
-    outhtml = ""
-    outhtml += "<li class='py-1 row'><a type='button' onClick='starSubject("
-    outhtml += subject.subject_id.toString();
-    outhtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-2'>";
-    // check if the subject is starred or not
-    is_starred = starred.find(s => s.subject_id === subject.subject_id)
-    if (is_starred) {
-        outhtml += starFull + "</a>";
-    } else {
-        outhtml += starOutline + "</a>";
-    }
-    outhtml += "<a class='col link text-decoration-none px-0 mx-2' href=/subject/?id=";
-    outhtml += subject.subject_id.toString();
-    outhtml += ">";
-    outhtml += subject.display_name;
-    outhtml += "</a></li>"
+    // construct li element for each subject
+    outhtml =  `<li class='py-1 row'>
+                    -
+                    <a class='col link text-decoration-none px-0 mx-2' href=/subject/?id=${subject.subject_id}>
+                        ${subject.display_name}
+                    </a>
+                </li>`
     return outhtml
 }
 
-function starSubject(subject_id, element) {
-    if (starred.find(s => s.subject_id === subject_id)) { // already starred
-        index = starred.findIndex(s => s.subject_id === subject_id); // get index
+function starStandard(standard_number, element) {
+    standard = potentially_starred.find(s => s.standard_number == standard_number)
+    
+    if (starred.find(s => s.standard_number === standard_number)) { // already starred
+        index = starred.findIndex(s => s.standard_number == standard_number); // get index
         element.innerHTML = starOutline; // replace with outline
         starred.splice(index, 1); // remove from array
     } else {
         element.innerHTML = starFull; // fill star
-        subject = subjects.find(s => s.subject_id === subject_id); // get object (from id)
-        starred.push(subject); // add this to the starred list
+        starred.push(standard); // add this to the starred list
     }
     window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
     displayStarred(); // update display
+    search();
 }
 
-function unstarSubject(subject_id, element) { // for removing the starred subject, with the event from the starred list
-    index = starred.findIndex(s => s.subject_id === subject_id); // get index
+function unstarStandard(standard_number, element) { // for removing the starred subject, with the event from the starred list
+    index = starred.findIndex(s => s.standard_number === standard_number); // get index
     starred.splice(index, 1); // remove from array
     window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
     displayStarred(); // update display
-    displaySubjects();
+    search(); // refresh search starred status
 }
 
-function getStarred(then=None) {
+function getStarred(then=() => {a=1}) {
     if (window.localStorage.getItem('starred')) { // if this has been done before
         starred = JSON.parse(window.localStorage.getItem('starred')); // update from browser storage (which only stores strings)
     } else {
@@ -101,11 +94,6 @@ function getStarred(then=None) {
     then();
 }
 
-function generateStarredCard(standard) {
-    // construct row for each starred standard
-    outhtml = ""
-    return outhtml
-}
 
 function displayStarred() {
     if (starred.length == 0) {
@@ -123,9 +111,25 @@ function displayStarred() {
         //             \     / 
         //            standard
         // put this in the future, for now we will just have it in the table
-        starred.forEach(standard => {
-            outhtml += generateStarredRow(standard);
+        outhtml += `<thead>
+                        <tr>
+                            <th scope="col">Star</th>
+                            <th scope="col" class="col text-end">Number</th>
+                            <th scope="col" class="col">Title</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Level</th>
+                            <th scope="col">Credits</th>
+                            <th scope="col">Literacy</th>
+                            <th scope="col">Numeracy</th>
+                            <th scope="col">I/E</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+        starred.sort((a,b) => (a.standard_number > b.standard_number) - (a.standard_number < b.standard_number)).forEach(standard => {
+            standard.id = standard.standard_number
+            outhtml += generateStandardRow(standard);
         });
+        outhtml += `</tbody>`;
         $("#starredlist").html(outhtml);
     }
 }
@@ -133,42 +137,51 @@ function displayStarred() {
 function generateStandardRow(standard) {
     outhtml = ""
     i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
-
+    is_starred = starred.find((searched) => searched.standard_number == standard.id)
+    stretchedlinkstr = `<a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>`;
+    
     outhtml += "<tr class='clickable " + i_e_class + "'>" // initialise row
+    
+    // add the star standard button, depending on whether it's starred or not
+    outhtml += `    <th scope='row' style='position: relative;'>
+                        <a onClick='${is_starred ? "unstar": "star"}Standard(${standard.id}, this)' class='stretched-link link text-decoration-none text-dark text-center d-block'>
+                            ${is_starred ? starFull : starOutline}
+                        </a>
+                    </th>`
     // add <th> (header) styled standard number with link to the standard page
     outhtml += `    <th scope='row' style='position: relative;'>
-                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ${stretchedlinkstr}
                         <span class='float-end'>` + standard.id + `</span>
                     </th>`
     
     // add all the other information in <td> styled boxes
     outhtml += `    <td style='position: relative;'>
-                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ${stretchedlinkstr}
                         ` + standard.title + `
                     </td>
                     <td style='position: relative;'>
-                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ${stretchedlinkstr}
                         ` + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + `
                     </td>
                     <td class='text-center' style='position: relative;'>
-                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ${stretchedlinkstr}
                         ` + standard.level + `
                     </td>
                     <td class='text-center' style='position: relative;'>
-                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ${stretchedlinkstr}
                         ` + standard.credits + `
                     </td>
                     <td style='position: relative;'>
-                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ${stretchedlinkstr}
                         <span class='float-start'>` + (standard.reading ? "R" : "N") + `</span>
                         <span class='float-end'>` + (standard.writing ? "W" : "N") + `</span>
                     </td>
                     <td class='text-center' style='position: relative;'>
-                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ${stretchedlinkstr}
                         ` + (standard.numeracy ? "Y" : "N") + `
                     </td>
                     <td style='position: relative;'>
-                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ${stretchedlinkstr}
                         ` + (standard.internal ? `Internal` : `External`) + `
                     </td>
                 </tr>`;
@@ -191,20 +204,11 @@ async function search() {
                             </thead>
                             <tbody>`;
             subjects['hits'].forEach(result => {
-                subjecthtml += "<tr>"
-                subjecthtml += "<td>"
-                subjecthtml += "<a type='button' onClick='starSubject("
-                subjecthtml += result.id;
-                subjecthtml += ", this)' class='col btn float-start btn-sm p-0 pe-3'>";
-                // check if the subject is starred or not
-                is_starred = starred.find(s => s.subject_id === parseInt(result.id))
-                if (is_starred) {
-                    subjecthtml += starFull + "</a>";
-                } else {
-                    subjecthtml += starOutline + "</a>";
-                }       
-                subjecthtml += "<a href='/subject/?id=" + result.id + "' class='text-decoration-none link'>" + result.display_name + "</a></td>"
-                subjecthtml += "</tr>"
+                subjecthtml += `<tr>
+                                    <td>
+                                        <a href='/subject/?id=${result.id}' class='text-decoration-none link'>${result.display_name}</a>
+                                    </td>
+                                </tr>`;
             });
             subjecthtml += "</tbody></table>"
             $("#subjects-results").html(subjecthtml)
@@ -215,23 +219,29 @@ async function search() {
         
         const standards = await standindex.search(searchtext, {limit: 5})
         if (standards['hits'].length > 0 & $("#searchbox").val().length > 0) {
+
             standardshtml =  `<h3 class="mb-1">Standards</h3>
 
                         <table class="table-bordered border-0 table table-hover">
                             <thead>
                                 <tr>
-                                <th scope="col" class="col text-end">Number</th>
-                                <th scope="col" class="col">Title</th>
-                                <th scope="col">Type</th>
-                                <th scope="col">Level</th>
-                                <th scope="col">Credits</th>
-                                <th scope="col">Literacy</th>
-                                <th scope="col">Numeracy</th>
-                                <th scope="col">I/E</th>
+                                    <th scope="col" class="col">Star</th>
+                                    <th scope="col" class="col text-end">Number</th>
+                                    <th scope="col" class="col">Title</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Level</th>
+                                    <th scope="col">Credits</th>
+                                    <th scope="col">Literacy</th>
+                                    <th scope="col">Numeracy</th>
+                                    <th scope="col">I/E</th>
                                 </tr>
                             </thead>
                             <tbody>`;
             standards['hits'].forEach(result => {
+                // add to potentially_starred list with the correct id/standard_number key replacement
+                potential = result
+                potential.standard_number = result.id
+                potentially_starred.push(potential);
                 standardshtml += generateStandardRow(result)
             });
             standardshtml += "</tbody></table>"
@@ -252,7 +262,6 @@ async function search() {
             }
         }
     } else {
-//         $("#search-results").html("")
         $("#subjects-results").html("")
         $("#standards-results").html("")
         $("#search-results").css("visibility","hidden");
