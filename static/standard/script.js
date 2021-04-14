@@ -284,6 +284,8 @@ function sort_handler() {
 }
 
 $(document).ready(function() {
+    // get starred subject
+    getStarred();
     if (standard_number >= 90000) {
         sortbycategory = $('#sort-selector').is(':checked'); // set sort to whether this is checked or not
         $("#sort-selector").on("change", sort_handler);

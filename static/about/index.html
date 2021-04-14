@@ -56,26 +56,26 @@
                     <div class='col-sm ps-3'>
                         <p>The system to support this system is built on the following elements, all containerised through Docker, and composed through Docker Compose</p>
                         <dl>
-                            <dt>Python with Beautiful Soup</dt>
-                            <dd>for scraping and managing where the scraped data goes.</dd>
+                            <dt>Python3.9 with Beautiful Soup and Pandas</dt>
+                            <dd>for scraping, parsing, and managing the database.</dd>
 
                             <dt>MeiliSearch</dt>
                             <dd>for serving fast, typo-resistant search results for both subjects and standards.</dd>
 
                             <dt>PostgreSQL</dt>
-                            <dd>for providing a scalable, production-quality database.</dd>
+                            <dd>for providing a scalable, enterprise-level database.</dd>
 
                             <dt>Python with Flask</dt>
-                            <dd>for accessing and serving the data from the database to the frontend.</dd>
+                            <dd>for accessing and serving the data from the database to the frontend with a RESTful API.</dd>
                             
                             <dt>Caddy</dt>
-                            <dd>for directing traffic and auto-SSL certificates from LetsEncrypt.</dd>
+                            <dd>as a reverse proxy and a service retrieving auto-SSL certificates from LetsEncrypt.</dd>
                             
                             <dt>GoAccess</dt>
-                            <dd>for reading Caddy logs and running a websocket, where a dashboard can be connected.</dd>
+                            <dd>for reading Caddy logs and hosting a websocket, where a dashboard can be connected.</dd>
                             
                             <dt>HTML/CSS/JS + Bootstrap</dt>
-                            <dd>for writing and running the frontend.  </dd>
+                            <dd>for creating a responsive, dynamic frontend.</dd>
                         </dl>
                     <!-- <p>This journey began during exams last year. I built up an intense frustration at the number of clicks between going to the NZQA website, and the exam papers I needed for my study. I thought to myself <em>"There must be a better way!"</em> Then, after some research, I discovered that there was a dataset provided by NZQA, describing all their 106k standards that they've made since 1989. From here I'd imagined it would simply be entering this information into a database, writing a quick API to interface with that database, and serving that through a basic frontend. But lo! The dataset they provided didn't have information regarding what NCEA subject each standard fell under. So I went about my day, scraping the NZQA/NCEA subjects page for subject, then for each of those subjects, I would work through the "Search results" page for each level, building up a list of standards for each subject, that I would save in a JSON file. Then &mdash; shock! I discovered why that dataset didn't provide the subject for each standard. Standards can be a part of multiple subjects! Modifying my database to suit this, I moved forward. After many trials and tribulations, I ended up with a functioning site, with the following system diagram.</p>-->
                     </div>
