@@ -219,9 +219,13 @@ function getResourcesList() {
 function update_star() {
     is_starred = starred.find(s => s.standard_number == standard_number)
     star = is_starred ? starFull : starOutline;
-    link = $("#standard-star")
-    link.html(star);
-    link.attr('onclick', `${is_starred ? "unstar": "star"}Standard(${standard_number}, this)`);
+    title_link = $("#title-star")
+    title_link.html(star);
+    title_link.children().addClass("mb-2 mb-md-3 clickable");
+    size = "0.9em"
+    title_link.children().attr("width",size);
+    title_link.children().attr("height",size);
+    title_link.attr('onclick', `${is_starred ? "unstar": "star"}Standard(${standard_number}, this)`);
 }
 
 function updateEverything() { // populate EVERYTHING hehe
@@ -250,13 +254,15 @@ function updateEverything() { // populate EVERYTHING hehe
                                     <div class='col-auto p-lg-0'>
                                         <a class="nav-link active" aria-current="page">${standard_num_text}</a>
                                     </div>
-                                    <div class='col-auto p-lg-0 d-flex align-items-center'>
-                                        <a class="text-light" id='standard-star' onClick="${is_starred ? "unstar": "star"}Standard(${standard_number}, this)">${star}</a>
-                                    </div>
-                                </div>`); 
+                                </div>`);
+//                                     <div class='col-auto p-lg-0 d-flex align-items-center'>
+//                                         <a class="text-light" id='standard-star' onClick="${is_starred ? "unstar": "star"}Standard(${standard_number}, this)">${star}</a>
+//                                     </div>
+//                                 </div>`); 
     
     // update headers
-    $("#standard-number").html(standard_num_text);
+    $("#standard-number").html(`${standard_num_text} <span id='title-star' onClick="${is_starred ? "unstar": "star"}Standard(${standard_number}, this)">${star}</span>`);
+    update_star();
     $("#standard-title").html(standard.basic_info.title);
     
     updateSubjects();
