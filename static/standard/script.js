@@ -48,33 +48,36 @@ function linkToNZQA(number) {
     nzqaurl = "https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber=" + number.toString()
     window.open(nzqaurl, '_blank')
 }
-
-function starSubject(subject_id, element) {
-    if (starred.find(s => s.subject_id === subject_id)) { // already starred
-        index = starred.findIndex(s => s.subject_id === subject_id); // get index
+function starStandard(standard_number, element) {
+    standard_to_star = standard.basic_info
+    console.log(`Adding ${standard_number}`);
+    if (starred.find(s => s.standard_number === standard_number)) { // already starred
+        index = starred.findIndex(s => s.standard_number == standard_number); // get index
         element.innerHTML = starOutline; // replace with outline
         starred.splice(index, 1); // remove from array
     } else {
         element.innerHTML = starFull; // fill star
-        subject = standard.subjects.find(s => s.subject_id === subject_id); // get object (from id)
-        starred.push(subject); // add this to the starred list
+        starred.push(standard_to_star); // add this to the starred list
     }
     window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
+    update_star(); // update displayed star
 }
 
-function unstarSubject(subject_id, element) { // for removing the starred subject, with the event from the starred list
-    index = starred.findIndex(s => s.subject_id === subject_id); // get index
+function unstarStandard(standard_number, element) { // for removing the starred standard
+    console.log(`Removing ${standard_number}`);
+    index = starred.findIndex(s => s.standard_number == standard_number); // get index
     starred.splice(index, 1); // remove from array
     window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
-    displaySubjects();
+    update_star(); // update display
 }
 
-function getStarred() {
+function getStarred(then=() => {a=1}) {
     if (window.localStorage.getItem('starred')) { // if this has been done before
         starred = JSON.parse(window.localStorage.getItem('starred')); // update from browser storage (which only stores strings)
     } else {
         window.localStorage.setItem('starred', JSON.stringify(starred)); // initialise with empty array
     }
+    then();
 }
 
 function updateSubjects() {
@@ -88,23 +91,12 @@ function updateSubjects() {
 }
 
 function generateSubjectLI(subject) {
-    // construct li element for each subject with a star
-    outhtml = ""
-    outhtml += "<li class='py-2 list-group-item list-group-item-action'><a type='button' onClick='starSubject("
-    outhtml += subject.subject_id.toString();
-    outhtml += ", this)' class='col-1 btn float-start btn-sm p-0 pe-2'>";
-    // check if the subject is starred or not
-    is_starred = starred.find(s => s.subject_id === subject.subject_id)
-    if (is_starred) {
-        outhtml += starFull + "</a>";
-    } else {
-        outhtml += starOutline + "</a>";
-    }
-    outhtml += "<a class='col link text-decoration-none px-0 mx-2' href=/subject/?id=";
-    outhtml += subject.subject_id.toString();
-    outhtml += ">";
-    outhtml += subject.display_name;
-    outhtml += "</a></li>"
+    // construct li element for each subject
+    outhtml =  `<li class='py-2 list-group-item list-group-item-action'>
+                    <a class='col link text-decoration-none px-0 ms-1 me-2' href=/subject/?id=${subject.subject_id}>
+                        ${subject.display_name}
+                    </a>
+                </li>`
     return outhtml
 }
 
@@ -224,9 +216,30 @@ function getResourcesList() {
     return outhtml
 }
 
+function update_star() {
+    is_starred = starred.find(s => s.standard_number == standard_number)
+    star = is_starred ? starFull : starOutline;
+    title_link = $("#title-star")
+    title_link.html(star);
+    title_link.children().addClass("mb-2 mb-md-3 clickable");
+    size = "0.9em"
+    title_link.children().attr("width",size);
+    title_link.children().attr("height",size);
+    title_link.attr('onclick', `${is_starred ? "unstar": "star"}Standard(${standard_number}, this)`);
+}
+
 function updateEverything() { // populate EVERYTHING hehe
     
     standard_num_text = (standard_number > 90000 ? "AS" : "US") + standard_number; // e.g. AS91902 or US2345 depending on achievement vs unit
+    is_starred = starred.find(s => s.standard_number == standard_number)
+    star = is_starred ? starFull : starOutline;
+    
+    /* update page title */
+    title = `${standard_num_text} | NSN`;
+    if (document.title != title) {
+        document.title = title;
+    }
+    $('meta[name="description"]').attr("content", standard.basic_info.title);
     
     // hiding everything so that it's not jumpy when changed
     $('#standard-number').hide()
@@ -235,12 +248,21 @@ function updateEverything() { // populate EVERYTHING hehe
 
     // create breadcrumbs
     $("#nav-breadcrumbs").hide()
-    $("#nav-breadcrumbs").html(`<div class='row'><div class='col-auto pe-lg-0'><a class="nav-link" href="/">Home</a></div>
-                                <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
-                                <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">` + standard_num_text + `</a></div></div>`); 
+    $("#nav-breadcrumbs").html(`<div class='row'>
+                                    <div class='col-auto pe-lg-0'><a class="nav-link" href="/">Home</a></div>
+                                    <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
+                                    <div class='col-auto p-lg-0'>
+                                        <a class="nav-link active" aria-current="page">${standard_num_text}</a>
+                                    </div>
+                                </div>`);
+//                                     <div class='col-auto p-lg-0 d-flex align-items-center'>
+//                                         <a class="text-light" id='standard-star' onClick="${is_starred ? "unstar": "star"}Standard(${standard_number}, this)">${star}</a>
+//                                     </div>
+//                                 </div>`); 
     
     // update headers
-    $("#standard-number").html(standard_num_text);
+    $("#standard-number").html(`${standard_num_text} <span id='title-star' onClick="${is_starred ? "unstar": "star"}Standard(${standard_number}, this)">${star}</span>`);
+    update_star();
     $("#standard-title").html(standard.basic_info.title);
     
     updateSubjects();
@@ -256,7 +278,7 @@ function updateEverything() { // populate EVERYTHING hehe
     $('#credit-num').html(standard.basic_info.credits);
     $('#version-num').html(standard.basic_info.version == null ? "Unknown" : standard.basic_info.version );
     // set internal/external colour
-//     $("#internal-external").addClass(standard.basic_info.internal ? "internal_row" : "external_row")
+//   $("#internal-external").addClass(standard.basic_info.internal ? "internal_row" : "external_row")
     $('#internal-external').html(standard.basic_info.internal ? "Internal" : "External");
     
     // update nzqa link with href to correct bit of site
@@ -283,7 +305,7 @@ function sort_handler() {
 }
 
 $(document).ready(function() {
-    // get starred subject
+    // get starred standards
     getStarred();
     if (standard_number >= 90000) {
         sortbycategory = $('#sort-selector').is(':checked'); // set sort to whether this is checked or not
@@ -292,4 +314,5 @@ $(document).ready(function() {
         $("#sort-selector-div").addClass('d-none');
     }
     getInfo();
+
 });

@@ -1,6 +1,9 @@
 // globals
 subjects = [];
 standards = [];
+starred = [];
+
+
 const urlParams = new URLSearchParams(window.location.search); // get url parameters
 if (urlParams.get('id') == null) {
     window.location = "/"; // if there's no id parameter in the url
@@ -8,7 +11,7 @@ if (urlParams.get('id') == null) {
 // get level in url parameters, else null (inline ifs can be confusing sorry)
 const level = (urlParams.get('level') == null) ? null : parseInt(urlParams.get('level')); 
 const subject_id = parseInt(urlParams.get('id'));
-subject = 0;
+var subject = 0; // for init of the global subject object
 
 // for accessing the search engine
 const client = new MeiliSearch({
@@ -43,7 +46,7 @@ function getSubjects() { // update the local list of subjects
 }
 
 function getStandards(then=function(){a=1}) { // get the list of standards for the subject
-    $.get("/api/standards?subject=" + subject_id.toString(), (data) => {
+    $.get("/api/standards?subject=" + subject_id, (data) => {
         if (data.success) {
             console.log("Successfully gathered " + data.standards.length.toString() + " standards");
             standards = data.standards;
@@ -52,6 +55,41 @@ function getStandards(then=function(){a=1}) { // get the list of standards for t
             alert("Failure to get standards. Try reloading. If the problem persists, email linus@molteno.net");
         }
     }); 
+}
+
+
+function starStandard(standard_number, element) {
+    standard = standards.find(s => s.standard_number == standard_number)
+    console.log(`Adding ${standard_number}`);
+    if (starred.find(s => s.standard_number === standard_number)) { // already starred
+        index = starred.findIndex(s => s.standard_number == standard_number); // get index
+        element.innerHTML = starOutline; // replace with outline
+        starred.splice(index, 1); // remove from array
+    } else {
+        element.innerHTML = starFull; // fill star
+        starred.push(standard); // add this to the starred list
+    }
+    window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
+    displayStarred(); // update display
+    search();
+}
+
+function unstarStandard(standard_number, element) { // for removing the starred standard
+    console.log(`Removing ${standard_number}`);
+    index = starred.findIndex(s => s.standard_number == standard_number); // get index
+    starred.splice(index, 1); // remove from array
+    window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
+    displayStarred(); // update display
+    search(); // refresh search starred status
+}
+
+function getStarred(then=() => {a=1}) {
+    if (window.localStorage.getItem('starred')) { // if this has been done before
+        starred = JSON.parse(window.localStorage.getItem('starred')); // update from browser storage (which only stores strings)
+    } else {
+        window.localStorage.setItem('starred', JSON.stringify(starred)); // initialise with empty array
+    }
+    then();
 }
 
 async function search() {
@@ -73,16 +111,19 @@ async function search() {
                         <table class="table-bordered border-0 table table-hover">
                             <thead>
                                 <tr>
-                                <th scope="col" class="col text-end">Number</th>
-                                <th scope="col" class="col">Title</th>
-                                <th scope="col">Type</th>
-                                <th scope="col">Credits</th>
-                                <th scope="col">Literacy</th>
-                                <th scope="col">Numeracy</th>
-                                <th scope="col">I/E</th>
+                                    <th scope="col" class="col">Star</th>
+                                    <th scope="col" class="col text-end">Number</th>
+                                    <th scope="col" class="col">Title</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Level</th>
+                                    <th scope="col">Credits</th>
+                                    <th scope="col">Literacy</th>
+                                    <th scope="col">Numeracy</th>
+                                    <th scope="col">I/E</th>
                                 </tr>
                             </thead>
                             <tbody>`;
+
             filtered.forEach(result => {
                 standardshtml += generateSearchStandardRow(result)
             });
@@ -120,42 +161,54 @@ function generateSubjectRow(subject) {
     outhtml += "</tr>"
     return outhtml
 }
-
 function generateSearchStandardRow(standard) {
     outhtml = ""
     i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
-
+    is_starred = starred.find((searched) => searched.standard_number == standard.id)
+    stretchedlinkstr = `<a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>`;
+    
     outhtml += "<tr class='clickable " + i_e_class + "'>" // initialise row
+    
+    // add the star standard button, depending on whether it's starred or not
+    outhtml += `    <th scope='row' style='position: relative;'>
+                        <a onClick='${is_starred ? "unstar": "star"}Standard(${standard.id}, this)' class='stretched-link link text-decoration-none text-dark text-center d-block'>
+                            ${is_starred ? starFull : starOutline}
+                        </a>
+                    </th>`
     // add <th> (header) styled standard number with link to the standard page
     outhtml += `    <th scope='row' style='position: relative;'>
-                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ${stretchedlinkstr}
                         <span class='float-end'>` + standard.id + `</span>
                     </th>`
     
     // add all the other information in <td> styled boxes
     outhtml += `    <td style='position: relative;'>
-                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ${stretchedlinkstr}
                         ` + standard.title + `
                     </td>
                     <td style='position: relative;'>
-                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ${stretchedlinkstr}
                         ` + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + `
                     </td>
                     <td class='text-center' style='position: relative;'>
-                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ${stretchedlinkstr}
+                        ` + standard.level + `
+                    </td>
+                    <td class='text-center' style='position: relative;'>
+                        ${stretchedlinkstr}
                         ` + standard.credits + `
                     </td>
                     <td style='position: relative;'>
-                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ${stretchedlinkstr}
                         <span class='float-start'>` + (standard.reading ? "R" : "N") + `</span>
                         <span class='float-end'>` + (standard.writing ? "W" : "N") + `</span>
                     </td>
                     <td class='text-center' style='position: relative;'>
-                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ${stretchedlinkstr}
                         ` + (standard.numeracy ? "Y" : "N") + `
                     </td>
                     <td style='position: relative;'>
-                        <a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>
+                        ${stretchedlinkstr}
                         ` + (standard.internal ? `Internal` : `External`) + `
                     </td>
                 </tr>`;
@@ -173,6 +226,13 @@ function updateEverything() { // populate the standards list, and the subject na
     subject = subjects.find(o => o.subject_id == subject_id)
     $("#subject-name").hide()
     $("#subject-name").html(subject.display_name);
+    
+    /* update page title */
+    title = `${subject.display_name} | NSN`;
+    if (document.title != title) {
+        document.title = title;
+    }
+    $('meta[name="description"]').attr("content", `Standards relating to ${subject.display_name}`);
     
     $("#searchbox").attr("placeholder", "Search " + subject.display_name + " standards");
     
@@ -195,13 +255,15 @@ function updateEverything() { // populate the standards list, and the subject na
                 <table class="table table-bordered table-hover bg-white border-0">
                     <thead>
                         <tr>
-                        <th scope="col" class="col text-end">Number</th>
-                        <th scope="col" class="col">Title</th>
-                        <th scope="col">Type</th>
-                        <th scope="col">Credits</th>
-                        <th scope="col">Literacy</th>
-                        <th scope="col">Numeracy</th>
-                        <th scope="col">Int/Ext</th>
+                            <th scope="col" class="col">Star</th>
+                            <th scope="col" class="col text-end">Number</th>
+                            <th scope="col" class="col">Title</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Level</th>
+                            <th scope="col">Credits</th>
+                            <th scope="col">Literacy</th>
+                            <th scope="col">Numeracy</th>
+                            <th scope="col">I/E</th>
                         </tr>
                     </thead>`;
     var level_arr = (level == null) ? [1,2,3] : [level,]
@@ -213,7 +275,7 @@ function updateEverything() { // populate the standards list, and the subject na
             views = [['reports', 'Schedules'], ['exams','Exams'], ['achievements', 'Standards'], ['all', 'All']]
             outhtml += `<thead>
             <tr>
-                <th colspan="7" class="text-center border border-dark pb-1">
+                <th colspan="9" class="text-center border border-dark pb-1">
                     <div class='container px-1'>
                     <div class="row border-bottom pb-2"><div class="col fw-bold fs-3 text-center">Level ` + current_level + `</div></div>
                     <div class="row justify-content-center">`;
@@ -241,8 +303,9 @@ function updateEverything() { // populate the standards list, and the subject na
 }
 
 $(document).ready(function() {
-    getSubjects(); // for async requests, we have to do "thens", like promises
-    $("#searchbox").val("")
+    getStarred();
+    getSubjects(); // this kicks off the chain of requests to update everything
+    $("#searchbox").val("");
     search();
     document.getElementById("searchbox").addEventListener('input', search); // when something is input, search
 });
