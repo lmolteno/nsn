@@ -227,6 +227,13 @@ function updateEverything() { // populate the standards list, and the subject na
     $("#subject-name").hide()
     $("#subject-name").html(subject.display_name);
     
+    /* update page title */
+    title = `${subject.display_name} | NSN`;
+    if (document.title != title) {
+        document.title = title;
+    }
+    $('meta[name="description"]').attr("content", `Standards relating to ${subject.display_name}`);
+    
     $("#searchbox").attr("placeholder", "Search " + subject.display_name + " standards");
     
     $("#subject-name").fadeIn() // I love this so much

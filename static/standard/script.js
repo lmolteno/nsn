@@ -230,6 +230,12 @@ function updateEverything() { // populate EVERYTHING hehe
     is_starred = starred.find(s => s.standard_number == standard_number)
     star = is_starred ? starFull : starOutline;
     
+    /* update page title */
+    title = `${standard_num_text} | NSN`;
+    if (document.title != title) {
+        document.title = title;
+    }
+    $('meta[name="description"]').attr("content", standard.basic_info.title);
     
     // hiding everything so that it's not jumpy when changed
     $('#standard-number').hide()
@@ -302,4 +308,5 @@ $(document).ready(function() {
         $("#sort-selector-div").addClass('d-none');
     }
     getInfo();
+
 });
