@@ -98,11 +98,9 @@ function getStarred(then=() => {a=1}) {
 
 function displayStarred() {
     if (starred.length == 0) {
-        $("#starredlist").html("<p class='text-muted'>Nothin' here!</p>");
-        $("#starredHeader").html('My Standards<small class="text-muted fs-6 ps-3 fw-light">Hit the ' + starOutline + ' icon on a standard to add it here</small>');
-        $("#starredHeader svg").addClass("mb-1");
+        $("#starredlist").html(`<p class='text-muted mb-0'>Hit the ${starOutline} icon on a standard to add it here</p>`);
+        $("#starredlist svg").addClass("mb-1"); // move the star up a bit, inline with the text
     } else {
-        $("#starredHeader").html('My Standards');
         outhtml = ""
         // starred is a list of standards, we want to organise by subject then level
         // this is a minimum spanning tree of the tree of:
@@ -292,7 +290,7 @@ async function search() {
             $("#search-results").css("visibility","hidden");
         } else {
             if (subjects.hits.length == 0 && standards.hits.length == 0) {
-                $("#subjects-results").html("<p class='text-muted mb-2'>Nothin' here!</p>")
+                $("#subjects-results").html("<p class='text-muted mb-2'>No results found</p>")
                 $("#search-results").css("visibility","visible");
             }
         }

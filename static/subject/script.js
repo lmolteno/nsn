@@ -129,12 +129,12 @@ async function search() {
             });
             standardshtml += "</tbody></table>"
             if (filtered.length == 0) {
-                standardshtml = "<p class='text-muted mb-2'>Nothin' here!</p>";
+                standardshtml = "<p class='text-muted mb-2'>No results found</p>";
             }
             $("#standards-results").html(standardshtml)
             $("#search-results").css("visibility","visible");
         } else {
-            standardshtml = "<p class='text-muted mb-2'>Nothin' here!</p>";
+            standardshtml = "<p class='text-muted mb-2'>No results found</p>";
             $("#standards-results").html(standardshtml)
             $("#search-results").css("visibility","visible");
         }
