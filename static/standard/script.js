@@ -17,13 +17,13 @@ const starOutline = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="
 </svg>`;
 const starFull = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill" viewBox="0 0 16 16">
   <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.283.95l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-</svg>`;    
+</svg>`;
 const cross = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
   <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
 </svg>`;
 
 
-function getInfo(then=function(){a=1}) { // get the information regarding the standard with the ID from the URL
+function getInfo(then = function () { a = 1 }) { // get the information regarding the standard with the ID from the URL
     $.get("/api/standards?number=" + standard_number.toString(), (data) => {
         if (data.success) {
             console.log("Successfully gathered information about the standard.")
@@ -41,7 +41,7 @@ function getInfo(then=function(){a=1}) { // get the information regarding the st
         } else {
             alert("Failure to get standard info. Try reloading. If the problem persists, email linus@molteno.net");
         }
-    }); 
+    });
 }
 
 function linkToNZQA(number) {
@@ -71,7 +71,7 @@ function unstarStandard(standard_number, element) { // for removing the starred 
     update_star(); // update display
 }
 
-function getStarred(then=() => {a=1}) {
+function getStarred(then = () => { a = 1 }) {
     if (window.localStorage.getItem('starred')) { // if this has been done before
         starred = JSON.parse(window.localStorage.getItem('starred')); // update from browser storage (which only stores strings)
     } else {
@@ -86,13 +86,13 @@ function updateSubjects() {
     standard.subjects.forEach((subject) => {
         subject_list_html += generateSubjectLI(subject)
     });
-    
+
     $('#subject-list').html(subject_list_html);
 }
 
 function generateSubjectLI(subject) {
     // construct li element for each subject
-    outhtml =  `<li class='py-2 list-group-item list-group-item-action'>
+    outhtml = `<li class='py-2 list-group-item list-group-item-action'>
                     <a class='col link text-decoration-none px-0 ms-1 me-2' href=/subject/?id=${subject.subject_id}>
                         ${subject.display_name}
                     </a>
@@ -117,7 +117,7 @@ function getResourcesList() {
         $("#annotated-exemplar-div").hide();
         $("#links-row").removeClass("row-cols-md-3");
         $("#links-row").addClass("row-cols-md-2");
-        
+
     }
     if (standard_number < 90000) { // unit standards only have one document
         if (resources.length == 1) {
@@ -127,25 +127,25 @@ function getResourcesList() {
             $("#recent-standard-link").html("Unit Standard");
             $("#recent-standard-link").attr("href", resource.nzqa_url);
         } else {
-            
+
         }
     } else { // achievement standard
         if (sortbycategory) {
             all_categories = new Set();
             most_recent_achievement = null;    // for getting the most recent achievement standard
-            resources.forEach((resource) => { 
-                 if (resource.year > most_recent_achievement) {
+            resources.forEach((resource) => {
+                if (resource.year > most_recent_achievement) {
                     most_recent_achievement = resource;
                 }
                 all_categories.add(resource.category) // sets only contain unique elements, duplicates are removed
             });
-            
+
             // add the link to the most recent achievement standard
             if (most_recent_achievement != null) {
                 $("#recent-standard-link").html("Most Recent Achievement Standard");
                 $("#recent-standard-link").attr("href", most_recent_achievement.nzqa_url);
             }
-            
+
             all_categories.forEach((category) => {
                 resources_for_category = resources.filter((resource) => (resource.category == category))
                 category_names = {
@@ -168,13 +168,13 @@ function getResourcesList() {
                 resources_for_category.forEach((resource) => {
                     // add link for each resource
                     outhtml += `<a class='list-group-item' href='${resource.nzqa_url}'>${resource.title}</a>`
-                                        
+
                 });
                 outhtml += `        </ul>
                                 </div>
                             </div>`
             });
-            
+
         } else {
             all_years = new Set()
             most_recent_achievement = null; // for getting the most recent achievement standard
@@ -186,7 +186,7 @@ function getResourcesList() {
                     all_years.add(resource.year) // sets only contain unique elements, duplicates are removed
                 }
             });
-            
+
             // add the link to the most recent achievement standard
             if (most_recent_achievement != null) {
                 $("#recent-standard-link").html("Most Recent Achievement Standard");
@@ -205,7 +205,7 @@ function getResourcesList() {
                 resources_for_year.forEach((resource) => {
                     // add link for each resource
                     outhtml += `<a class='list-group-item' href='${resource.nzqa_url}'>${resource.title}</a>`
-                                        
+
                 });
                 outhtml += `        </ul>
                                 </div>
@@ -223,24 +223,24 @@ function update_star() {
     title_link.html(star);
     title_link.children().addClass("mb-2 mb-md-3 clickable");
     size = "0.9em"
-    title_link.children().attr("width",size);
-    title_link.children().attr("height",size);
-    title_link.attr('onclick', `${is_starred ? "unstar": "star"}Standard(${standard_number}, this)`);
+    title_link.children().attr("width", size);
+    title_link.children().attr("height", size);
+    title_link.attr('onclick', `${is_starred ? "unstar" : "star"}Standard(${standard_number}, this)`);
 }
 
 function updateEverything() { // populate EVERYTHING hehe
-    
+
     standard_num_text = (standard_number > 90000 ? "AS" : "US") + standard_number; // e.g. AS91902 or US2345 depending on achievement vs unit
     is_starred = starred.find(s => s.standard_number == standard_number)
     star = is_starred ? starFull : starOutline;
-    
+
     /* update page title */
     title = `Standard ${standard_num_text}`;
     if (document.title != title) {
         document.title = title;
     }
     $('meta[name="description"]').attr("content", standard.basic_info.title);
-    
+
     // hiding everything so that it's not jumpy when changed
     $('#standard-number').hide()
     $('#standard-title').hide()
@@ -255,44 +255,44 @@ function updateEverything() { // populate EVERYTHING hehe
                                         <a class="nav-link active" aria-current="page">${standard_num_text}</a>
                                     </div>
                                 </div>`);
-//                                     <div class='col-auto p-lg-0 d-flex align-items-center'>
-//                                         <a class="text-light" id='standard-star' onClick="${is_starred ? "unstar": "star"}Standard(${standard_number}, this)">${star}</a>
-//                                     </div>
-//                                 </div>`); 
-    
+    //                                     <div class='col-auto p-lg-0 d-flex align-items-center'>
+    //                                         <a class="text-light" id='standard-star' onClick="${is_starred ? "unstar": "star"}Standard(${standard_number}, this)">${star}</a>
+    //                                     </div>
+    //                                 </div>`); 
+
     // update headers
-    $("#standard-number").html(`${standard_num_text} <span id='title-star' onClick="${is_starred ? "unstar": "star"}Standard(${standard_number}, this)">${star}</span>`);
+    $("#standard-number").html(`${standard_num_text} <span id='title-star' onClick="${is_starred ? "unstar" : "star"}Standard(${standard_number}, this)">${star}</span>`);
     update_star();
     $("#standard-title").html(standard.basic_info.title);
-    
+
     updateSubjects();
-    
+
     // update contents of literacy/numeracy table
     $('#literacy-bool').html((standard.ncea_litnum.literacy) ? "Yes" : "No");
     $('#numeracy-bool').html((standard.ncea_litnum.numeracy) ? "Yes" : "No");
-    $('#reading-bool').html( (standard.ue_literacy.reading)  ? "Yes" : "No");
-    $('#writing-bool').html( (standard.ue_literacy.writing)  ? "Yes" : "No");
-    
+    $('#reading-bool').html((standard.ue_literacy.reading) ? "Yes" : "No");
+    $('#writing-bool').html((standard.ue_literacy.writing) ? "Yes" : "No");
+
     // update information table
     $('#level-num').html(standard.basic_info.level);
     $('#credit-num').html(standard.basic_info.credits);
-    $('#version-num').html(standard.basic_info.version == null ? "Unknown" : standard.basic_info.version );
+    $('#version-num').html(standard.basic_info.version == null ? "Unknown" : standard.basic_info.version);
     // set internal/external colour
-//   $("#internal-external").addClass(standard.basic_info.internal ? "internal_row" : "external_row")
+    //   $("#internal-external").addClass(standard.basic_info.internal ? "internal_row" : "external_row")
     $('#internal-external').html(standard.basic_info.internal ? "Internal" : "External");
-    
+
     // update nzqa link with href to correct bit of site
     $("#all-docs-link").attr("href", "https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber=" + standard_number);
-    
+
     $("#resources-container").hide();
     $("#resources-container").html(getResourcesList());
     $("#resources-container").fadeIn();
-    
+
     $('#subject-list').fadeIn();
     $('#standard-number').fadeIn()
     $('#standard-title').fadeIn()
     $("#nav-breadcrumbs").fadeIn()
-    $("#main-container").fadeIn();    
+    $("#main-container").fadeIn();
 }
 
 function sort_handler() {
@@ -304,7 +304,7 @@ function sort_handler() {
     });
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
     // get starred standards
     getStarred();
     if (standard_number >= 90000) {

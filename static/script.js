@@ -19,13 +19,13 @@ const starOutline = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="
 </svg>`;
 const starFull = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill" viewBox="0 0 16 16">
   <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.283.95l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-</svg>`;    
+</svg>`;
 const cross = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
   <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
 </svg>`;
 
-function getSubjects(then=function(){a=1}) { // update the local list of subjects
-    $.get("/api/subjects", function(data) { // send a get request to my api
+function getSubjects(then = function () { a = 1 }) { // update the local list of subjects
+    $.get("/api/subjects", function (data) { // send a get request to my api
         if (data.success) {
             console.log("Successfully gathered " + data['subjects'].length.toString() + " subjects");
             subjects = data['subjects'];
@@ -37,12 +37,12 @@ function getSubjects(then=function(){a=1}) { // update the local list of subject
 }
 
 function displaySubjects() { // display the current list of subjects
-    console.log("Displaying " + subjects.length.toString() + " subjects"); 
+    console.log("Displaying " + subjects.length.toString() + " subjects");
     outhtml = "" // this will be filled with list elements
-    subjects.sort((x,y) => {
-        if (x.display_name > y.display_name) {return  1;}
-        if (x.display_name < y.display_name) {return -1;}
-        else {return 0;}
+    subjects.sort((x, y) => {
+        if (x.display_name > y.display_name) { return 1; }
+        if (x.display_name < y.display_name) { return -1; }
+        else { return 0; }
     });
     subjects.forEach(subject => {
         outhtml += generateSubjectLI(subject);
@@ -52,7 +52,7 @@ function displaySubjects() { // display the current list of subjects
 
 function generateSubjectLI(subject) {
     // construct li element for each subject
-    outhtml =  `<li class='py-1 row'>
+    outhtml = `<li class='py-1 row'>
                     -
                     <a class='col link text-decoration-none px-0 mx-2' href=/subject/?id=${subject.subject_id}>
                         ${subject.display_name}
@@ -86,7 +86,7 @@ function unstarStandard(standard_number, element) { // for removing the starred 
     search(); // refresh search starred status
 }
 
-function getStarred(then=() => {a=1}) {
+function getStarred(then = () => { a = 1 }) {
     if (window.localStorage.getItem('starred')) { // if this has been done before
         starred = JSON.parse(window.localStorage.getItem('starred')); // update from browser storage (which only stores strings)
     } else {
@@ -129,13 +129,13 @@ function displayStarred() {
         total_reading = 0
         total_writing = 0
         total_numeracy = 0
-        starred.sort((a,b) => (a.standard_number > b.standard_number) - (a.standard_number < b.standard_number)).forEach(standard => {
+        starred.sort((a, b) => (a.standard_number > b.standard_number) - (a.standard_number < b.standard_number)).forEach(standard => {
             standard.id = standard.standard_number // to suit the search-configured row generation function
-            total_credits  += standard.credits;
-            total_reading  += standard.reading  ? standard.credits : 0;
-            total_writing  += standard.writing  ? standard.credits : 0;
+            total_credits += standard.credits;
+            total_reading += standard.reading ? standard.credits : 0;
+            total_writing += standard.writing ? standard.credits : 0;
             total_numeracy += standard.numeracy ? standard.credits : 0;
-            
+
             outhtml += generateStandardRow(standard);
         });
         outhtml += `</tbody>`;
@@ -172,12 +172,12 @@ function generateStandardRow(standard) {
     i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
     is_starred = starred.find((searched) => searched.standard_number == standard.id)
     stretchedlinkstr = `<a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>`;
-    
+
     outhtml += "<tr class='clickable " + i_e_class + "'>" // initialise row
-    
+
     // add the star standard button, depending on whether it's starred or not
     outhtml += `    <th scope='row' style='position: relative;'>
-                        <a onClick='${is_starred ? "unstar": "star"}Standard(${standard.id}, this)' class='stretched-link link text-decoration-none text-dark text-center d-block'>
+                        <a onClick='${is_starred ? "unstar" : "star"}Standard(${standard.id}, this)' class='stretched-link link text-decoration-none text-dark text-center d-block'>
                             ${is_starred ? starFull : starOutline}
                         </a>
                     </th>`
@@ -186,7 +186,7 @@ function generateStandardRow(standard) {
                         ${stretchedlinkstr}
                         <span class='float-end'>` + standard.id + `</span>
                     </th>`
-    
+
     // add all the other information in <td> styled boxes
     outhtml += `    <td style='position: relative;'>
                         ${stretchedlinkstr}
@@ -223,10 +223,10 @@ function generateStandardRow(standard) {
 
 async function search() {
     searchtext = $("#searchbox").val()
-    
+
     if (searchtext.length != 0) {
-        
-        const subjects = await subjindex.search(searchtext, {limit: 5})
+
+        const subjects = await subjindex.search(searchtext, { limit: 5 })
         if (subjects.hits.length > 0 & $("#searchbox").val().length > 0) {
             subjecthtml = `<h3 class="mb-1">Subjects</h3>
                         <table class="table table-bordered border-0">
@@ -245,15 +245,15 @@ async function search() {
             });
             subjecthtml += "</tbody></table>"
             $("#subjects-results").html(subjecthtml)
-            $("#search-results").css("visibility","visible");
+            $("#search-results").css("visibility", "visible");
         } else {
             $("#subjects-results").html("");
         }
-        
-        const standards = await standindex.search(searchtext, {limit: 5})
+
+        const standards = await standindex.search(searchtext, { limit: 5 })
         if (standards['hits'].length > 0 & $("#searchbox").val().length > 0) {
 
-            standardshtml =  `<h3 class="mb-1">Standards</h3>
+            standardshtml = `<h3 class="mb-1">Standards</h3>
 
                         <table class="table-bordered border-0 table table-hover">
                             <thead>
@@ -279,25 +279,25 @@ async function search() {
             });
             standardshtml += "</tbody></table>"
             $("#standards-results").html(standardshtml)
-            $("#search-results").css("visibility","visible");
+            $("#search-results").css("visibility", "visible");
         } else {
             $("#standards-results").html("");
         }
-        
+
         if ($("#searchbox").val().length == 0) { // recheck the box after all the awaits, just in case things have changed (#3)
             $("#subjects-results").html("")
             $("#standards-results").html("")
-            $("#search-results").css("visibility","hidden");
+            $("#search-results").css("visibility", "hidden");
         } else {
             if (subjects.hits.length == 0 && standards.hits.length == 0) {
                 $("#subjects-results").html("<p class='text-muted mb-2'>No results found</p>")
-                $("#search-results").css("visibility","visible");
+                $("#search-results").css("visibility", "visible");
             }
         }
     } else {
         $("#subjects-results").html("")
         $("#standards-results").html("")
-        $("#search-results").css("visibility","hidden");
+        $("#search-results").css("visibility", "hidden");
     }
 }
 
@@ -306,9 +306,9 @@ function linkToAssessment(number) {
     window.open(nzqaurl, '_blank')
 }
 
-$(document).ready(function() {
-    getSubjects(then=displaySubjects); // for async requests, we have to do "thens", like promises
-    getStarred(then=displayStarred); // reference the local storage to find the starred subjects
+$(document).ready(function () {
+    getSubjects(then = displaySubjects); // for async requests, we have to do "thens", like promises
+    getStarred(then = displayStarred); // reference the local storage to find the starred subjects
     // disable the enter key going to a new url in the search box
     $("#searchbox").val("") // reset value
     search(); // initialise search results

@@ -9,7 +9,7 @@ if (urlParams.get('id') == null) {
     window.location = "/"; // if there's no id parameter in the url
 }
 // get level in url parameters, else null (inline ifs can be confusing sorry)
-const level = (urlParams.get('level') == null) ? null : parseInt(urlParams.get('level')); 
+const level = (urlParams.get('level') == null) ? null : parseInt(urlParams.get('level'));
 const subject_id = parseInt(urlParams.get('id'));
 var subject = 0; // for init of the global subject object
 
@@ -28,13 +28,13 @@ const starOutline = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="
 </svg>`;
 const starFull = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill" viewBox="0 0 16 16">
   <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.283.95l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-</svg>`;    
+</svg>`;
 const cross = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
   <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
 </svg>`;
 
 function getSubjects() { // update the local list of subjects
-    $.get("/api/subjects", function(data) { // send a get request to my api
+    $.get("/api/subjects", function (data) { // send a get request to my api
         if (data.success) {
             console.log("Successfully gathered " + data['subjects'].length.toString() + " subjects");
             subjects = data['subjects'];
@@ -45,7 +45,7 @@ function getSubjects() { // update the local list of subjects
     });
 }
 
-function getStandards(then=function(){a=1}) { // get the list of standards for the subject
+function getStandards(then = function () { a = 1 }) { // get the list of standards for the subject
     $.get("/api/standards?subject=" + subject_id, (data) => {
         if (data.success) {
             console.log("Successfully gathered " + data.standards.length.toString() + " standards");
@@ -54,7 +54,7 @@ function getStandards(then=function(){a=1}) { // get the list of standards for t
         } else {
             alert("Failure to get standards. Try reloading. If the problem persists, email linus@molteno.net");
         }
-    }); 
+    });
 }
 
 
@@ -83,7 +83,7 @@ function unstarStandard(standard_number, element) { // for removing the starred 
     search(); // refresh search starred status
 }
 
-function getStarred(then=() => {a=1}) {
+function getStarred(then = () => { a = 1 }) {
     if (window.localStorage.getItem('starred')) { // if this has been done before
         starred = JSON.parse(window.localStorage.getItem('starred')); // update from browser storage (which only stores strings)
     } else {
@@ -95,9 +95,9 @@ function getStarred(then=() => {a=1}) {
 async function search() {
     console.log("Searching!");
     searchtext = $("#searchbox").val()
-    
+
     if (searchtext.length != 0) {
-        searched_standards = await standindex.search(searchtext, {limit: 100})
+        searched_standards = await standindex.search(searchtext, { limit: 100 })
         if (searched_standards['hits'].length > 0) {
             var filtered = []
             // for all of the hits, check if they're in the list of standards for this subject
@@ -106,7 +106,7 @@ async function search() {
                     filtered.push(result)
                 }
             })
-            standardshtml =  `<h3 class="mb-1">Standards</h3>
+            standardshtml = `<h3 class="mb-1">Standards</h3>
 
                         <table class="table-bordered border-0 table table-hover">
                             <thead>
@@ -132,24 +132,24 @@ async function search() {
                 standardshtml = "<p class='text-muted mb-2'>No results found</p>";
             }
             $("#standards-results").html(standardshtml)
-            $("#search-results").css("visibility","visible");
+            $("#search-results").css("visibility", "visible");
         } else {
             standardshtml = "<p class='text-muted mb-2'>No results found</p>";
             $("#standards-results").html(standardshtml)
-            $("#search-results").css("visibility","visible");
+            $("#search-results").css("visibility", "visible");
         }
-        
-                
+
+
         if ($("#searchbox").val().length == 0) { // recheck the box after all the awaits, just in case things have changed (#3)
             $("#subjects-results").html("")
             $("#standards-results").html("")
-            $("#search-results").css("visibility","hidden");
+            $("#search-results").css("visibility", "hidden");
         } else {
-            $("#search-results").css("visibility","visible");
+            $("#search-results").css("visibility", "visible");
         }
     } else {
         $("#standards-results").html("")
-        $("#search-results").css("visibility","hidden");
+        $("#search-results").css("visibility", "hidden");
     }
 }
 
@@ -166,12 +166,12 @@ function generateSearchStandardRow(standard) {
     i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
     is_starred = starred.find((searched) => searched.standard_number == standard.id)
     stretchedlinkstr = `<a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>`;
-    
+
     outhtml += "<tr class='clickable " + i_e_class + "'>" // initialise row
-    
+
     // add the star standard button, depending on whether it's starred or not
     outhtml += `    <th scope='row' style='position: relative;'>
-                        <a onClick='${is_starred ? "unstar": "star"}Standard(${standard.id}, this)' class='stretched-link link text-decoration-none text-dark text-center d-block'>
+                        <a onClick='${is_starred ? "unstar" : "star"}Standard(${standard.id}, this)' class='stretched-link link text-decoration-none text-dark text-center d-block'>
                             ${is_starred ? starFull : starOutline}
                         </a>
                     </th>`
@@ -180,7 +180,7 @@ function generateSearchStandardRow(standard) {
                         ${stretchedlinkstr}
                         <span class='float-end'>` + standard.id + `</span>
                     </th>`
-    
+
     // add all the other information in <td> styled boxes
     outhtml += `    <td style='position: relative;'>
                         ${stretchedlinkstr}
@@ -226,16 +226,16 @@ function updateEverything() { // populate the standards list, and the subject na
     subject = subjects.find(o => o.subject_id == subject_id)
     $("#subject-name").hide()
     $("#subject-name").html(subject.display_name);
-    
+
     /* update page title */
     title = `NCEA ${subject.display_name} Standards`;
     if (document.title != title) {
         document.title = title;
     }
     $('meta[name="description"]').attr("content", `Standards relating to ${subject.display_name}`);
-    
+
     $("#searchbox").attr("placeholder", "Search " + subject.display_name + " standards");
-    
+
     $("#subject-name").fadeIn() // I love this so much
     $("#nav-breadcrumbs").hide()
     if (level != null) {
@@ -247,7 +247,7 @@ function updateEverything() { // populate the standards list, and the subject na
     } else {
         $("#nav-breadcrumbs").html(`<div class='row'><div class='col-auto pe-lg-0'><a class="nav-link" href="/">Home</a></div>
                                     <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
-                                    <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">` + subject.display_name + `</a></div></div>`);    
+                                    <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">` + subject.display_name + `</a></div></div>`);
     }
     $("#nav-breadcrumbs").fadeIn() // I love this so much
     outhtml = ` <div class="table-responsive">
@@ -266,13 +266,13 @@ function updateEverything() { // populate the standards list, and the subject na
                             <th scope="col">I/E</th>
                         </tr>
                     </thead>`;
-    var level_arr = (level == null) ? [1,2,3] : [level,]
+    var level_arr = (level == null) ? [1, 2, 3] : [level,]
     level_arr.forEach(current_level => { // for each level allowed on the page
         standards_for_level = standards.filter(o => o.level == current_level);
-        standards_for_level = standards_for_level.sort((a,b) => (a.standard_number > b.standard_number) - (a.standard_number < b.standard_number)); // sort by standard_number
+        standards_for_level = standards_for_level.sort((a, b) => (a.standard_number > b.standard_number) - (a.standard_number < b.standard_number)); // sort by standard_number
         if (standards_for_level.length > 0) {
-            baseurl = `https://www.nzqa.govt.nz/ncea/assessment/search.do?query=`+subject.name.replace(/\ /g, '+')+`&level=0`+current_level+`&view=`;
-            views = [['reports', 'Schedules'], ['exams','Exams'], ['achievements', 'Standards'], ['all', 'All']]
+            baseurl = `https://www.nzqa.govt.nz/ncea/assessment/search.do?query=` + subject.name.replace(/\ /g, '+') + `&level=0` + current_level + `&view=`;
+            views = [['reports', 'Schedules'], ['exams', 'Exams'], ['achievements', 'Standards'], ['all', 'All']]
             outhtml += `<thead>
             <tr>
                 <th colspan="9" class="text-center border border-dark pb-1">
@@ -280,7 +280,7 @@ function updateEverything() { // populate the standards list, and the subject na
                     <div class="row border-bottom pb-2"><div class="col fw-bold fs-3 text-center">Level ` + current_level + `</div></div>
                     <div class="row justify-content-center">`;
             views.forEach(view => { //  add buttons for each view
-                outhtml += `<div class='col-auto'><a class="btn btn-link text-decoration-none" target="_blank" href="`+baseurl+view[0]+`">`+view[1]+`</a></div>`;
+                outhtml += `<div class='col-auto'><a class="btn btn-link text-decoration-none" target="_blank" href="` + baseurl + view[0] + `">` + view[1] + `</a></div>`;
             });
             outhtml += `</div>
                     </div>
@@ -293,16 +293,16 @@ function updateEverything() { // populate the standards list, and the subject na
             });
             outhtml += "</tbody>";
         } else {
-            outhtml += "<thead><tr><th colspan=7 class='text-center border border-dark'>No standards for Level " + current_level +"</th></tr></thead>";
+            outhtml += "<thead><tr><th colspan=7 class='text-center border border-dark'>No standards for Level " + current_level + "</th></tr></thead>";
         }
     });
     outhtml += "</tbody></table></div>";
     $("#main-container").hide();
     $("#main-container").html(outhtml);
-    $("#main-container").fadeIn();    
+    $("#main-container").fadeIn();
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
     getStarred();
     getSubjects(); // this kicks off the chain of requests to update everything
     $("#searchbox").val("");
