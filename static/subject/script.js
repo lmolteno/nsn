@@ -228,7 +228,7 @@ function updateEverything() { // populate the standards list, and the subject na
     $("#subject-name").html(subject.display_name);
     
     /* update page title */
-    title = `${subject.display_name} | NSN`;
+    title = `NCEA ${subject.display_name} Standards`;
     if (document.title != title) {
         document.title = title;
     }

@@ -235,7 +235,7 @@ function updateEverything() { // populate EVERYTHING hehe
     star = is_starred ? starFull : starOutline;
     
     /* update page title */
-    title = `${standard_num_text} | NSN`;
+    title = `Standard ${standard_num_text}`;
     if (document.title != title) {
         document.title = title;
     }
