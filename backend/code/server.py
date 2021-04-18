@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 import psycopg2
 import psycopg2.extras
 
+
 class DBManager:
     def __init__(self,
                  database=os.environ.get("POSTGRES_DB"),
@@ -14,13 +15,14 @@ class DBManager:
             database=database,
             user=user,
             password=password)
-        self.cursor = self.connection.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-    
+        self.cursor = self.connection.cursor(
+            cursor_factory=psycopg2.extras.RealDictCursor)
+
     def get_subjects(self):
         self.cursor.execute('SELECT * FROM subjects;')
         rec = self.cursor.fetchall()
         return rec
-    
+
     def get_structure_info(self):
         rec = {"fields": [], "subfields": [], "domains": []}
         self.cursor.execute('SELECT * FROM fields;')
@@ -30,7 +32,7 @@ class DBManager:
         self.cursor.execute('SELECT * FROM domains;')
         rec['domains'] = self.cursor.fetchall()
         return rec
-    
+
     def get_standards(self):
         rec = []
         sql = """SELECT DISTINCT standards.standard_number,
@@ -60,7 +62,7 @@ class DBManager:
         self.cursor.execute(sql)
         rec = self.cursor.fetchall()
         return rec
-    
+
     def get_standards_from_subject(self, subject_id):
         rec = []
         sql = """SELECT DISTINCT standards.standard_number,
@@ -91,9 +93,9 @@ class DBManager:
         self.cursor.execute(sql, (subject_id,))
         rec = self.cursor.fetchall()
         return rec
-    
+
     def get_standard_info(self, standard_number):
-        get_basic  = """SELECT standard_number,
+        get_basic = """SELECT standard_number,
                         title,
                         internal,
                         standard_types.name AS type,
@@ -128,9 +130,9 @@ class DBManager:
         # get reading/writing status
         self.cursor.execute(get_ue_literacy, (standard_number,))
         outdict['ue_literacy'] = self.cursor.fetchone()
-        
+
         return outdict
-    
+
     def get_resources(self, standard_number):
         sql = """SELECT standard_number,
                         year,
@@ -145,8 +147,10 @@ class DBManager:
         resources = self.cursor.fetchall()
         return resources
 
+
 server = Flask(__name__)
 conn = None
+
 
 @server.route('/api/standards', methods=['GET'])
 def api_standards():
@@ -159,36 +163,40 @@ def api_standards():
         subject_id = request.args['subject']
         try:
             subject_id = int(subject_id)
-        except ValueError: # they didn't provide an integer
+        except ValueError:  # they didn't provide an integer
             return jsonify({"success": False, "error": "You must provide an integer subject_id"})
-        
+
         standards = conn.get_standards_from_subject(subject_id)
         if len(standards) > 0:
             return jsonify({"success": True, "standards": standards})
         else:
             return jsonify({"success": False, "error": "No standards exist for that subject"})
-        
-    elif 'number' in request.args: # check if there's a specific standard they're asking for
+
+    elif 'number' in request.args:  # check if there's a specific standard they're asking for
         standard_number = request.args['number']
         try:
             standard_number = int(standard_number)
         except ValueError:
             return jsonify({"success": False, "error": "You must provide an integer standard number"})
-        
+
         info = conn.get_standard_info(standard_number)
-        if len(info['subjects']) > 0: # every standard that exists is associated with at least one subject
-            return jsonify({'success': True} | info) # merge the success: true with the info provided from the connection
+        # every standard that exists is associated with at least one subject
+        if len(info['subjects']) > 0:
+            # merge the success: true with the info provided from the connection
+            return jsonify({'success': True} | info)
         else:
             return jsonify({'success': False, "error": "This standard does not appear to be in the database"})
-        
-    else: # get all standards
+
+    else:  # get all standards
         standards = conn.get_standards()
         if len(standards) > 0:
             return jsonify({"success": True, "standards": standards})
         else:
             return jsonify({"success": False, "error": "No standards are present in the database. Contact linus@molteno.net"})
-        
+
 # get all the subjects and their ids
+
+
 @server.route('/api/subjects', methods=['GET'])
 def api_subjects():
     global conn
@@ -200,6 +208,7 @@ def api_subjects():
         return jsonify({"success": True, "subjects": subjects})
     else:
         return jsonify({"success": False, "error": "No subjects are present in the database. Contact linus@molteno.net"})
+
 
 @server.route('/api/resources', methods=['GET'])
 def api_resources():
@@ -213,7 +222,7 @@ def api_resources():
             standard_number = int(standard_number)
         except ValueError:
             return jsonify({"success": False, "error": "You must provide an integer standard number"})
-        
+
         resources = conn.get_resources(standard_number)
         if len(resources) > 0:
             return jsonify({"success": True, "resources": resources})
@@ -224,6 +233,8 @@ def api_resources():
 
 # get the information about the structure of classification of the standards
 # fields, subfields, domains
+
+
 @server.route('/api/structure', methods=['GET'])
 def api_structure():
     global conn
@@ -232,10 +243,10 @@ def api_structure():
 
     structure = conn.get_structure_info()
     if len(structure['fields']) > 0 and len(structure['subfields']) > 0 and len(structure['domains']) > 0:
-        return jsonify({**{"success": True}, **structure}) # join the two dictionaries together
+        # join the two dictionaries together
+        return jsonify({**{"success": True}, **structure})
     else:
         return jsonify({"success": False, "error": "Structure information is not present in the database. Contact linus@molteno.net"})
-    
 
 
 if __name__ == '__main__':
