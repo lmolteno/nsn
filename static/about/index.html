@@ -19,7 +19,7 @@
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" href="/">NCEA Standards Navigator</a>
+                <a class="navbar-brand" href="/">NSN<small>.nz</small></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav-links" aria-controls="nav-links" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
                 </button>
@@ -52,7 +52,7 @@
                     </figcaption>
                 </figure>
                 <p class='text-center lead'>This project was born out of a frustration with the current NZQA website for the purposes of getting information and documents relating to standards students were being assessed on.</p>-->
-                <div class='row justify-content-end'>
+                <div class='row justify-content-end' id='about'>
                     <div class='col-sm ps-3'>
                         <p>The system to support this system is built on the following elements, all containerised through Docker, and composed through Docker Compose</p>
                         <dl>
@@ -82,6 +82,18 @@
                     <div class='col-sm'>
                         <img src='system_diagram.png' class='img-fluid'></img> 
                     </div>
+                </div>
+                <hr />
+                <div>
+                    <h4>FAQ</h4>
+                    <section id='literacy'>
+                        <h5><em>Why are there two columns in the literacy column?</em></h5>
+                        <p>
+                            This is because literacy, for university entrance (UE), comes under two categories - reading, or writing. Some standards count for neither, one, or both.
+                            On the left of the literacy column, there's a letter that represents whether the standard provides reading or writing credits for UE (N for no, R for yes).
+                            On the right of the literacy column, the letter represents whether the standard provides writing credits (N for no, W for yes).
+                        </p>
+                    </section>
                 </div>
             </div>
         </main>
