@@ -118,7 +118,7 @@ function displayStarred() {
                             <th scope="col">Type</th>
                             <th scope="col">Level</th>
                             <th scope="col">Credits</th>
-                            <th scope="col">Literacy</th>
+                            <th scope="col"><a href='/about/#literacy' class='text-dark'>Literacy</a></th>
                             <th scope="col">Numeracy</th>
                             <th scope="col">I/E</th>
                         </tr>
@@ -264,7 +264,7 @@ async function search() {
                                     <th scope="col">Type</th>
                                     <th scope="col">Level</th>
                                     <th scope="col">Credits</th>
-                                    <th scope="col">Literacy</th>
+                                    <th scope="col"><a href='/about/#literacy' class='text-dark'>Literacy</a></th>
                                     <th scope="col">Numeracy</th>
                                     <th scope="col">I/E</th>
                                 </tr>
