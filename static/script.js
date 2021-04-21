@@ -33,7 +33,7 @@ function getSubjects() { // update the local list of subjects
                 resolve(); 
             } else {
                 alert("Failure to get subjects. Try reloading. If the problem persists, email linus@molteno.net");
-                reject()
+                reject(data.error)
             }
         });
     });
@@ -100,7 +100,6 @@ function getStarred() {
         resolve();
     });
 }
-
 
 function displayStarred() {
     if (starred.length == 0) {

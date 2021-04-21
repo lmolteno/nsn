@@ -42,7 +42,7 @@ function getSubjects() { // update the local list of subjects
                 resolve()
             } else {
                 alert("Failure to get subjects. Try reloading. If the problem persists, email linus@molteno.net");
-                reject()
+                reject(data.error)
             }
         })
     });
@@ -58,7 +58,7 @@ function getStandards() { // get the list of standards for the subject
                 resolve()
             } else {
                 alert("Failure to get standards. Try reloading. If the problem persists, email linus@molteno.net");
-                reject()
+                reject(data,error)
             }
         });
     });

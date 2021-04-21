@@ -32,7 +32,7 @@ function getInfo(then = function () { a = 1 }) { // get the information regardin
                 resolve();
             } else {
                 alert("Failure to get standard info. Try reloading. If the problem persists, email linus@molteno.net");
-                reject();
+                reject(data.error);
             }
         });
     });
@@ -45,9 +45,11 @@ function getResources() {
             if (resources_data.success) {
                 console.log("Succesfully gathered resources for the standard");
                 resources = resources_data.resources
+                resolve();
                 updateEverything(); // run the next function
             } else {
                 alert("Failure to get resources. Try reloading. If the problem persists, email linus@molteno.net");
+                reject(resources_data.error)
             }
         });
     });
