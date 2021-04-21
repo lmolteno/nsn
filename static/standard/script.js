@@ -50,6 +50,13 @@ function linkToNZQA(number) {
 }
 function starStandard(standard_number, element) {
     standard_to_star = standard.basic_info
+
+    // update it to match what the browser storage should have
+    standard_to_star.reading = standard.ue_literacy.reading
+    standard_to_star.writing = standard.ue_literacy.writing
+    standard_to_star.numeracy = standard.ncea_litnum.numeracy
+    standard_to_star.literacy = standard.ncea_litnum.literacy
+
     console.log(`Adding ${standard_number}`);
     if (starred.find(s => s.standard_number === standard_number)) { // already starred
         index = starred.findIndex(s => s.standard_number == standard_number); // get index
