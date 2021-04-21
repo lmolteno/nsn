@@ -34,27 +34,35 @@ const cross = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fi
 </svg>`;
 
 function getSubjects() { // update the local list of subjects
-    $.get("/api/subjects", function (data) { // send a get request to my api
-        if (data.success) {
-            console.log("Successfully gathered " + data['subjects'].length.toString() + " subjects");
-            subjects = data['subjects'];
-            getStandards(); // run the next function
-        } else {
-            alert("Failure to get subjects. Try reloading. If the problem persists, email linus@molteno.net");
-        }
+    let promise = new Promise((resolve, reject) => {
+        $.get("/api/subjects", function (data) { // send a get request to my api
+            if (data.success) {
+                console.log("Successfully gathered " + data['subjects'].length.toString() + " subjects");
+                subjects = data['subjects'];
+                resolve()
+            } else {
+                alert("Failure to get subjects. Try reloading. If the problem persists, email linus@molteno.net");
+                reject()
+            }
+        })
     });
+    return promise
 }
 
-function getStandards(then = function () { a = 1 }) { // get the list of standards for the subject
-    $.get("/api/standards?subject=" + subject_id, (data) => {
-        if (data.success) {
-            console.log("Successfully gathered " + data.standards.length.toString() + " standards");
-            standards = data.standards;
-            updateEverything(); // run the next function
-        } else {
-            alert("Failure to get standards. Try reloading. If the problem persists, email linus@molteno.net");
-        }
+function getStandards() { // get the list of standards for the subject
+    let promise = new Promise((resolve, reject) => {
+            $.get("/api/standards?subject=" + subject_id, (data) => {
+            if (data.success) {
+                console.log("Successfully gathered " + data.standards.length.toString() + " standards");
+                standards = data.standards;
+                resolve()
+            } else {
+                alert("Failure to get standards. Try reloading. If the problem persists, email linus@molteno.net");
+                reject()
+            }
+        });
     });
+    return promise
 }
 
 
@@ -161,6 +169,7 @@ function generateSubjectRow(subject) {
     outhtml += "</tr>"
     return outhtml
 }
+
 function generateSearchStandardRow(standard) {
     outhtml = ""
     i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
@@ -224,8 +233,10 @@ function generateStandardRow(standard) {
 
 function updateEverything() { // populate the standards list, and the subject name
     subject = subjects.find(o => o.subject_id == subject_id)
+    // this hide, set html, fadein idiom comes through a lot
     $("#subject-name").hide()
     $("#subject-name").html(subject.display_name);
+    $("#subject-name").fadeIn()
 
     /* update page title */
     title = `NCEA ${subject.display_name} Standards`;
@@ -236,20 +247,20 @@ function updateEverything() { // populate the standards list, and the subject na
 
     $("#searchbox").attr("placeholder", "Search " + subject.display_name + " standards");
 
-    $("#subject-name").fadeIn() // I love this so much
-    $("#nav-breadcrumbs").hide()
-    if (level != null) {
-        $("#nav-breadcrumbs").html(`<div class='row'><div class='col-auto pe-lg-0'><a class="nav-link" href="/">Home</a></div>
-                                    <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
-                                    <div class='col-auto p-lg-0'><a class="nav-link" href="/subject/?id=` + subject_id + `">` + subject.display_name + `</a></div>
-                                    <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
-                                    <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">Level ` + level + `</a></div></div>`);
-    } else {
-        $("#nav-breadcrumbs").html(`<div class='row'><div class='col-auto pe-lg-0'><a class="nav-link" href="/">Home</a></div>
-                                    <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
-                                    <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">` + subject.display_name + `</a></div></div>`);
+   
+    navhtml = `<div class='row'><div class='col-auto pe-lg-0'><a class="nav-link" href="/">Home</a></div>
+               <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
+               <div class='col-auto p-lg-0'><a class="nav-link" href="/subject/?id=` + subject_id + `">` + subject.display_name + `</a></div>`;
+    if (level != null) { // add the "/ level 1" if the level is there
+        navhtml += `<div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
+                    <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">Level ` + level + `</a></div>`;
     }
-    $("#nav-breadcrumbs").fadeIn() // I love this so much
+    navhtml += `</div>`
+    
+    $("#nav-breadcrumbs").hide()
+    $("#nav-breadcrumbs").html(navhtml)
+    $("#nav-breadcrumbs").fadeIn()
+
     outhtml = ` <div class="table-responsive">
                 <h3 class="mb-1">Standards</h3>
                 <table class="table table-bordered table-hover bg-white border-0">
@@ -266,6 +277,7 @@ function updateEverything() { // populate the standards list, and the subject na
                             <th scope="col">I/E</th>
                         </tr>
                     </thead>`;
+
     var level_arr = (level == null) ? [1, 2, 3] : [level,]
     level_arr.forEach(current_level => { // for each level allowed on the page
         standards_for_level = standards.filter(o => o.level == current_level);
@@ -297,6 +309,7 @@ function updateEverything() { // populate the standards list, and the subject na
         }
     });
     outhtml += "</tbody></table></div>";
+
     $("#main-container").hide();
     $("#main-container").html(outhtml);
     $("#main-container").fadeIn();
@@ -304,7 +317,9 @@ function updateEverything() { // populate the standards list, and the subject na
 
 $(document).ready(function () {
     getStarred();
-    getSubjects(); // this kicks off the chain of requests to update everything
+    getSubjects()
+        .then(getStandards)
+        .then(updateEverything); // using promises to get synchronisity among multiple functions
     $("#searchbox").val("");
     search();
     document.getElementById("searchbox").addEventListener('input', search); // when something is input, search

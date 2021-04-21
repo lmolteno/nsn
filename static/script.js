@@ -24,16 +24,20 @@ const cross = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fi
   <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
 </svg>`;
 
-function getSubjects(then = function () { a = 1 }) { // update the local list of subjects
-    $.get("/api/subjects", function (data) { // send a get request to my api
-        if (data.success) {
-            console.log("Successfully gathered " + data['subjects'].length.toString() + " subjects");
-            subjects = data['subjects'];
-            then(); // run the next function, which defaults to nothing
-        } else {
-            alert("Failure to get subjects. Try reloading. If the problem persists, email linus@molteno.net");
-        }
+function getSubjects() { // update the local list of subjects
+    let promise = new Promise((resolve, reject) => {
+        $.get("/api/subjects", function (data) { // send a get request to my api
+            if (data.success) {
+                console.log("Successfully gathered " + data['subjects'].length.toString() + " subjects");
+                subjects = data['subjects'];
+                resolve(); 
+            } else {
+                alert("Failure to get subjects. Try reloading. If the problem persists, email linus@molteno.net");
+                reject()
+            }
+        });
     });
+    return promise
 }
 
 function displaySubjects() { // display the current list of subjects
@@ -86,13 +90,15 @@ function unstarStandard(standard_number, element) { // for removing the starred 
     search(); // refresh search starred status
 }
 
-function getStarred(then = () => { a = 1 }) {
-    if (window.localStorage.getItem('starred')) { // if this has been done before
-        starred = JSON.parse(window.localStorage.getItem('starred')); // update from browser storage (which only stores strings)
-    } else {
-        window.localStorage.setItem('starred', JSON.stringify(starred)); // initialise with empty array
-    }
-    then();
+function getStarred() {
+    return new Promise((resolve, reject) => {
+        if (window.localStorage.getItem('starred')) { // if this has been done before
+            starred = JSON.parse(window.localStorage.getItem('starred')); // update from browser storage (which only stores strings)
+        } else {
+            window.localStorage.setItem('starred', JSON.stringify(starred)); // initialise with empty array
+        }
+        resolve();
+    });
 }
 
 
@@ -307,8 +313,8 @@ function linkToAssessment(number) {
 }
 
 $(document).ready(function () {
-    getSubjects(then = displaySubjects); // for async requests, we have to do "thens", like promises
-    getStarred(then = displayStarred); // reference the local storage to find the starred subjects
+    getSubjects().then(displaySubjects);
+    getStarred().then(displayStarred) // reference the local storage to find the starred subjects
     // disable the enter key going to a new url in the search box
     $("#searchbox").val("") // reset value
     search(); // initialise search results

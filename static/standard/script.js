@@ -24,24 +24,34 @@ const cross = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fi
 
 
 function getInfo(then = function () { a = 1 }) { // get the information regarding the standard with the ID from the URL
-    $.get("/api/standards?number=" + standard_number.toString(), (data) => {
-        if (data.success) {
-            console.log("Successfully gathered information about the standard.")
-            standard = data;
-            $.get("/api/resources?number=" + standard_number, (resources_data) => {
-                if (resources_data.success) {
-                    console.log("Succesfully gathered resources for the standard");
-                    console.log(resources_data.resources);
-                    resources = resources_data.resources
-                    updateEverything(); // run the next function
-                } else {
-                    alert("Failure to get resources. Try reloading. If the problem persists, email linus@molteno.net");
-                }
-            });
-        } else {
-            alert("Failure to get standard info. Try reloading. If the problem persists, email linus@molteno.net");
-        }
+    let promise = new Promise((resolve, reject) => {
+        $.get("/api/standards?number=" + standard_number.toString(), (data) => {
+            if (data.success) {
+                console.log("Successfully gathered information about the standard.")
+                standard = data;
+                resolve();
+            } else {
+                alert("Failure to get standard info. Try reloading. If the problem persists, email linus@molteno.net");
+                reject();
+            }
+        });
     });
+    return promise
+}
+
+function getResources() {
+    let promise = new Promise((resolve, reject) => {
+        $.get("/api/resources?number=" + standard_number, (resources_data) => {
+            if (resources_data.success) {
+                console.log("Succesfully gathered resources for the standard");
+                resources = resources_data.resources
+                updateEverything(); // run the next function
+            } else {
+                alert("Failure to get resources. Try reloading. If the problem persists, email linus@molteno.net");
+            }
+        });
+    });
+    return promise
 }
 
 function linkToNZQA(number) {
@@ -158,8 +168,8 @@ function getResourcesList() {
             all_categories.forEach((category) => {
                 // filter resources by category
                 resources_for_category = resources.filter((resource) => (resource.category == category))
-                // sort resources by year (they should already be like this but I want to make sure)
-                resources_for_category = resources.sort((a, b) => (a.year > b.year) - (a.year < b.year))
+                // sort resources by year (they should already be like this but I want to make sure) reversed because we want 2021 first
+                resources_for_category = resources.sort((a, b) => (a.year > b.year) - (a.year < b.year)).reverse()
 
                 category_names = {
                     "achievements": "Achievement Standards",
@@ -327,6 +337,6 @@ $(document).ready(function () {
     }
 
     // get all the info
-    getInfo();
+    getInfo().then(getResources).then(updateEverything);
 
 });
