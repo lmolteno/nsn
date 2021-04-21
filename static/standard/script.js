@@ -110,6 +110,7 @@ function generateSubjectLI(subject) {
 function getResourcesList() {
     console.log("Updating resource list")
     outhtml = ""
+
     if (standard.basic_info.internal) {
         // check and see if there's an annotated exemplar
         exemplar = resources.find(el => el.category == 'annotated-exemplars')
@@ -126,6 +127,7 @@ function getResourcesList() {
         $("#links-row").addClass("row-cols-md-2");
 
     }
+
     if (standard_number < 90000) { // unit standards only have one document
         if (resources.length == 1) {
             console.log("Updating for unit standard");
@@ -154,7 +156,11 @@ function getResourcesList() {
             }
 
             all_categories.forEach((category) => {
+                // filter resources by category
                 resources_for_category = resources.filter((resource) => (resource.category == category))
+                // sort resources by year (they should already be like this but I want to make sure)
+                resources_for_category = resources.sort((a, b) => (a.year > b.year) - (a.year < b.year))
+
                 category_names = {
                     "achievements": "Achievement Standards",
                     "reports": "Assessment Reports",
@@ -165,6 +171,7 @@ function getResourcesList() {
                     "pep": "Profiles of Expected Performance",
                     "annotated-exemplars": "Annotated Exemplars"
                 }
+
                 // add card for each cateogry
                 outhtml += `<div class='col'>    
                                 <div class="card">
@@ -201,6 +208,7 @@ function getResourcesList() {
             }
             // iterate over the sorted, reversed list of years (sets can't be sorted, so i moved it to an array)
             Array.from(all_years).sort().reverse().forEach((year) => {
+                // filter resources by year
                 resources_for_year = resources.filter((resource) => (resource.year == year))
                 // add card for each year
                 outhtml += `<div class='col'>    
@@ -220,6 +228,7 @@ function getResourcesList() {
             });
         }
     }
+
     return outhtml
 }
 
@@ -238,23 +247,24 @@ function update_star() {
 function updateEverything() { // populate EVERYTHING hehe
 
     standard_num_text = (standard_number > 90000 ? "AS" : "US") + standard_number; // e.g. AS91902 or US2345 depending on achievement vs unit
-    is_starred = starred.find(s => s.standard_number == standard_number)
-    star = is_starred ? starFull : starOutline;
+    is_starred = starred.find(s => s.standard_number == standard_number) // check whether or not there's a starred standard
+    star = is_starred ? starFull : starOutline; // decide which svg to use based on whether it's starred or not
 
-    /* update page title */
+    // update page title
     title = `Standard ${standard_num_text}`;
     if (document.title != title) {
         document.title = title;
     }
     $('meta[name="description"]').attr("content", standard.basic_info.title);
 
-    // hiding everything so that it's not jumpy when changed
+    // hiding everything so that it's not (too) jumpy when changed
     $('#standard-number').hide()
     $('#standard-title').hide()
     $('#subject-list').hide();
+    $("#resources-container").hide();
+    $("#nav-breadcrumbs").hide()
 
     // create breadcrumbs
-    $("#nav-breadcrumbs").hide()
     $("#nav-breadcrumbs").html(`<div class='row'>
                                     <div class='col-auto pe-lg-0'><a class="nav-link" href="/">Home</a></div>
                                     <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
@@ -262,10 +272,6 @@ function updateEverything() { // populate EVERYTHING hehe
                                         <a class="nav-link active" aria-current="page">${standard_num_text}</a>
                                     </div>
                                 </div>`);
-    //                                     <div class='col-auto p-lg-0 d-flex align-items-center'>
-    //                                         <a class="text-light" id='standard-star' onClick="${is_starred ? "unstar": "star"}Standard(${standard_number}, this)">${star}</a>
-    //                                     </div>
-    //                                 </div>`); 
 
     // update headers
     $("#standard-number").html(`${standard_num_text} <span id='title-star' onClick="${is_starred ? "unstar" : "star"}Standard(${standard_number}, this)">${star}</span>`);
@@ -284,17 +290,16 @@ function updateEverything() { // populate EVERYTHING hehe
     $('#level-num').html(standard.basic_info.level);
     $('#credit-num').html(standard.basic_info.credits);
     $('#version-num').html(standard.basic_info.version == null ? "Unknown" : standard.basic_info.version);
-    // set internal/external colour
-    //   $("#internal-external").addClass(standard.basic_info.internal ? "internal_row" : "external_row")
     $('#internal-external').html(standard.basic_info.internal ? "Internal" : "External");
 
     // update nzqa link with href to correct bit of site
     $("#all-docs-link").attr("href", "https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber=" + standard_number);
 
-    $("#resources-container").hide();
+    // update resources container content
     $("#resources-container").html(getResourcesList());
+    
+    // fade in all the now-set elements
     $("#resources-container").fadeIn();
-
     $('#subject-list').fadeIn();
     $('#standard-number').fadeIn()
     $('#standard-title').fadeIn()
@@ -314,12 +319,14 @@ function sort_handler() {
 $(document).ready(function () {
     // get starred standards
     getStarred();
-    if (standard_number >= 90000) {
+    if (standard_number >= 90000) { // if it's an achievement standard
         sortbycategory = $('#sort-selector').is(':checked'); // set sort to whether this is checked or not
         $("#sort-selector").on("change", sort_handler);
-    } else {
+    } else { // if it's a unit standard, the only documents are the unit standard, which don't have a year history
         $("#sort-selector-div").addClass('d-none');
     }
+
+    // get all the info
     getInfo();
 
 });
