@@ -200,12 +200,12 @@ function generateSearchStandardRow(standard) {
                     </td>
                     <td style='position: relative;'>
                         ${stretchedlinkstr}
-                        <span class='float-start'>` + (standard.reading ? "R" : "N") + `</span>
-                        <span class='float-end'>` + (standard.writing ? "W" : "N") + `</span>
+                        <span class='float-start'>` + (standard.reading ? "R" : " ") + `</span>
+                        <span class='float-end'>` + (standard.writing ? "W" : " ") + `</span>
                     </td>
                     <td class='text-center' style='position: relative;'>
                         ${stretchedlinkstr}
-                        ` + (standard.numeracy ? "Y" : "N") + `
+                        ` + (standard.numeracy ? "Y" : " ") + `
                     </td>
                     <td style='position: relative;'>
                         ${stretchedlinkstr}
