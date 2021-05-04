@@ -68,7 +68,6 @@ function getStandards() { // get the list of standards for the subject
 
 function starStandard(standard_number, element) {
     standard = standards.find(s => s.standard_number == standard_number)
-    console.log(`Adding ${standard_number}`);
     if (starred.find(s => s.standard_number === standard_number)) { // already starred
         index = starred.findIndex(s => s.standard_number == standard_number); // get index
         element.innerHTML = starOutline; // replace with outline
@@ -78,16 +77,13 @@ function starStandard(standard_number, element) {
         starred.push(standard); // add this to the starred list
     }
     window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
-    displayStarred(); // update display
     search();
 }
 
 function unstarStandard(standard_number, element) { // for removing the starred standard
-    console.log(`Removing ${standard_number}`);
     index = starred.findIndex(s => s.standard_number == standard_number); // get index
     starred.splice(index, 1); // remove from array
     window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
-    displayStarred(); // update display
     search(); // refresh search starred status
 }
 
@@ -101,7 +97,6 @@ function getStarred(then = () => { a = 1 }) {
 }
 
 async function search() {
-    console.log("Searching!");
     searchtext = $("#searchbox").val()
 
     if (searchtext.length != 0) {
@@ -314,6 +309,7 @@ function updateEverything() { // populate the standards list, and the subject na
     $("#main-container").html(outhtml);
     $("#main-container").fadeIn();
 }
+
 
 $(document).ready(function () {
     getStarred();

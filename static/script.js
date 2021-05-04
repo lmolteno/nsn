@@ -105,7 +105,10 @@ function displayStarred() {
     if (starred.length == 0) {
         $("#starredlist").html(`<p class='text-muted mb-0'>Hit the ${starOutline} icon on a standard to add it here</p>`);
         $("#starredlist svg").addClass("mb-1"); // move the star up a bit, inline with the text
+        $("#sharebutton").addClass("disabled") // disable the share button
     } else {
+        $("#sharebutton").removeClass("disabled") // re-enable the share button
+        sharelink = '/share/?n='
         outhtml = ""
         // starred is a list of standards, we want to organise by subject then level
         // this is a minimum spanning tree of the tree of:
@@ -137,11 +140,14 @@ function displayStarred() {
         starred.sort((a, b) => (a.standard_number > b.standard_number) - (a.standard_number < b.standard_number)).forEach(standard => {
             standard.id = standard.standard_number // to suit the search-configured row generation function
             total_credits += standard.credits;
-            total_reading += standard.reading ? standard.credits : 0;
-            total_writing += standard.writing ? standard.credits : 0;
+            total_reading += standard.reading ? standard.credits : 0; // either add the number of credits or nothing 
+            total_writing += standard.writing ? standard.credits : 0; // depending on the writing/reading credits
             total_numeracy += standard.numeracy ? standard.credits : 0;
 
             outhtml += generateStandardRow(standard);
+
+            // add to shared link
+            sharelink += encode64(standard.standard_number)
         });
         outhtml += `</tbody>`;
         // add row of totals to footer
@@ -162,6 +168,8 @@ function displayStarred() {
                         </tr>
                     </tfoot>`;
         $("#starredlist").html(outhtml);
+
+        $("#sharebutton").attr("href", sharelink)
     }
 }
 
@@ -310,6 +318,27 @@ function linkToAssessment(number) {
     nzqaurl = "https://www.nzqa.govt.nz/ncea/assessment/view-detailed.do?standardNumber=" + number.toString()
     window.open(nzqaurl, '_blank')
 }
+
+// for the sharing stuff, i'll probably only need the encoding, but i have both just to be sure.
+function encode64(dec) {
+    let padding = 3; // this value is determined by the length of the largest standard encoded (3 characters)
+    let charstring = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"; // described in comments in #24
+    var result = '';
+    var residual = dec; // the amount left over
+    while (true) {
+        result = charstring.charAt(residual % 64) + result; // add to the start of the result string
+        residual = Math.floor(residual / 64); // get the remainder
+        if (residual === 0) {
+            break;
+        }
+    }
+
+    // do the padding
+    result = result.padStart(padding, charstring.charAt(0)); // add A at the beginning until it's 3 characters long
+
+    return result;
+}
+
 
 $(document).ready(function () {
     getSubjects().then(displaySubjects);
