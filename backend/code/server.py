@@ -133,6 +133,13 @@ class DBManager:
 
         return outdict
 
+    def get_multiple_standard_info(self, standard_numbers):
+        information = []
+        for standard_number in standard_numbers:
+            information.append(self.get_standard_info(standard_number))
+
+        return information
+
     def get_resources(self, standard_number):
         sql = """SELECT standard_number,
                         year,
@@ -172,20 +179,33 @@ def api_standards():
         else:
             return jsonify({"success": False, "error": "No standards exist for that subject"})
 
-    elif 'number' in request.args:  # check if there's a specific standard they're asking for
-        standard_number = request.args['number']
+    elif 'number' in request.args:  # check if there's a specific standard they're asking for (or set of standards)
+        standard_numbers = request.args['number'].split('.') # full stop separated standards
         try:
-            standard_number = int(standard_number)
+            standard_numbers = list(map(int, standard_numbers))
         except ValueError:
             return jsonify({"success": False, "error": "You must provide an integer standard number"})
+        
+        if len(standard_numbers) == 1:
+            standard_number = standard_numbers[0]
 
-        info = conn.get_standard_info(standard_number)
-        # every standard that exists is associated with at least one subject
-        if len(info['subjects']) > 0:
-            # merge the success: true with the info provided from the connection
-            return jsonify({'success': True} | info)
-        else:
-            return jsonify({'success': False, "error": "This standard does not appear to be in the database"})
+            info = conn.get_standard_info(standard_number)
+            # every standard that exists is associated with at least one subject
+            if len(info['subjects']) > 0:
+                # merge the success: true with the info provided from the connection
+                return jsonify({'success': True} | info)
+            else:
+                return jsonify({'success': False, "error": "This standard does not appear to be in the database"})
+
+        elif len(standard_numbers) > 1:
+            info = conn.get_multiple_standard_info(standard_numbers)
+            if len(info) > 0: # success!
+                return jsonify({'success' : True, 'standards': info})
+            else:
+                return jsonify({'success': False, "error": "These standards do not appear to be in the database"})
+
+        elif len(standard_numbers) == 0:
+            return jsonify({"success": False, "error": "No standards were provided"})
 
     else:  # get all standards
         standards = conn.get_standards()
@@ -195,8 +215,6 @@ def api_standards():
             return jsonify({"success": False, "error": "No standards are present in the database. Contact linus@molteno.net"})
 
 # get all the subjects and their ids
-
-
 @server.route('/api/subjects', methods=['GET'])
 def api_subjects():
     global conn
@@ -233,8 +251,6 @@ def api_resources():
 
 # get the information about the structure of classification of the standards
 # fields, subfields, domains
-
-
 @server.route('/api/structure', methods=['GET'])
 def api_structure():
     global conn
