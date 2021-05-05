@@ -245,7 +245,7 @@ function updateEverything() { // populate the standards list, and the subject na
    
     navhtml = `<div class='row'><div class='col-auto pe-lg-0'><a class="nav-link" href="/">Home</a></div>
                <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
-               <div class='col-auto p-lg-0'><a class="nav-link" href="/subject/?id=` + subject_id + `">` + subject.display_name + `</a></div>`;
+               <div class='col-auto p-lg-0'><a class="nav-link active" href="/subject/?id=` + subject_id + `">` + subject.display_name + `</a></div>`;
     if (level != null) { // add the "/ level 1" if the level is there
         navhtml += `<div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
                     <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">Level ` + level + `</a></div>`;

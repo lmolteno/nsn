@@ -37,8 +37,14 @@
         
         <!-- Big heading -->
         <div class="container-fluid py-3 bg-dark" id="heading-container">
-            <h1 class="text-center display-3 align-middle text-light" id="standard-number">&#x200b;</h1> <!-- the &#x200b; keeps the space tall, to make the loading of the standard name less jarring --> 
-            <h3 class="text-center display-6 align-middle text-light" id="standard-title">&#x200b;</h3>
+            <h1 class="text-center display-3 align-middle text-light" id="standard-number">
+                <div class="spinner d-flex justify-content-center">
+                    <div class="spinner-border my-4" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </h1> 
+            <h3 class="text-center display-6 align-middle text-light" id="standard-title">&#x200b;</h3> <!-- the &#x200b; keeps the space tall, to make the loading of the standard name less jarring --> 
         </div>
         
         <!-- Main container for information -->

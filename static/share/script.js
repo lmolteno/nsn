@@ -20,7 +20,7 @@ const cross = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fi
 function getListFromURL() {
     var standardNumbers = urlParams.get('n')
 
-    if (standardNumbers == null) {
+    if (standardNumbers == null || standardNumbers == "") {
         window.location = "/"; // if there's no n parameter in the url, redirect to home, which is a safe bet
     }
 
@@ -105,6 +105,8 @@ function displayStandards() {
                         </td>
                     </tr>
                 </tfoot>`;
+    
+    $(".spinner").remove(); 
     $("#sharedList").html(outhtml);
 
 }

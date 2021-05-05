@@ -51,6 +51,7 @@ function displaySubjects() { // display the current list of subjects
     subjects.forEach(subject => {
         outhtml += generateSubjectLI(subject);
     });
+    $("#spinner-subjects").remove();
     $("#subjectlist").html(outhtml);
 }
 
@@ -175,6 +176,7 @@ function displayStarred() {
 
         $("#sharebutton").attr("href", sharelink)
     }
+    $("#spinner-starred").remove();
 }
 
 function clearStarred() {
@@ -365,9 +367,8 @@ function updateShareLink() {
 
 
 $(document).ready(function () {
-    getSubjects().then(displaySubjects);
     getStarred().then(displayStarred) // reference the local storage to find the starred subjects
-    // disable the enter key going to a new url in the search box
+    getSubjects().then(displaySubjects); // update subject list
     $("#searchbox").val("") // reset value
     search(); // initialise search results
     document.getElementById("searchbox").addEventListener('input', search); // when something is input, search
