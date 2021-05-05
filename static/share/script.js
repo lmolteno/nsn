@@ -110,7 +110,14 @@ function displayStandards() {
 }
 
 function updateHeader() {
-    $("#heading").html(getTitle());
+    var title = getTitle();
+    // update page title
+    if (document.title != `${title} | NSN`) {
+        document.title = `${title} | NSN`;
+    }
+    $('meta[name="description"]').attr("content", title);
+
+    $("#heading").html(title);
 }
 
 function convertStandard(standard) {
