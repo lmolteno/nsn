@@ -137,7 +137,11 @@ function displayStarred() {
         total_reading = 0
         total_writing = 0
         total_numeracy = 0
-        starred.sort((a, b) => (a.standard_number > b.standard_number) - (a.standard_number < b.standard_number)).forEach(standard => {
+        // sort the starred subjects by standard number
+        starred = starred.sort((a, b) => (a.standard_number > b.standard_number) - (a.standard_number < b.standard_number)) 
+
+        // iterate over each standard and generate the row
+        starred.forEach(standard => {
             standard.id = standard.standard_number // to suit the search-configured row generation function
             total_credits += standard.credits;
             total_reading += standard.reading ? standard.credits : 0; // either add the number of credits or nothing 
@@ -339,6 +343,26 @@ function encode64(dec) {
     return result;
 }
 
+function copyShareLink() {
+    url = $("#shared-url").val();
+    navigator.clipboard.writeText(url).then(function() {
+        console.log(`copied ${url} to clipboard!`);
+    }, function(err) {
+        console.error('couldn\'t copy!: ', err);
+    });
+}
+
+function updateShareLink() {
+    title = $("#shared-title").val();
+    sharelink = `https://${window.location.host}/share/?n=`
+    starred.forEach((standard) => {
+        sharelink += encode64(standard.standard_number);
+    });
+
+    sharelink += "&t=" + encodeURIComponent(title);
+    $('#shared-url').val(sharelink);
+}
+
 
 $(document).ready(function () {
     getSubjects().then(displaySubjects);
@@ -347,4 +371,7 @@ $(document).ready(function () {
     $("#searchbox").val("") // reset value
     search(); // initialise search results
     document.getElementById("searchbox").addEventListener('input', search); // when something is input, search
+
+    $("#shared-title").on("input", updateShareLink);
+    $('#shareModal').on('show.bs.modal', updateShareLink)
 });

@@ -62,13 +62,40 @@
         <div class="container-lg border border-secondary rounded-3 mt-3" id="starred-container">
             <div class='d-flex justify-content-between'>
                 <h3 class='pt-2' id='starredHeader'>My Standards</h3>
-                <a class='btn my-2 btn-outline-secondary' id='sharebutton'>Share</a>
+                <a class='btn my-2 btn-outline-secondary' id='sharebutton' data-bs-toggle="modal" data-bs-target="#shareModal">Share</a>
             </div>
             <div class='table-responsive'>
                 <table class="table table-bordered border-0" id="starredlist">
                 </table>
             </div>
         </div>
+
+        <!-- Share Modal -->
+        <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="shareModalLabel">Share your list</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="sharedNameLabel">Title</span>
+                    <input type="text" class="form-control" aria-label="Title of shared list" aria-describedby="sharedNameLabel" id="shared-title" placeholder="Your Title">
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="shareURLLabel">URL</span>
+                    <input type="text" class="form-control" aria-label="URL of shared list" aria-describedby="shareURLLabel" id="shared-url">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" onClick="copyShareLink()" class="btn btn-primary">Copy link to clipboard</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         
         <!-- All subjects -->
         <div class="container-lg border border-secondary rounded-3 my-3" id="main-container">
