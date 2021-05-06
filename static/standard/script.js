@@ -124,14 +124,19 @@ function getResourcesList() {
 
     // weed out 0-resource standards
     if (resources.length == 0) {
+        // remove like everything
         $("#annotated-exemplar-div").fadeOut();
         $("#annotated-exemplar-div").hide();
+        
         $("#recent-standard-div").fadeOut();
         $("#recent-standard-div").hide();
+        
         $("#links-row").removeClass("row-cols-md-3");
         $("#links-row").addClass("row-cols-md-1");
+        
         $("#resources-container").removeClass("row-cols-md-3");
         $("#resources-container").addClass("row-cols-md-1");
+        $("#sort-selector-div").addClass('d-none');
         return `<h4 class='text-center text-muted'>No resources available for this standard</span>`
     }
 
