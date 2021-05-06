@@ -142,11 +142,6 @@ function getResourcesList() {
 
     if (standard.basic_info.internal) {
         // check and see if there's an annotated exemplar
-        return `<h4 class='text-center text-muted'>No resources available for this standard</span>`
-    }
-
-    if (standard.basic_info.internal) {
-        // check and see if there's an annotated exemplar
         exemplar = resources.find(el => el.category == 'annotated-exemplars')
         if (exemplar == undefined) {
             // disable button
