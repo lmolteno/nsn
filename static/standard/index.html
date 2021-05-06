@@ -38,12 +38,12 @@
         <!-- Big heading -->
         <div class="container-fluid py-3 bg-dark" id="heading-container">
             <h1 class="text-center display-3 align-middle text-light" id="standard-number">
-                <div class="spinner d-flex justify-content-center">
-                    <div class="spinner-border my-4" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
             </h1> 
+            <h6 id="spinner-header" class="d-flex justify-content-center">
+                <div class="spinner-border text-light my-4" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </h6>
             <h3 class="text-center display-6 align-middle text-light" id="standard-title">&#x200b;</h3> <!-- the &#x200b; keeps the space tall, to make the loading of the standard name less jarring --> 
         </div>
         
@@ -140,11 +140,16 @@
                     <div class='col'>
                         <a class='btn text-light link w-100 nzqa-link' id='all-docs-link'>All NZQA Documents</a>
                     </div>
-                    <div class='col'>
+                    <div class='col' id='recent-standard-div'>
                         <a class='btn text-light link w-100 nzqa-link' id='recent-standard-link'>&#x200b;</a>
                     </div>
                     <div class=col' id='annotated-exemplar-div'>
                         <a class='btn text-light link w-100 nzqa-link' id='annotated-exemplar-link'>Annotated Exemplar</a>
+                    </div>
+                </div>
+                <div id="spinner-resources" class="d-flex justify-content-center">
+                    <div class="spinner-border  my-4" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
                 </div>
                 <div id='resources-container' class='row row-cols-1 row-cols-md-3 g-3 mt-0 mb-3'>

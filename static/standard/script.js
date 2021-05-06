@@ -122,6 +122,24 @@ function getResourcesList() {
     console.log("Updating resource list")
     outhtml = ""
 
+    // weed out 0-resource standards
+    if (resources.length == 0) {
+        $("#annotated-exemplar-div").fadeOut();
+        $("#annotated-exemplar-div").hide();
+        $("#recent-standard-div").fadeOut();
+        $("#recent-standard-div").hide();
+        $("#links-row").removeClass("row-cols-md-3");
+        $("#links-row").addClass("row-cols-md-1");
+        $("#resources-container").removeClass("row-cols-md-3");
+        $("#resources-container").addClass("row-cols-md-1");
+        return `<h4 class='text-center text-muted'>No resources available for this standard</span>`
+    }
+
+    if (standard.basic_info.internal) {
+        // check and see if there's an annotated exemplar
+        return `<h4 class='text-center text-muted'>No resources available for this standard</span>`
+    }
+
     if (standard.basic_info.internal) {
         // check and see if there's an annotated exemplar
         exemplar = resources.find(el => el.category == 'annotated-exemplars')
@@ -131,7 +149,7 @@ function getResourcesList() {
         } else {
             $("#annotated-exemplar-link").attr('href', exemplar.nzqa_url);
         }
-    } else {
+    } else { // if external
         $("#annotated-exemplar-div").fadeOut();
         $("#annotated-exemplar-div").hide();
         $("#links-row").removeClass("row-cols-md-3");
@@ -146,10 +164,8 @@ function getResourcesList() {
             // add the link to the most unit standard
             $("#recent-standard-link").html("Unit Standard");
             $("#recent-standard-link").attr("href", resource.nzqa_url);
-        } else {
-
         }
-    } else { // achievement standard
+        } else { // achievement standard
         if (sortbycategory) {
             all_categories = new Set();
             most_recent_achievement = null;    // for getting the most recent achievement standard
@@ -275,6 +291,8 @@ function updateEverything() { // populate EVERYTHING hehe
     $("#resources-container").hide();
     $("#nav-breadcrumbs").hide()
 
+    $("#spinner-header").remove();
+
     // create breadcrumbs
     $("#nav-breadcrumbs").html(`<div class='row'>
                                     <div class='col-auto pe-lg-0'><a class="nav-link" href="/">Home</a></div>
@@ -308,6 +326,7 @@ function updateEverything() { // populate EVERYTHING hehe
 
     // update resources container content
     $("#resources-container").html(getResourcesList());
+    $("#spinner-resources").remove();
     
     // fade in all the now-set elements
     $("#resources-container").fadeIn();
@@ -316,6 +335,7 @@ function updateEverything() { // populate EVERYTHING hehe
     $('#standard-title').fadeIn()
     $("#nav-breadcrumbs").fadeIn()
     $("#main-container").fadeIn();
+
 }
 
 function sort_handler() {

@@ -242,10 +242,12 @@ def api_resources():
             return jsonify({"success": False, "error": "You must provide an integer standard number"})
 
         resources = conn.get_resources(standard_number)
-        if len(resources) > 0:
-            return jsonify({"success": True, "resources": resources})
-        else:
-            return jsonify({"success": False, "error": "No resources seem to be available for this standard. If this seems wrong, contact linus@molteno.net"})
+        return jsonify({"success": True, "resources": resources})
+        #26
+        #if len(resources) > 0:
+        #    return jsonify({"success": True, "resources": resources})
+        #else:
+        #    return jsonify({"success": False, "error": "No resources seem to be available for this standard. If this seems wrong, contact linus@molteno.net"})
     else:
         return jsonify({"success": False, "error": "You must provide a standard number in the request arguments"})
 
