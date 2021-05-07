@@ -100,16 +100,12 @@ async function search() {
     searchtext = $("#searchbox").val()
 
     if (searchtext.length != 0) {
-        searched_standards = await standindex.search(searchtext, { limit: 100 }) // get top hits, then filter for subject
+        options = {
+            limit: 5,
+            filters: `subject_id = ${subject_id}` // i hope this is okay with arrays
+        }
+        searched_standards = await standindex.search(searchtext, options) 
         if (searched_standards['hits'].length > 0) {
-            var filtered = []
-            // for all of the hits, check if they're in the list of standards for this subject
-            // this is inefficient and can be done differently
-            searched_standards['hits'].forEach(result => {
-                if (standards.find(o => o.standard_number == result.id) && filtered.length < 5) {
-                    filtered.push(result)
-                }
-            })
             standardshtml = `<h3 class="mb-1">Standards</h3>
 
                         <table class="table-bordered border-0 table table-hover">
@@ -128,15 +124,11 @@ async function search() {
                             </thead>
                             <tbody>`;
 
-            filtered.forEach(result => {
+            searched_standards['hits'].forEach(result => {
                 standardshtml += generateSearchStandardRow(result)
-            });
-            top_result = filtered[0]; // update top result for handlesubmit
+            })
+            top_result = searched_standards['hits'][0]; // update top result for handlesubmit
             standardshtml += "</tbody></table>"
-            if (filtered.length == 0) {
-                standardshtml = "<p class='text-muted mb-2'>No results found</p>";
-                top_result = undefined; // remove top result
-            }
             $("#standards-results").html(standardshtml)
             $("#search-results").css("visibility", "visible");
         } else {
