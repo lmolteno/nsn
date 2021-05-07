@@ -3,6 +3,8 @@ subjects = [];
 starred = [];
 potentially_starred = []; // this is list of the standards that are stored in memory in case they become starred (from search results)
 starModal = 0;
+top_standard = undefined;
+top_subject = undefined;
 
 // for accessing the search engine
 const client = new MeiliSearch({
@@ -300,11 +302,13 @@ async function search() {
                                     </td>
                                 </tr>`;
             });
+            top_subject = subjects['hits'][0]; // update most relevant subject
             subjecthtml += "</tbody></table>"
             $("#subjects-results").html(subjecthtml)
             $("#search-results").css("visibility", "visible");
         } else {
             $("#subjects-results").html("");
+            top_subject = undefined; // ignore subject in handleSubmit
         }
 
         const standards = await standindex.search(searchtext, { limit: 5 })
@@ -329,16 +333,22 @@ async function search() {
                             <tbody>`;
             standards['hits'].forEach(result => {
                 // add to potentially_starred list with the correct id/standard_number key replacement
+                // this is for accessing from the handleSearchSubmit and starring functions in case these are handled
                 potential = result
                 potential.standard_number = result.id
                 potentially_starred.push(potential);
+                if (potentially_starred.length > 100) {
+                    potentially_starred.shift() // removes the first element of the array, this keeps the length below 100 as i keep this list updated async
+                }
                 standardshtml += generateStandardRow(result)
             });
+            top_standard = standards['hits'][0]; // update top hit, to be the first one
             standardshtml += "</tbody></table>"
             $("#standards-results").html(standardshtml)
             $("#search-results").css("visibility", "visible");
         } else {
             $("#standards-results").html("");
+            top_standard = undefined;// update top hit, to be undefined (ignored in handleSubmit)
         }
 
         if ($("#searchbox").val().length == 0) { // recheck the box after all the awaits, just in case things have changed (#3)
@@ -356,6 +366,33 @@ async function search() {
         $("#standards-results").html("")
         $("#search-results").css("visibility", "hidden");
     }
+}
+
+function handleSearchSubmit() {
+    var searchTerm = $("#searchbox").val();
+    var matching_standard = potentially_starred.find(s => s.standard_number == searchTerm); // check if standard number matches
+    if (matching_standard != undefined) {
+        // go to matching standard
+        window.location.href = '/standard/?num=' + matching_standard.standard_number;
+        return false;
+    }
+    var matching_subject = subjects.find(s => s.display_name.toLowerCase() == searchTerm.toLowerCase())
+    if (matching_subject != undefined) {
+        // go to matching subject
+        window.location.href = '/subject/?id=' + matching_subject.subject_id;
+        return false; // skip the rest of the function
+    }
+    // go to top hit
+    if (top_subject != undefined) {
+        // go to subject (it's above standards)
+        window.location.href = '/subject/?id=' + top_subject.id;
+        return false;   
+    }
+    if (top_standard != undefined) {
+        window.location.href = '/standard/?num=' + top_standard.id;
+        return false;
+    }
+    return false; // don't get the default function to redirect to /
 }
 
 function linkToAssessment(number) {
@@ -416,6 +453,7 @@ $(document).ready(function () {
     getSubjects().then(displaySubjects).then(getStarred).then(displayStarred); // update subject list and starred standard list
     $("#searchbox").val("") // reset value
     search(); // initialise search results
+    $("#searchform").submit(handleSearchSubmit); // set submit handler
     document.getElementById("searchbox").addEventListener('input', search); // when something is input, search
 
     $("#shared-title").on("input", updateShareLink);
