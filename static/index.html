@@ -77,13 +77,13 @@
 
         <!-- Share Modal -->
         <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
                 <h5 class="modal-title" id="shareModalLabel">Share your list</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
+            </div>
+            <div class="modal-body">
                 <div class="input-group mb-3">
                     <span class="input-group-text" id="sharedNameLabel">Title</span>
                     <input type="text" class="form-control" aria-label="Title of shared list" aria-describedby="sharedNameLabel" id="shared-title" placeholder="Your Title">
@@ -92,15 +92,37 @@
                     <span class="input-group-text" id="shareURLLabel">URL</span>
                     <input type="text" class="form-control" aria-label="URL of shared list" aria-describedby="shareURLLabel" id="shared-url">
                 </div>
-              </div>
-              <div class="modal-footer">
+            </div>
+            <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <button type="button" onClick="copyShareLink()" class="btn btn-primary">Copy link to clipboard</button>
-              </div>
             </div>
-          </div>
         </div>
+        </div>
+        </div>
+        
+        <!-- Choose subject for starring standards Modal --> 
+        <div class="modal fade" id="starModal" tabindex="-1" aria-labelledby="starModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="starModalLabel">Star this standard</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    This standard is listed under multiple subjects. Which of these would you like to star it under?
+                </p>
+                <ul class="list-unstyled" id='ambiguousList'>
 
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+        </div>
+        </div>
         
         <!-- All subjects -->
         <div class="container-lg border border-secondary rounded-3 my-3" id="main-container">

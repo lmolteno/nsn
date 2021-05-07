@@ -1,6 +1,7 @@
 // define the globals
 var standards = []
 var starred = []
+var subject_groups = [];
 
 const urlParams = new URLSearchParams(window.location.search); // get url parameters
 
@@ -24,8 +25,17 @@ function getListFromURL() {
         window.location = "/"; // if there's no n parameter in the url, redirect to home, which is a safe bet
     }
 
-    standardNumbers = standardNumbers.match(/.{3}/g).map(decode64) // regex magic to split the string into sections of 3, then we decode them all
-    return standardNumbers
+    subject_groups = standardNumbers.match(/[^\.]+\.[^\.]+/g); // regex magic splits at every second .
+    subject_groups = subject_groups.map((str) => {
+        console.log(str);
+        both = str.split(".")
+        subject_id = decode64(both[0])
+        standard_numbers = both[1]
+                    .match(/.{3}/g) // regex magic split the string into size 3
+                    .map(decode64); // decode them all
+        return {'subject_id': subject_id, 'standard_numbers': standard_numbers}
+    });
+    return subject_groups 
 }
 
 function getTitle() {
@@ -38,10 +48,11 @@ function getTitle() {
 }
 
 function getInfo() {
-    var standardNumbers = getListFromURL()
+    subject_groups = getListFromURL();
     console.log(`Getting standards `)
-    var standardstring = standardNumbers.join(".") // as in the backend, these have to be full-stop separated
-    console.log(standardstring)
+    var standardNumbers = subject_groups.map(group => group.standard_numbers);
+    var standardstring = standardNumbers.flat().join(".") // as in the backend, these have to be full-stop separated
+    console.log(standardstring);
     let promise = new Promise((resolve, reject) => {
         $.get("/api/standards?number=" + standardstring, function (data) { // send the get request to the API
             if (data.success) {
@@ -71,22 +82,37 @@ function displayStandards() {
                         <th scope="col">Numeracy</th>
                         <th scope="col">I/E</th>
                     </tr>
-                </thead>
-                <tbody>`;
+                </thead>`;
     // for totals footer
     total_credits = 0
     total_reading = 0
     total_writing = 0
     total_numeracy = 0
-    standards.forEach(standard => {
-        standard.id = standard.basic_info.standard_number // to suit the search-configured row generation function (i reuse it a lot)
-        total_credits += standard.basic_info.credits;
-        total_reading += standard.ue_literacy.reading ? standard.basic_info.credits : 0; // either add the number of credits or nothing 
-        total_writing += standard.ue_literacy.writing ? standard.basic_info.credits : 0; // depending on the writing/reading credits
-        total_numeracy += standard.ncea_litnum.numeracy ? standard.basic_info.credits : 0;
 
-        outhtml += generateStandardRow(convertStandard(standard));
+    subject_groups.forEach(s_gr => {
+        // find the subject name
+        var firstStandard = standards.find(s => s.basic_info.standard_number == s_gr.standard_numbers[0])
+        subject = firstStandard.subjects.find(s => s.subject_id == s_gr.subject_id)
+        // generate subject header
+        outhtml += `<tr>
+                        <td colspan="9" class="text-center border border-dark pb-1">
+                            <a href="/subject/?id=${s_gr.subject_id}" class="text-dark col fw-bold fs-3 text-center">${subject.display_name}</a>
+                        </td>
+                    </tr>`;
+        s_gr.standard_numbers.forEach(num => {
+            standard = standards.find(s => s.basic_info.standard_number == num);
+            
+
+            standard.id = standard.basic_info.standard_number // to suit the search-configured row generation function (i reuse it a lot)
+            total_credits += standard.basic_info.credits;
+            total_reading += standard.ue_literacy.reading ? standard.basic_info.credits : 0; // either add the number of credits or nothing 
+            total_writing += standard.ue_literacy.writing ? standard.basic_info.credits : 0; // depending on the writing/reading credits
+            total_numeracy += standard.ncea_litnum.numeracy ? standard.basic_info.credits : 0;
+
+            outhtml += generateStandardRow(convertStandard(standard));
+        });
     });
+
     outhtml += `</tbody>`;
     // add row of totals to footer
     outhtml += `<tfoot>

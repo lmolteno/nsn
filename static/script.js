@@ -2,6 +2,7 @@
 subjects = [];
 starred = [];
 potentially_starred = []; // this is list of the standards that are stored in memory in case they become starred (from search results)
+starModal = 0;
 
 // for accessing the search engine
 const client = new MeiliSearch({
@@ -66,15 +67,40 @@ function generateSubjectLI(subject) {
     return outhtml
 }
 
+function resolveAmbiguity(standard_number, subject_id) {
+    // shallow copy
+    var standard = JSON.parse(JSON.stringify(potentially_starred.find(s => s.standard_number == standard_number)));
+    standard.subject_id = subject_id;
+    starred.push(standard); // add this to the starred list
+    window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
+    starModal.hide();
+    displayStarred(); // update display
+    search();
+}
+
 function starStandard(standard_number, element) {
     standard = potentially_starred.find(s => s.standard_number == standard_number)
-    console.log(`Adding ${standard_number}`);
-    if (starred.find(s => s.standard_number === standard_number)) { // already starred
+    if (starred.find(s => s.standard_number == standard_number)) { // already starred
+        console.log(`Removing ${standard_number}`)
         index = starred.findIndex(s => s.standard_number == standard_number); // get index
         element.innerHTML = starOutline; // replace with outline
         starred.splice(index, 1); // remove from array
     } else {
-        element.innerHTML = starFull; // fill star
+        console.log(`Adding ${standard_number}`);
+        if (standard.subject_id.length > 1) { // 91361 is a good option
+            console.log(`Ambiguity!`)
+            outhtml = ""
+            standard.subject_id.forEach(s_id => {
+                subject = subjects.find(s => s.subject_id == s_id)
+                outhtml += `<li><a class='clickable' onClick='resolveAmbiguity(${standard.standard_number}, ${s_id})'>${subject.display_name}</a></li>`
+            });
+            $("#ambiguousList").html(outhtml);
+            starModal.show();
+            return;
+        } else {
+            element.innerHTML = starFull; // fill star
+            standard.subject_id = standard.subject_id[0];
+        }
         starred.push(standard); // add this to the starred list
     }
     window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
@@ -87,6 +113,7 @@ function unstarStandard(standard_number, element) { // for removing the starred 
     index = starred.findIndex(s => s.standard_number == standard_number); // get index
     starred.splice(index, 1); // remove from array
     window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
+    element.innerHTML = starOutline; // replace with outline
     displayStarred(); // update display
     search(); // refresh search starred status
 }
@@ -109,7 +136,6 @@ function displayStarred() {
         $("#sharebutton").addClass("disabled") // disable the share button
     } else {
         $("#sharebutton").removeClass("disabled") // re-enable the share button
-        sharelink = '/share/?n='
         outhtml = ""
         // starred is a list of standards, we want to organise by subject then level
         // this is a minimum spanning tree of the tree of:
@@ -119,6 +145,8 @@ function displayStarred() {
         //             \     / 
         //            standard
         // put this in the future, for now we will just have it in the table
+        // other option is prompting the user, storing the subject it should be under in the cookies
+        // if they access it through a specific subject page, then it's starred as the subject they went through
         outhtml += `<thead>
                         <tr>
                             <th scope="col">Star</th>
@@ -132,28 +160,39 @@ function displayStarred() {
                             <th scope="col">I/E</th>
                         </tr>
                     </thead>
-                    <tbody>`;
+                    <tbody>`
         // for totals footer
         total_credits = 0
         total_reading = 0
         total_writing = 0
         total_numeracy = 0
         // sort the starred subjects by standard number
-        starred = starred.sort((a, b) => (a.standard_number > b.standard_number) - (a.standard_number < b.standard_number)) 
+        starred = starred.sort((a, b) => (a.standard_number > b.standard_number) - (a.standard_number < b.standard_number))
+        
+        // generate lists of all unique subjects
+        let unique_subjects = [... new Set(starred.map(s => s.subject_id))]; // sets are unique
+        unique_subjects.forEach(subject_id => {
+            subject = subjects.find(s => s.subject_id == subject_id); // get the subjectname
+            subject_name = subject.display_name;
+            subject_standards = starred.filter(s => s.subject_id == subject_id); // get standards under this subject
+            // generate subject header
+            outhtml += `<tr>
+                            <td colspan="9" class="text-center border border-dark pb-1">
+                                <a href="/subject/?id=${subject_id}" class="text-dark col fw-bold fs-3 text-center">${subject_name}</a>
+                            </td>
+                        </tr>`;
+            subject_standards.forEach(standard => {
+                standard.id = standard.standard_number // to suit the search-configured row generation function
+                total_credits += standard.credits;
+                total_reading += standard.reading ? standard.credits : 0; // either add the number of credits or nothing 
+                total_writing += standard.writing ? standard.credits : 0; // depending on the writing/reading credits
+                total_numeracy += standard.numeracy ? standard.credits : 0;
 
-        // iterate over each standard and generate the row
-        starred.forEach(standard => {
-            standard.id = standard.standard_number // to suit the search-configured row generation function
-            total_credits += standard.credits;
-            total_reading += standard.reading ? standard.credits : 0; // either add the number of credits or nothing 
-            total_writing += standard.writing ? standard.credits : 0; // depending on the writing/reading credits
-            total_numeracy += standard.numeracy ? standard.credits : 0;
+                outhtml += generateStandardRow(standard);
+            })
+        })
 
-            outhtml += generateStandardRow(standard);
 
-            // add to shared link
-            sharelink += encode64(standard.standard_number)
-        });
         outhtml += `</tbody>`;
         // add row of totals to footer
         outhtml += `<tfoot>
@@ -174,7 +213,6 @@ function displayStarred() {
                     </tfoot>`;
         $("#starredlist").html(outhtml);
 
-        $("#sharebutton").attr("href", sharelink)
     }
     $("#spinner-starred").remove();
 }
@@ -325,9 +363,7 @@ function linkToAssessment(number) {
     window.open(nzqaurl, '_blank')
 }
 
-// for the sharing stuff, i'll probably only need the encoding, but i have both just to be sure.
-function encode64(dec) {
-    let padding = 3; // this value is determined by the length of the largest standard encoded (3 characters)
+function encode64(dec, padding=3) {
     let charstring = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"; // described in comments in #24
     var result = '';
     var residual = dec; // the amount left over
@@ -340,7 +376,7 @@ function encode64(dec) {
     }
 
     // do the padding
-    result = result.padStart(padding, charstring.charAt(0)); // add A at the beginning until it's 3 characters long
+    result = result.padStart(padding, charstring.charAt(0)); // add A at the beginning until it's <padding> characters long
 
     return result;
 }
@@ -357,22 +393,32 @@ function copyShareLink() {
 function updateShareLink() {
     title = $("#shared-title").val();
     sharelink = `https://${window.location.host}/share/?n=`
-    starred.forEach((standard) => {
-        sharelink += encode64(standard.standard_number);
+    // generate lists of all unique subjects
+    let unique_subjects = [... new Set(starred.map(s => s.subject_id))]; // sets are unique
+    unique_subjects.forEach(subject_id => { // for each subject
+        subject = subjects.find(s => s.subject_id == subject_id); // get the subject name
+        subject_name = subject.display_name;
+        subject_standards = starred.filter(s => s.subject_id == subject_id); // get standards under this subject
+        sharelink += encode64(subject_id, 1) + "." // 1 character padding
+        subject_standards.forEach((standard) => { // for each standard
+            sharelink += encode64(standard.standard_number);
+        });
+        sharelink += ".";
+        // the format of the share link is now ?n=<subjectid>.<standard><standard>.<subjectid>.<standard><standard>.&t=<title>
     });
 
-    sharelink += "&t=" + encodeURIComponent(title);
+    sharelink += "&t=" + encodeURIComponent(title); // encodeURIComponent makes sure that reserved characters are represented using percent encoding
     $('#shared-url').val(sharelink);
 }
 
 
 $(document).ready(function () {
-    getStarred().then(displayStarred) // reference the local storage to find the starred subjects
-    getSubjects().then(displaySubjects); // update subject list
+    getSubjects().then(displaySubjects).then(getStarred).then(displayStarred); // update subject list and starred standard list
     $("#searchbox").val("") // reset value
     search(); // initialise search results
     document.getElementById("searchbox").addEventListener('input', search); // when something is input, search
 
     $("#shared-title").on("input", updateShareLink);
     $('#shareModal').on('show.bs.modal', updateShareLink)
+    starModal = new bootstrap.Modal(document.getElementById('starModal'));
 });

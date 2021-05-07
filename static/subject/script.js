@@ -279,7 +279,7 @@ function updateEverything() { // populate the standards list, and the subject na
         standards_for_level = standards_for_level.sort((a, b) => (a.standard_number > b.standard_number) - (a.standard_number < b.standard_number)); // sort by standard_number
         if (standards_for_level.length > 0) {
             baseurl = `https://www.nzqa.govt.nz/ncea/assessment/search.do?query=` + subject.name.replace(/\ /g, '+') + `&level=0` + current_level + `&view=`;
-            views = [['reports', 'Schedules'], ['exams', 'Exams'], ['achievements', 'Standards'], ['all', 'All']]
+            views = [['reports', 'Schedules'], ['exams', 'Exams'], ['achievements', 'Standards'], ['all', 'All']] // url to display name table
             outhtml += `<thead>
             <tr>
                 <th colspan="9" class="text-center border border-dark pb-1">

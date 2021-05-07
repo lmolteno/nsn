@@ -205,3 +205,8 @@ input:checked + .slider:before {
     font-style: normal;
     font-display: swap;
 }
+
+/* make the placeholder disappear on focus */
+input:focus::placeholder {
+  color: transparent;
+}

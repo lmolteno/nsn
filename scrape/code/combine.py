@@ -309,7 +309,8 @@ def combine():
                            "numeracy": ncea_row['numeracy'],
                            "reading": ue_row['reading'],
                            "writing": ue_row['writing'],
-                           "internal": internal}
+                           "internal": internal,
+                           "subject_id": [subject_id]}
 
         outdict = {"standard_number": standard_number,
                    "title": title,
@@ -324,25 +325,46 @@ def combine():
 
         # ensure no duplication
         try:
-            # if it can already be found
+            # if it can already be found in the standards list
             _ = next(
-                standard for standard in standards if standard['standard_number'] == outdict['standard_number'])
+                standard for standard in standards if standard['standard_number'] == outdict['standard_number']
+            )
             duplicate += 1
-            #print(f"DUPLICATE AS{scraped['number']:<5d}")
+            # if it already exists in the search standard, update the subjects list inside it, for frontend reasons (#17)
+            searched = next(
+                standard for standard in search_standards if int(standard['id']) == outdict['standard_number']
+            )
+            print(f"AS{outdict['standard_number']} is a duplicate!")
+            # i don't need to have an if here because it will raise an exception if it doesnt exist      
+            all_subjects = searched['subject_id'] + [subject_id]
+            all_subjects = [*{*all_subjects}] # convert to set (unique only) and then back to a list
+            searched['subject_id'] = all_subjects # the next() function returns an object that modifies the object in the list
+            # the code i used to test this was:
+            # >>> a = []
+            # >>> for i in range(10):
+            # ...     a.append({"a": i})
+            # >>> a
+            # [{'a': 0}, {'a': 1}, {'a': 2}, {'a': 3}, {'a': 4}, {'a': 5}, {'a': 6}, {'a': 7}, {'a': 8}, {'a': 9}]
+            # >>> b = next(b for b in a if b['a'] == 1)
+            # >>> b['a'] = 10
+            # >>> a
+            # [{'a': 0}, {'a': 10}, {'a': 2}, {'a': 3}, {'a': 4}, {'a': 5}, {'a': 6}, {'a': 7}, {'a': 8}, {'a': 9}]
+            # you can see that the list a is mutated to have the second element have 'a' = 10, as opposed to the original 1
+            # i really hope this doesn't come back to bite me :(
         except StopIteration:  # there is no duplicate
             standards.append(outdict)
             search_standards.append(search_standard)
 
     print(
-        f"Resolved:\n{duplicate:>3d} {'Duplicates':>15s}\n{mismatch:>3d} {'Mismatches':>15s}\n{singular:>3d} {'Singulars':>15s}")
+        f"Resolved:\n{duplicate:>3d} {'Duplicates':>10s}\n{mismatch:>3d} {'Mismatches':>10s}\n{singular:>3d} {'Singulars':>10s}")
 
-    # Resource handling
+    # Resources!
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Processing {len(s_re)} resources...")
     categories = []  # list of categories to go into the database
     resources = []  # list of resource dicts to go into the database
     duplicate = 0  # counter for duplicates that i resolve
     for resource in s_re:
-        # first verify that the resource references a standard that exists (not level 4)
+        # first verify that the resource references a standard that exists (not level 4 or anything)
         try:
             standard = next(
                 standard for standard in standards if standard['standard_number'] == resource['standard_number'])
@@ -375,7 +397,7 @@ def combine():
     # Enter the data
     conn = psycopg2.connect(host="db",  # this is because docker! cool!
                             database=os.environ.get("POSTGRES_DB"),
-                            user=os.environ.get("POSTGRES_USER"),
+                            user    =os.environ.get("POSTGRES_USER"),
                             password=os.environ.get("POSTGRES_PASSWORD"))
 
     # convert list of tuples into list of dictionaries for meilisearch
@@ -390,6 +412,7 @@ def combine():
     client.index('subjects').add_documents(search_subjects)
     client.index('standards').add_documents(search_standards)
 
+    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Entering subjects and standards into PostgreSQL")
     # enter info
     with conn.cursor() as curs:
         # insert types ([*enumerate(types)] turns ['a','b'] to [(0,'a'), (1,'b')], assigning indicies)

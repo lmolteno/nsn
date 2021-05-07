@@ -4,6 +4,8 @@ standard_number = null;
 resources = [];
 starred = [];
 sortbycategory = false; // sorting of resource
+starModal = 0;
+
 const urlParams = new URLSearchParams(window.location.search); // get url parameters
 if (urlParams.get('num') == null) {
     window.location = "/"; // if there's no id parameter in the url
@@ -75,10 +77,40 @@ function starStandard(standard_number, element) {
         starred.splice(index, 1); // remove from array
     } else {
         element.innerHTML = starFull; // fill star
+        if (standard.subjects.length > 1) { // 91361 is a good option
+            console.log(`Ambiguity!`)
+            outhtml = ""
+            standard.subjects.forEach(subject => {
+                outhtml += `<li><a class='clickable' onClick='resolveAmbiguity(${standard.standard_number}, ${subject.subject_id})'>${subject.display_name}</a></li>`
+            });
+            $("#ambiguousList").html(outhtml);
+            starModal.show();
+            update_star();
+            return;
+        } else {
+            standard_to_star.subject_id = standard.subjects[0].subject_id;
+        }
         starred.push(standard_to_star); // add this to the starred list
     }
     window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
     update_star(); // update displayed star
+}
+
+function resolveAmbiguity(standard_number, subject_id) {
+    standard_to_star = standard.basic_info
+
+    // update it to match what the browser storage should have
+    standard_to_star.reading = standard.ue_literacy.reading
+    standard_to_star.writing = standard.ue_literacy.writing
+    standard_to_star.numeracy = standard.ncea_litnum.numeracy
+    standard_to_star.literacy = standard.ncea_litnum.literacy
+
+    standard_to_star.subject_id = subject_id;
+    starred.push(standard_to_star); // add this to the starred list
+    window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
+    starModal.hide();
+    console.log("Ambiguity resolved!")
+    update_star(); // update display
 }
 
 function unstarStandard(standard_number, element) { // for removing the starred standard
@@ -359,5 +391,5 @@ $(document).ready(function () {
 
     // get all the info
     getInfo().then(getResources).then(updateEverything);
-
+    starModal = new bootstrap.Modal(document.getElementById('starModal'));
 });
