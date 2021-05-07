@@ -2,7 +2,7 @@
 subjects = [];
 standards = [];
 starred = [];
-
+top_result = undefined;
 
 const urlParams = new URLSearchParams(window.location.search); // get url parameters
 if (urlParams.get('id') == null) {
@@ -100,10 +100,11 @@ async function search() {
     searchtext = $("#searchbox").val()
 
     if (searchtext.length != 0) {
-        searched_standards = await standindex.search(searchtext, { limit: 100 })
+        searched_standards = await standindex.search(searchtext, { limit: 100 }) // get top hits, then filter for subject
         if (searched_standards['hits'].length > 0) {
             var filtered = []
             // for all of the hits, check if they're in the list of standards for this subject
+            // this is inefficient and can be done differently
             searched_standards['hits'].forEach(result => {
                 if (standards.find(o => o.standard_number == result.id) && filtered.length < 5) {
                     filtered.push(result)
@@ -130,9 +131,11 @@ async function search() {
             filtered.forEach(result => {
                 standardshtml += generateSearchStandardRow(result)
             });
+            top_result = filtered[0]; // update top result for handlesubmit
             standardshtml += "</tbody></table>"
             if (filtered.length == 0) {
                 standardshtml = "<p class='text-muted mb-2'>No results found</p>";
+                top_result = undefined; // remove top result
             }
             $("#standards-results").html(standardshtml)
             $("#search-results").css("visibility", "visible");
@@ -140,6 +143,7 @@ async function search() {
             standardshtml = "<p class='text-muted mb-2'>No results found</p>";
             $("#standards-results").html(standardshtml)
             $("#search-results").css("visibility", "visible");
+            top_result = undefined;
         }
 
 
@@ -310,6 +314,20 @@ function updateEverything() { // populate the standards list, and the subject na
     $("#main-container").fadeIn();
 }
 
+function handleSearchSubmit() {
+    var searchTerm = $("#searchbox").val();
+    var matching_standard = standards.find(s => s.standard_number == searchTerm); // check if standard number matches
+    if (matching_standard != undefined) {
+        // go to matching standard
+        window.location.href = '/standard/?num=' + matching_standard.standard_number;
+        return false;
+    }
+    if (top_result != undefined) {
+        window.location.href = '/standard/?num=' + top_result.id;
+        return false;
+    }
+    return false; // don't get the default function to redirect to /
+}
 
 $(document).ready(function () {
     getStarred();
@@ -318,5 +336,6 @@ $(document).ready(function () {
         .then(updateEverything); // using promises to get synchronisity among multiple functions
     $("#searchbox").val("");
     search();
+    $("#searchform").submit(handleSearchSubmit); // update submit handler
     document.getElementById("searchbox").addEventListener('input', search); // when something is input, search
 });
