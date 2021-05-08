@@ -33,6 +33,14 @@ const cross = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fi
   <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
 </svg>`;
 
+const magnifying_glass = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+<svg>`;
+
+const spinner = `<div class="spinner-border spinner-border-sm fs-6" role="status">
+  <span class="visually-hidden">Loading...</span>
+</div>`
+
 function getSubjects() { // update the local list of subjects
     let promise = new Promise((resolve, reject) => {
         $.get("/api/subjects", function (data) { // send a get request to my api
@@ -98,6 +106,9 @@ function getStarred(then = () => { a = 1 }) {
 
 async function search() {
     searchtext = $("#searchbox").val()
+    
+    // move search icon to spinner
+    $("#searchicon").html(spinner);
 
     if (searchtext.length != 0) {
         options = {
@@ -146,9 +157,12 @@ async function search() {
         } else {
             $("#search-results").css("visibility", "visible");
         }
+        // reset to a magnifying glass
+        $("#searchicon").html(magnifying_glass);
     } else {
         $("#standards-results").html("")
         $("#search-results").css("visibility", "hidden");
+        $("#searchicon").html(magnifying_glass);
     }
 }
 
