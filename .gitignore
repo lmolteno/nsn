@@ -5,3 +5,4 @@
 static/analytics/*
 Caddyfile
 scrape/cache/*
+.vscode/*
