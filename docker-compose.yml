@@ -41,7 +41,9 @@ services:
             - ./static:/static
             - ./Caddyfile:/etc/caddy/Caddyfile
             - ./certs/config:/root/.config/caddy
-            - ./certs/local:/root/.local/share/caddy         
+            - ./certs/local:/root/.local/share/caddy
+            - ./certs/data:/data
+            - ./certs/local-config:/config
     scraper:
         build:
             context: ./scrape
@@ -53,7 +55,7 @@ services:
             - ./scrape/output:/output
             - ./scrape/cache:/cache
         environment:
-            FORCE_SCRAPE: 1
+            FORCE_SCRAPE: 0
             HARD_CACHE: 1
             POSTGRES_USER: nzqa
             POSTGRES_PASSWORD: nzqa
