@@ -175,6 +175,8 @@ function convertStandard(standard) {
     standard.writing = standard.ue_literacy.writing
     standard.standard_number = standard.basic_info.standard_number
 
+    standard.subject_id = standard.subjects.map(el => el.subject_id);
+
     return standard
 }
 
@@ -192,6 +194,7 @@ function starStandard(standard_number, element) {
         starred.push(standard); // add this to the starred list
     }
     window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
+    displayStandards();
 }
 
 function unstarStandard(standard_number, element) { // for removing the starred standard
@@ -199,6 +202,7 @@ function unstarStandard(standard_number, element) { // for removing the starred 
     index = starred.findIndex(s => s.standard_number == standard_number); // get index
     starred.splice(index, 1); // remove from array
     window.localStorage.setItem('starred', JSON.stringify(starred)); // update browser storage
+    displayStandards();
 }
 
 function getStarred() {
