@@ -210,3 +210,14 @@ input:checked + .slider:before {
 input:focus::placeholder {
   color: transparent;
 }
+
+/* style the popout link button for the share url */
+#go-to-share {
+    border-color: #ced4da !important;
+    background-color: #e9ecef;
+    transition: background-color 0.3s;
+}
+
+#go-to-share:hover { /* darken on hover, helps with interactivity */
+    background-color: #ddd;
+}

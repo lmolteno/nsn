@@ -458,6 +458,7 @@ function updateShareLink() {
 
     sharelink += "&t=" + encodeURIComponent(title); // encodeURIComponent makes sure that reserved characters are represented using percent encoding
     $('#shared-url').val(sharelink);
+    $("#go-to-share").attr('href', sharelink);
 }
 
 
