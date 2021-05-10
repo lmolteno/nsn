@@ -56,7 +56,7 @@ function getInfo() {
     let promise = new Promise((resolve, reject) => {
         $.get("/api/standards?number=" + standardstring, function (data) { // send the get request to the API
             if (data.success) {
-                if (standardNumbers.length == 1) {
+                if (standardNumbers.flat().length == 1) {
                     console.log("Successfully gathered one standard");
                     standards = [data]
                 } else {
