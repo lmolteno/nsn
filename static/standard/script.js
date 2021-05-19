@@ -198,7 +198,7 @@ function getResourcesList() {
             $("#recent-standard-link").attr("href", resource.nzqa_url);
         }
         } else { // achievement standard
-        if (sortbycategory) {
+        if (sortbycategory) { // sorting by category
             all_categories = new Set();
             most_recent_achievement = null;    // for getting the most recent achievement standard
             resources.forEach((resource) => {
@@ -214,11 +214,11 @@ function getResourcesList() {
                 $("#recent-standard-link").attr("href", most_recent_achievement.nzqa_url);
             }
 
-            all_categories.forEach((category) => {
+            all_categories.forEach((category) => { 
                 // filter resources by category
                 resources_for_category = resources.filter((resource) => (resource.category == category))
                 // sort resources by year (they should already be like this but I want to make sure) reversed because we want 2021 first
-                resources_for_category = resources.sort((a, b) => (a.year > b.year) - (a.year < b.year)).reverse()
+                resources_for_category = resources_for_category.sort((a, b) => (a.year > b.year) - (a.year < b.year)).reverse()
 
                 category_names = {
                     "achievements": "Achievement Standards",
@@ -248,7 +248,7 @@ function getResourcesList() {
                             </div>`
             });
 
-        } else {
+        } else { // sorting by year
             all_years = new Set()
             most_recent_achievement = null; // for getting the most recent achievement standard
             resources.forEach((resource) => {
