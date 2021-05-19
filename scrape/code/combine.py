@@ -14,6 +14,9 @@ replacement_words = [
     ("P?keh?", "Pakeha")
 ]
 
+def debug_time():
+    return datetime.now().strftime('%y/%m/%d %H:%M:%S')
+
 
 def get_dataset():
     online_url = "https://catalogue.data.govt.nz/dataset/a314d10e-8da6-4640-959f-256160f9ffe4/resource/0986281d-d293-4bc5-950e-640e5bc5a07e/download/list-of-all-standards-2020.csv"
@@ -25,13 +28,13 @@ def get_dataset():
     nzqafn = "../cache/nzqa.csv"
     if os.path.isfile(nzqafn):
         print(
-            f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Using cached NZQA Dataset")
+            f"[{debug_time()}] Using cached NZQA Dataset")
     else:
         print(
-            f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Downloading NZQA Dataset")
+            f"[{debug_time()}] Downloading NZQA Dataset")
         page = requests.get(online_url)  # send request
         page.raise_for_status()  # raise an error on a bad status
-        print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Caching')
+        print(f'[{debug_time()}] Caching')
         # make directories on the way to the caching location
         os.makedirs(os.path.dirname(nzqafn), exist_ok=True)
         with open(nzqafn, 'w') as f:
@@ -42,7 +45,7 @@ def get_dataset():
     ds_df = pd.read_csv(nzqafn)
     ds_df.columns = ['title', 'number', 'type', 'version', 'level', 'credits', 'status',
                      'v_status', 'field', 'subfield', 'domain']  # rename columns to ones that don't have spaces
-    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Parsing...")
+    print(f"[{debug_time()}] Parsing...")
     for _, row in ds_df.iterrows():
         # check that the standard is worth holding on to
         if row['status'] == "Registered" and row['v_status'] == "Current":
@@ -64,7 +67,6 @@ def get_scraped():
 
     return s_st, s_re
 
-
 def get_ncea_litnum():
 
     # get the literacy/numeracy xls spreadsheet
@@ -72,13 +74,13 @@ def get_ncea_litnum():
     litnum_fn = "../cache/litnum.xls"
     if os.path.isfile(litnum_fn):  # if it's cached, use it
         print(
-            f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Using cached Literacy and Numeracy data")
+            f"[{debug_time()}] Using cached Literacy and Numeracy data")
     else:  # download it
         print(
-            f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Downloading Literacy and Numeracy data")
+            f"[{debug_time()}] Downloading Literacy and Numeracy data")
         page = requests.get(litnum_url)  # send request
         page.raise_for_status()  # raise an error on a bad status
-        print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Caching')
+        print(f'[{debug_time()}] Caching')
         # make directories on the way to the caching location
         os.makedirs(os.path.dirname(litnum_fn), exist_ok=True)
         with open(litnum_fn, 'wb') as f:
@@ -94,7 +96,7 @@ def get_ncea_litnum():
     # 'Numeracy' is either Y or blank
     # 'Status' is either 'Expiring', 'Registered', or 'Expired'
     ln_dict = {}  # this dict will be filled with key-value pairs for sn: {'literacy': bool, 'numeracy': bool}
-    print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Parsing...')
+    print(f'[{debug_time()}] Parsing...')
     for _, row in ln_df.iterrows():
         sn = int(row['Registered'])
         literacy = str(row['Literacy']).upper().strip() == "Y"
@@ -112,13 +114,13 @@ def get_ue_lit():
     uelit_fn = "../cache/uelit.xlsx"
     if os.path.isfile(uelit_fn):  # if it's cached, use it
         print(
-            f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Using cached UE Literacy data")
+            f"[{debug_time()}] Using cached UE Literacy data")
     else:  # download it
         print(
-            f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Downloading UE Literacy data")
+            f"[{debug_time()}] Downloading UE Literacy data")
         page = requests.get(uelit_url)  # send request
         page.raise_for_status()  # raise an error on a bad status
-        print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Caching')
+        print(f'[{debug_time()}] Caching')
         # make directories on the way to the caching location
         os.makedirs(os.path.dirname(uelit_fn), exist_ok=True)
         with open(uelit_fn, 'wb') as f:
@@ -134,7 +136,7 @@ def get_ue_lit():
     # 'Writing' is either Y or N
     # 'Subject Reference' is e.g. Accounting 3.1, except they mispelled some things so i can't use it. :(
     uelit_dict = {}  # this dict will be filled with key-value pairs for sn: {'reading': bool, 'writing': bool}
-    print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Parsing...')
+    print(f'[{debug_time()}] Parsing...')
     for _, row in uelit_df.iterrows():
         # THERE IS A SINGLE ROW thAT DOESn'T HAVE AN ID BECAUSE AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
         sn = row['ID']
@@ -150,6 +152,28 @@ def get_ue_lit():
 
     return uelit_dict
 
+def get_subjects():
+    # refer to issue #33 for more information, but basically I must make sure that the subject ids remain constant from now
+    subject_fn = '../cache/subjects.json'
+    
+    subjects = [] # if there isn't a file
+    if os.path.isfile(subject_fn):
+        print(f"[{debug_time()}] Using previous list of subject IDs")
+    
+        # open the file and read the subject list    
+        with open(subject_fn) as f:
+            subjects = json.load(f)['subjects']
+        
+    return subjects
+
+def store_subjects(subjects):
+    # second part of issue #33
+    subject_fn = '../cache/subjects.json'
+    
+    with open(subject_fn, 'w') as f:
+       json.dump({'subjects': subjects}, f)
+
+    return True
 
 def combine():
 
@@ -158,12 +182,17 @@ def combine():
     ln_dict = get_ncea_litnum()
     uelit_dict = get_ue_lit()
 
-    print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Combining/Entering the four, basing on {len(s_st)} standards')
+    print(f'[{debug_time()}] Combining/Entering the four, basing on {len(s_st)} standards')
     # join the two, getting all the assessments from the json object and assigning them a field, subfield, and domain
     # also check that the two datasets match, print and debug where they don't
     standards = []  # output list of tuple objects for each standard
     # produce list of unique fields, subfields, domains, and subjects
-    subjects = []
+    # for subjects we have to do special things for #33
+    subjects = get_subjects() # get current subject_ids 
+    max_subject_id = 0
+    if len(subjects) > 0:
+        max_subject_id = max(subjects, key=lambda s: s['id']) # max subject id we already know
+
     fields = []
     subfields = []
     domains = []
@@ -185,12 +214,22 @@ def combine():
     duplicate = 0
     for scraped in s_st:
 
-        # update subjects, types lists
-        subject_tuple = (scraped['subject']['name'],
-                         scraped['subject']['display_name'])
-        if subject_tuple not in subjects:
-            subjects.append(subject_tuple)
-        subject_id = subjects.index(subject_tuple)
+        # update subjects and types lists
+        subject_info = scraped['subject']
+        try:
+            subject_info = next(subject for subject in subjects if subject['name'] == subject_info['name'])
+            max_subject_id = max(max_subject_id, subject_info['id']) # update max id (for use when we don't know)
+            # that will update it to be the subject it already has
+            # all of the try: next() idioms I have in this will take a lot of time.
+            # maybe I should try to improve performance, it takes a couple minutes for the whole scrape.
+            # maybe this is a good opportunity for rust!!
+        except StopIteration:
+            # we don't have this subject in our list of known subjects
+            subject_info['id'] = max_subject_id
+            subjects.append(subject_info)
+            max_subject_id += 1 # increment
+
+        subject_id = subject_info['id'] # this will either have been set by the known list or by the max_subject_id 
         # add join between subject and standard
         subject_standards.append((subject_id, scraped['number']))
 
@@ -225,7 +264,7 @@ def combine():
                         'numeracy': info['numeracy']}
         except KeyError:
             # it isn't mentioned
-            # this really isn't a problem
+            # this really isn't a problem, just null null
             pass
 
         try:
@@ -280,7 +319,7 @@ def combine():
             version = provided['version']
 
         except StopIteration:
-            related_entry = False  # lower the flag
+            related_entry = False  # lower the flag for there being an entry in the csv dataset
             singular += 1  # one more singular assessment
             #print(f"ONLY SCRAPED AS{scraped['number']:<5d}")
 
@@ -300,7 +339,8 @@ def combine():
                 # use the scraped title as these are what people would expect, what's on the website and stuff
                 # only do this if there aren't ? in the scraped title though
                 title = scraped['title']
-
+        
+        # entry for the search database
         search_standard = {"id": str(standard_number),
                            "title": title,
                            "level": level,
@@ -311,7 +351,8 @@ def combine():
                            "writing": ue_row['writing'],
                            "internal": internal,
                            "subject_id": [subject_id]}
-
+        
+        # entry for the postgresql database
         outdict = {"standard_number": standard_number,
                    "title": title,
                    "internal": internal,
@@ -334,11 +375,12 @@ def combine():
             searched = next(
                 standard for standard in search_standards if int(standard['id']) == outdict['standard_number']
             )
-            print(f"AS{outdict['standard_number']} is a duplicate!")
+            # print(f"AS{outdict['standard_number']} is a duplicate!")
             # i don't need to have an if here because it will raise an exception if it doesnt exist      
+            # so, assuming it exists:
             all_subjects = searched['subject_id'] + [subject_id]
             all_subjects = [*{*all_subjects}] # convert to set (unique only) and then back to a list
-            searched['subject_id'] = all_subjects # the next() function returns an object that modifies the object in the list
+            searched['subject_id'] = all_subjects # the next() function returns an object (pointery thing) that modifies the object in the list
             # the code i used to test this was:
             # >>> a = []
             # >>> for i in range(10):
@@ -349,7 +391,7 @@ def combine():
             # >>> b['a'] = 10
             # >>> a
             # [{'a': 0}, {'a': 10}, {'a': 2}, {'a': 3}, {'a': 4}, {'a': 5}, {'a': 6}, {'a': 7}, {'a': 8}, {'a': 9}]
-            # you can see that the list a is mutated to have the second element have 'a' = 10, as opposed to the original 1
+            # you can see that the list a is mutated to have the second element have 'a' = 10, as opposed to the original 'a' = 1 in that element
             # i really hope this doesn't come back to bite me :(
         except StopIteration:  # there is no duplicate
             standards.append(outdict)
@@ -358,8 +400,11 @@ def combine():
     print(
         f"Resolved:\n{duplicate:>3d} {'Duplicates':>10s}\n{mismatch:>3d} {'Mismatches':>10s}\n{singular:>3d} {'Singulars':>10s}")
 
+    print(f"[{debug_time()}] Storing subjects as JSON...")
+    store_subjects(subjects)
+
     # Resources!
-    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Processing {len(s_re)} resources...")
+    print(f"[{debug_time()}] Processing {len(s_re)} resources...")
     categories = []  # list of categories to go into the database
     resources = []  # list of resource dicts to go into the database
     duplicate = 0  # counter for duplicates that i resolve
@@ -391,8 +436,8 @@ def combine():
         except StopIteration:  # there is no duplicate, so it reaches the stopiteration endpoint
             resources.append(resource)
 
-    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Resolved {duplicate} duplicates")
-    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Entering all data")
+    print(f"[{debug_time()}] Resolved {duplicate} duplicate resources")
+    print(f"[{debug_time()}] Entering all data")
 
     # Enter the data
     conn = psycopg2.connect(host="db",  # this is because docker! cool!
@@ -400,39 +445,30 @@ def combine():
                             user    =os.environ.get("POSTGRES_USER"),
                             password=os.environ.get("POSTGRES_PASSWORD"))
 
-    # convert list of tuples into list of dictionaries for meilisearch
-    search_subjects = [{"id": str(index),
-                        "name": subj_name[0],
-                        "display_name": subj_name[1]} for index, subj_name in enumerate(subjects)]
 
-    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Entering subjects and standards into Meilisearch")
+    print(f"[{debug_time()}] Entering subjects and standards into Meilisearch")
 
     # save both the subjects and standards to the search utility
     client = meilisearch.Client('http://search:7700')
-    client.index('subjects').add_documents(search_subjects)
+    client.index('subjects').add_documents(subjects)
     client.index('standards').add_documents(search_standards)
 
-    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Entering subjects and standards into PostgreSQL")
+    print(f"[{debug_time()}] Entering subjects and standards into PostgreSQL")
     # enter info
     with conn.cursor() as curs:
         # insert types ([*enumerate(types)] turns ['a','b'] to [(0,'a'), (1,'b')], assigning indicies)
-        # for the subjects, which is a tuple, we need to make a better list from [0, (a,b)] to [0, a, b]
-        flattened_subjects = [list(flatten(sublist))
-                              for sublist in [*enumerate(subjects)]]
-        curs.executemany("INSERT INTO standard_types (type_id, name)                   VALUES (%s,%s);", [
-                         *enumerate(types)])
-        curs.executemany(
-            "INSERT INTO subjects       (subject_id, name, display_name)  VALUES (%s,%s,%s);", flattened_subjects)
-        curs.executemany("INSERT INTO fields         (field_id, name)                  VALUES (%s,%s);", [
-                         *enumerate(fields)])
-        curs.executemany("INSERT INTO subfields      (subfield_id, name)               VALUES (%s,%s);", [
-                         *enumerate(subfields)])
-        curs.executemany("INSERT INTO domains        (domain_id, name)                 VALUES (%s,%s);", [
-                         *enumerate(domains)])
+        # for the subjects, which is a dict, we need to make a list from {'id': 0, 'name': a, 'display_name': b} to [0, a, b]
+        flattened_subjects = [[s['id'], s['name'], s['display_name']] for s in subjects]
+        curs.executemany("INSERT INTO standard_types (type_id, name)                   VALUES (%s,%s);", [*enumerate(types)])
+        curs.executemany("INSERT INTO subjects       (subject_id, name, display_name)  VALUES (%s,%s,%s);", flattened_subjects)
+        curs.executemany("INSERT INTO fields         (field_id, name)                  VALUES (%s,%s);", [*enumerate(fields)])
+        curs.executemany("INSERT INTO subfields      (subfield_id, name)               VALUES (%s,%s);", [*enumerate(subfields)])
+        curs.executemany("INSERT INTO domains        (domain_id, name)                 VALUES (%s,%s);", [*enumerate(domains)])
 
         # insert a dict into a table
         # this should be easier, oh my god
-        # i'm doing this because there are so many columns to enter, it looks super frickin messy
+        # i'm doing this because there are so many columns to enter, it looks super frickin messy (but it would be messier if
+        # I did this with the normal SQL statement thing
         cols = list(standards[0].keys())  # get all the column names
 
         vals = [[standard[x] for x in cols]
@@ -445,8 +481,6 @@ def combine():
             cols=", ".join(cols), vals_str=vals_str), vals)  # combine it all
 
         # insert relational join table for link between standards and subjects
-        curs.executemany(
-            "INSERT INTO standard_subject (subject_id, standard_number) VALUES (%s,%s);", subject_standards)
         # insert literacy/numeracy/reading/writing
         # flatten dicts to just the values (with a good order)
         # the order is standard_number, literacy, numeracy
@@ -454,13 +488,12 @@ def combine():
         ncea_vals = [list(row.values()) for row in ncea_litnum]
         ue_vals = [list(row.values()) for row in ue_lit]
         curs.executemany(
-            "INSERT INTO ncea_litnum (standard_number, literacy, numeracy) VALUES (%s,%s,%s);", ncea_vals)
+            "INSERT INTO ncea_litnum (standard_number, literacy, numeracy) VALUES (%s,%s,%s);", ncea_vals) 
         curs.executemany(
             "INSERT INTO ue_literacy (standard_number, reading , writing ) VALUES (%s,%s,%s);", ue_vals)
 
         # handle the resources and the cateogires
-        curs.executemany("INSERT INTO resource_categories (category_id, name) VALUES (%s, %s);", [
-                         *enumerate(categories)])
+        curs.executemany("INSERT INTO resource_categories (category_id, name) VALUES (%s, %s);", [*enumerate(categories)])
         # convert list of dicts to list of tuples with the right order
         resource_tuples = [(
             r['standard_number'],
@@ -472,7 +505,7 @@ def combine():
         curs.executemany(
             "INSERT INTO resources (standard_number, category, year, title, nzqa_url, filepath) VALUES (%s,%s,%s, %s,%s,%s);", resource_tuples)
 
-        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Committing...")
+        print(f"[{debug_time()}] Committing...")
         conn.commit()
 
     conn.close()
