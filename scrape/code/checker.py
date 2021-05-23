@@ -148,6 +148,7 @@ def test():
 
 if __name__ == "__main__":
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Starting checking")
+    alreadyforcescraped = False
     while True:
         if os.path.isfile(of):  # check if the output file exists
             with open(of) as outfile:
@@ -159,7 +160,8 @@ if __name__ == "__main__":
                 olderthanayear = (
                     lastupdated + timedelta(days=365)) < datetime.now()
                 # if FORCE_SCRAPE environment variable is set, scrape even if previous file is young young
-                if olderthanayear or os.environ.get("FORCE_SCRAPE") == '1':
+                if olderthanayear or (os.environ.get("FORCE_SCRAPE") == '1' and not alreadyforcescraped):
+                    alreadyforcescraped =  os.environ.get("FORCE_SCRAPE") == 1 # only force scrape the first time around
                     print(
                         f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] File is outdated, or scrape is forced.")
                     print(
