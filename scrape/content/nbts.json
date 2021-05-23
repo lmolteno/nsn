@@ -3,49 +3,49 @@
         {
             "subject": 41, 
             "level_1": [
-                "<a class='btn btn-link text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/Level1_physics/NCEA1_physics.html'>No Brain Too Small</a>"
+                "<p class='fw-normal mb-0'>Level 1 Physics study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/Level1_physics/NCEA1_physics.html'>No Brain Too Small</a></p>"
             ],
             "level_2": [
-                "<a class='btn btn-link text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_physics/NCEA2_physics.html'>No Brain Too Small</a>"       
+                "<p class='fw-normal mb-0'>Level 2 Physics study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_physics/NCEA2_physics.html'>No Brain Too Small</a></p>"       
             ],
             "level_3": [
-                "<a class='btn btn-link text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_physics/NCEA2_physics.html'>No Brain Too Small</a>"
+                "<p class='fw-normal mb-0'>Level 3 Physics study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_physics/NCEA2_physics.html'>No Brain Too Small</a></p>"
             ]
         },
         {
             "subject": 5,
             "level_1": [
-                "<a class='btn btn-link text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/Level1_chemistry/NCEA1_chemistry.html'>No Brain Too Small</a>"
+                "<p class='fw-normal mb-0'>Level 1 Chemistry study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/Level1_chemistry/NCEA1_chemistry.html'>No Brain Too Small</a></p>"
             ],
             "level_2": [
-                "<a class='btn btn-link text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_chemistry/NCEA2_chemistry.html'>No Brain Too Small</a>"
+                "<p class='fw-normal mb-0'>Level 2 Chemistry study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_chemistry/NCEA2_chemistry.html'>No Brain Too Small</a></p>"
             ],
             "level_3": [
-                "<a class='btn btn-link text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_chemistry/NCEA3_chemistry.html'>No Brain Too Small</a>"
+                "<p class='fw-normal mb-0'>Level 3 Chemistry study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_chemistry/NCEA3_chemistry.html'>No Brain Too Small</a></p>"
             ]
         },
         {
             "subject": 4,
             "level_1": [
-                "<a class='btn btn-link text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/Level1_biology/NCEA1_biology.html'>No Brain Too Small</a>"
+                "<p class='fw-normal mb-0'>Level 1 Biology study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/Level1_biology/NCEA1_biology.html'>No Brain Too Small</a></p>"
             ],
             "level_2": [
-                "<a class='btn btn-link text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_biology/NCEA2_biology.html'>No Brain Too Small</a>"
+                "<p class='fw-normal mb-0'>Level 2 Biology study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_biology/NCEA2_biology.html'>No Brain Too Small</a></p>"
             ],
             "level_3": [
-                "<a class='btn btn-link text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_biology/NCEA3_biology.html'>No Brain Too Small</a>"
+                "<p class='fw-normal mb-0'>Level 3 Biology study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_biology/NCEA3_biology.html'>No Brain Too Small</a></p>"
             ]
         },
         {
             "subject": 46,
             "level_1": [
-                "<a class='btn btn-link text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/Level1_science/NCEA1_science.html'>No Brain Too Small</a>"
+                "<p class='fw-normal mb-0'>Level 1 Science study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/Level1_science/NCEA1_science.html'>No Brain Too Small</a></p>"
             ],
             "level_2": [
-                "<a class='btn btn-link text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_science/NCEA2_science.html'>No Brain Too Small</a>"
+                "<p class='fw-normal mb-0'>Level 2 Science study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_science/NCEA2_science.html'>No Brain Too Small</a></p>"
             ],
             "level_3": [
-                "<a class='btn btn-link text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_science/NCEA3_science.html'>No Brain Too Small</a>"
+                "<p class='fw-normal mb-0'>Level 3 Science study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_science/NCEA3_science.html'>No Brain Too Small</a></p>"
             ]
         }
     ]

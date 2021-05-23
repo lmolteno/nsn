@@ -259,9 +259,7 @@ function generateCustomHtml(level = null) {
     } else {
         // concatenate them into a listerino
         return  `<div class='row justify-content-center'>
-                     ${
-                        elements.map(el => `<div class='col-sm text-center'>${el.html}</div>`).join("")
-                     }
+                     ${elements.map(el => `<div class='col-auto text-center'>${el.html}</div>`).join("")}
                    </div>`;
     }
 }
@@ -333,7 +331,7 @@ function updateEverything() { // populate the standards list, and the subject na
                 <th colspan="9" class="text-center border border-dark pb-1">
                     <div class='container px-1'>
                     <div class="row border-bottom pb-2"><div class="col fw-bold fs-3 text-center">Level ` + current_level + `</div></div>
-                    <div class="mt-1">${generateCustomHtml(current_level)}</div>
+                    <div class="mt-2">${generateCustomHtml(current_level)}</div>
                     <div class="row justify-content-center">`;
             views.forEach(view => { //  add buttons for each view
                 outhtml += `<div class='col-auto'><a class="btn btn-link text-decoration-none" target="_blank" href="` + baseurl + view[0] + `">` + view[1] + `</a></div>`;
