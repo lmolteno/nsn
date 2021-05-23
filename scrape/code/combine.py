@@ -9,14 +9,18 @@ from datetime import datetime
 import meilisearch  # for entering in search data
 from pandas.core.common import flatten
 
+# functions for getting information to be combined
+from custom_content import get_content
+from literacy_numeracy import get_ncea_litnum, get_ue_lit
+
+
 replacement_words = [
     ("M?ori", "Maori"),
     ("P?keh?", "Pakeha")
 ]
 
-def debug_time():
+def debug_time(): # for faster/easier timestamping
     return datetime.now().strftime('%y/%m/%d %H:%M:%S')
-
 
 def get_dataset():
     online_url = "https://catalogue.data.govt.nz/dataset/a314d10e-8da6-4640-959f-256160f9ffe4/resource/0986281d-d293-4bc5-950e-640e5bc5a07e/download/list-of-all-standards-2020.csv"
@@ -67,91 +71,6 @@ def get_scraped():
 
     return s_st, s_re
 
-def get_ncea_litnum():
-
-    # get the literacy/numeracy xls spreadsheet
-    litnum_url = "https://www.nzqa.govt.nz/assets/qualifications-and-standards/qualifications/ncea/NCEA-subject-resources/Literacy-and-Numeracy/literacy-numeracy-assessment-standards-April-2019.xls"
-    litnum_fn = "../cache/litnum.xls"
-    if os.path.isfile(litnum_fn):  # if it's cached, use it
-        print(
-            f"[{debug_time()}] Using cached Literacy and Numeracy data")
-    else:  # download it
-        print(
-            f"[{debug_time()}] Downloading Literacy and Numeracy data")
-        page = requests.get(litnum_url)  # send request
-        page.raise_for_status()  # raise an error on a bad status
-        print(f'[{debug_time()}] Caching')
-        # make directories on the way to the caching location
-        os.makedirs(os.path.dirname(litnum_fn), exist_ok=True)
-        with open(litnum_fn, 'wb') as f:
-            # save to file for later caching if there's a cache
-            f.write(page.content)
-
-    # read it with pandas
-    # header=1 because the header is on the second row
-    ln_df = pd.read_excel(litnum_fn, header=1)
-    # 'Registered' is the standard number
-    # 'Title' is the title, with macrons!
-    # 'Literacy' is either Y or blank
-    # 'Numeracy' is either Y or blank
-    # 'Status' is either 'Expiring', 'Registered', or 'Expired'
-    ln_dict = {}  # this dict will be filled with key-value pairs for sn: {'literacy': bool, 'numeracy': bool}
-    print(f'[{debug_time()}] Parsing...')
-    for _, row in ln_df.iterrows():
-        sn = int(row['Registered'])
-        literacy = str(row['Literacy']).upper().strip() == "Y"
-        numeracy = str(row['Numeracy']).upper().strip() == "Y"
-        status = row['Status']
-        if status == 'Registered':
-            ln_dict[sn] = {'literacy': literacy, 'numeracy': numeracy}
-
-    return ln_dict
-
-
-def get_ue_lit():
-    # get the UE literacy xls*X* spreadsheet (the X is frustrating because I need a different engine to actually reference it)
-    uelit_url = "https://www.nzqa.govt.nz/assets/qualifications-and-standards/Awards/University-Entrance/UE-Literacy-List/University-Entrance-Literacy-list-from-1-January-2020-1.xlsx"
-    uelit_fn = "../cache/uelit.xlsx"
-    if os.path.isfile(uelit_fn):  # if it's cached, use it
-        print(
-            f"[{debug_time()}] Using cached UE Literacy data")
-    else:  # download it
-        print(
-            f"[{debug_time()}] Downloading UE Literacy data")
-        page = requests.get(uelit_url)  # send request
-        page.raise_for_status()  # raise an error on a bad status
-        print(f'[{debug_time()}] Caching')
-        # make directories on the way to the caching location
-        os.makedirs(os.path.dirname(uelit_fn), exist_ok=True)
-        with open(uelit_fn, 'wb') as f:
-            # save to file for later caching if there's a cache
-            f.write(page.content)
-
-    # read it with pandas (uelit dataframe)
-    # header=1 because the header is on the second row
-    uelit_df = pd.read_excel(uelit_fn, header=1, engine='openpyxl')
-    # 'ID' is the standard number
-    # 'Title' is the title, with macrons!
-    # 'Reading' is either Y or N
-    # 'Writing' is either Y or N
-    # 'Subject Reference' is e.g. Accounting 3.1, except they mispelled some things so i can't use it. :(
-    uelit_dict = {}  # this dict will be filled with key-value pairs for sn: {'reading': bool, 'writing': bool}
-    print(f'[{debug_time()}] Parsing...')
-    for _, row in uelit_df.iterrows():
-        # THERE IS A SINGLE ROW thAT DOESn'T HAVE AN ID BECAUSE AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        sn = row['ID']
-        try:
-            sn = int(sn)
-        except ValueError:
-            continue  # ignore it
-
-        # I have to strip it because there are sometimes random spaces
-        reading = str(row['Reading']).upper().strip() == "Y"
-        writing = str(row['Writing']).upper().strip() == "Y"
-        uelit_dict[sn] = {'reading': reading, 'writing': writing}
-
-    return uelit_dict
-
 def get_subjects():
     # refer to issue #33 for more information, but basically I must make sure that the subject ids remain constant from now
     subject_fn = '../cache/subjects.json'
@@ -191,7 +110,7 @@ def combine():
     subjects = get_subjects() # get current subject_ids 
     max_subject_id = 0
     if len(subjects) > 0:
-        max_subject_id = max(subjects, key=lambda s: s['id']) # max subject id we already know
+        max_subject_id = max(subjects, key=lambda s: s['id'])['id'] # max subject id we already know
 
     fields = []
     subfields = []
@@ -437,6 +356,37 @@ def combine():
             resources.append(resource)
 
     print(f"[{debug_time()}] Resolved {duplicate} duplicate resources")
+
+    # custom content (#30)
+    print(f"[{debug_time()}] Getting custom content...")
+    contents = get_content() # this is a list of objects
+    # each object represents the content for a subject
+    # {
+    #   subject_id
+    #   level_1 -> list of html objects
+    #   level_2 -> ''
+    #   level_3 -> ''
+    #   general -> '' for the top of the subject page
+    # }
+    db_contents = [] # this will contain tuples of (subject_id, level, html) and level can be null
+    print(f"[{debug_time()}] Processing custom content...")
+    for content in contents:
+        sections = [
+            ('level_1',1),
+            ('level_2',2),
+            ('level_3',3),
+            ('general', None)
+        ]
+        for section in sections:
+            if section[0] in content.keys():
+                for html in content[section[0]]:
+                    outtuple = (content['subject'], section[1], html)
+                    db_contents.append(outtuple)
+
+    
+        
+        
+
     print(f"[{debug_time()}] Entering all data")
 
     # Enter the data
@@ -505,6 +455,11 @@ def combine():
         curs.executemany(
             "INSERT INTO resources (standard_number, category, year, title, nzqa_url, filepath) VALUES (%s,%s,%s, %s,%s,%s);", resource_tuples)
 
+        # insert custom content
+        curs.executemany(
+            "INSERT INTO custom_content (subject_id, level, html) VALUES (%s, %s, %s);",
+            db_contents
+        )
         print(f"[{debug_time()}] Committing...")
         conn.commit()
 

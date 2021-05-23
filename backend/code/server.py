@@ -154,6 +154,14 @@ class DBManager:
         resources = self.cursor.fetchall()
         return resources
 
+    def get_content(self, subject_id):
+        sql = """SELECT level,
+                        html FROM custom_content
+                WHERE subject_id = %s;"""
+        self.cursor.execute(sql, (subject_id,))
+        content = self.cursor.fetchall()
+        return content
+
 
 server = Flask(__name__)
 conn = None
@@ -266,6 +274,14 @@ def api_structure():
     else:
         return jsonify({"success": False, "error": "Structure information is not present in the database. Contact linus@molteno.net"})
 
+@server.route('/api/content', methods=['GET'])
+def api_content():
+    global conn
+    if not conn:
+        conn = DBManager() # initialise if not there
+
+    content = conn.get_content(request.args['id']) # get content for subject
+    return jsonify({'success': True, 'content': content})
 
 if __name__ == '__main__':
     server.run(port=3000)
