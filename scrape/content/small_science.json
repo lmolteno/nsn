@@ -27,13 +27,13 @@
         {
             "subject": 4,
             "level_1": [
-                "<p class='fw-normal mb-0'>Level 1 Biology study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/Level1_biology/NCEA1_biology.html'>No Brain Too Small</a></p>"
+                "<p class='fw-normal mb-0'>Level 1 Biology study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/Level1_biology/NCEA1_biology.html'>No Brain Too Small</a> and <a class='text-decoration-none' target='_blank' href='https://www.passbiology.co.nz/biology-level-1'>Pass Biology</a></p>"
             ],
             "level_2": [
-                "<p class='fw-normal mb-0'>Level 2 Biology study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_biology/NCEA2_biology.html'>No Brain Too Small</a></p>"
+                "<p class='fw-normal mb-0'>Level 2 Biology study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_biology/NCEA2_biology.html'>No Brain Too Small</a> and <a class='text-decoration-none' target='_blank' href='https://www.passbiology.co.nz/biology-level-2'>Pass Biology</a></p>"
             ],
             "level_3": [
-                "<p class='fw-normal mb-0'>Level 3 Biology study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_biology/NCEA3_biology.html'>No Brain Too Small</a></p>"
+                "<p class='fw-normal mb-0'>Level 3 Biology study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_biology/NCEA3_biology.html'>No Brain Too Small</a> and <a class='text-decoration-none' target='_blank' href='https://www.passbiology.co.nz/biology-level-3'>Pass Biology</a></p>"
             ]
         },
         {
