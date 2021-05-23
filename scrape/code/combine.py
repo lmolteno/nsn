@@ -383,10 +383,6 @@ def combine():
                     outtuple = (content['subject'], section[1], html)
                     db_contents.append(outtuple)
 
-    
-        
-        
-
     print(f"[{debug_time()}] Entering all data")
 
     # Enter the data
@@ -431,6 +427,8 @@ def combine():
             cols=", ".join(cols), vals_str=vals_str), vals)  # combine it all
 
         # insert relational join table for link between standards and subjects
+        curs.executemany(
+            "INSERT INTO standard_subject (subject_id, standard_number) VALUES (%s,%s);", subject_standards)
         # insert literacy/numeracy/reading/writing
         # flatten dicts to just the values (with a good order)
         # the order is standard_number, literacy, numeracy
