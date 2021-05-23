@@ -18,10 +18,10 @@
                 "<p class='fw-normal mb-0'>Level 1 Chemistry study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/Level1_chemistry/NCEA1_chemistry.html'>No Brain Too Small</a></p>"
             ],
             "level_2": [
-                "<p class='fw-normal mb-0'>Level 2 Chemistry study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_chemistry/NCEA2_chemistry.html'>No Brain Too Small</a></p>"
+                "<p class='fw-normal mb-0'>Level 2 Chemistry study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_chemistry/NCEA2_chemistry.html'>No Brain Too Small</a> and <a class='text-decoration-none' target='_blank' href='http://sciencescribe.co.nz/2chem.html'>Science Scribe</a></p>"
             ],
             "level_3": [
-                "<p class='fw-normal mb-0'>Level 3 Chemistry study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_chemistry/NCEA3_chemistry.html'>No Brain Too Small</a></p>"
+                "<p class='fw-normal mb-0'>Level 3 Chemistry study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_chemistry/NCEA3_chemistry.html'>No Brain Too Small</a> and <a class='text-decoration-none' target='_blank' href='http://sciencescribe.co.nz/3chem.html'>Science Scribe</a></p>"
             ]
         },
         {
@@ -39,7 +39,7 @@
         {
             "subject": 46,
             "level_1": [
-                "<p class='fw-normal mb-0'>Level 1 Science study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/Level1_science/NCEA1_science.html'>No Brain Too Small</a></p>"
+                "<p class='fw-normal mb-0'>Level 1 Science study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/Level1_science/NCEA1_science.html'>No Brain Too Small</a> and <a class='text-decoration-none' target='_blank' href='http://sciencescribe.co.nz/1sci.html'>Science Scribe</a></p>"
             ],
             "level_2": [
                 "<p class='fw-normal mb-0'>Level 2 Science study resources from <a class='text-decoration-none' target='_blank' href='http://www.nobraintoosmall.co.nz/html/senior_science/NCEA2_science.html'>No Brain Too Small</a></p>"
