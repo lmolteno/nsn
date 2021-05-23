@@ -103,3 +103,13 @@ CREATE TABLE resources (
    REFERENCES standards(standard_number)
    ON DELETE CASCADE
 );
+
+CREATE TABLE custom_content (
+  subject_id INT NOT NULL,
+  level INT,
+  html VARCHAR,
+  CONSTRAINT fk_content_subject
+   FOREIGN KEY(subject_id)
+    REFERENCES subjects(subject_id)
+    ON DELETE CASCADE
+);

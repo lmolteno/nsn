@@ -1,5 +1,6 @@
 // globals
 subjects = [];
+content = [];
 standards = [];
 starred = [];
 top_result = undefined;
@@ -66,7 +67,7 @@ function getStandards() { // get the list of standards for the subject
                 resolve()
             } else {
                 alert("Failure to get standards. Try reloading. If the problem persists, email linus@molteno.net");
-                reject(data,error)
+                reject(data.error)
             }
         });
     });
@@ -235,6 +236,36 @@ function generateStandardRow(standard) {
     // replaced with the standard number 
 }
 
+function getCustomContent() {
+    let promise = new Promise((resolve, reject) => {
+        $.get(`/api/content?id=`+subject_id, function (data) { // send a get request to my api
+            if (data.success) {
+                console.log("Successfully gathered custom content");
+                content = data['content'];
+                resolve()
+            } else {
+                //alert("Failure to get custom content. Try reloading. If the problem persists, email linus@molteno.net");
+                reject(data.error)
+            }
+        })
+    });
+    return promise
+}
+
+function generateCustomHtml(level = null) {
+    elements = content.filter(el => el.level == level)
+    if (elements.length == 0) {
+        return ""
+    } else {
+        // concatenate them into a listerino
+        return  `<div class='row justify-content-center'>
+                     ${
+                        elements.map(el => `<div class='col-sm text-center'>${el.html}</div>`).join("")
+                     }
+                   </div>`;
+    }
+}
+
 
 function updateEverything() { // populate the standards list, and the subject name
     subject = subjects.find(o => o.subject_id == subject_id)
@@ -283,6 +314,13 @@ function updateEverything() { // populate the standards list, and the subject na
                         </tr>
                     </thead>`;
 
+    // update custom general content
+    generalHtml = generateCustomHtml(); // not passing a level parameter gives the general html
+    $("#custom-general-container").html(generalHtml)
+    if (generalHtml.length > 0) {
+        $("#custom-general-container").addClass("my-2")
+    }
+
     var level_arr = (level == null) ? [1, 2, 3] : [level,]
     level_arr.forEach(current_level => { // for each level allowed on the page
         standards_for_level = standards.filter(o => o.level == current_level);
@@ -295,6 +333,7 @@ function updateEverything() { // populate the standards list, and the subject na
                 <th colspan="9" class="text-center border border-dark pb-1">
                     <div class='container px-1'>
                     <div class="row border-bottom pb-2"><div class="col fw-bold fs-3 text-center">Level ` + current_level + `</div></div>
+                    <div class="mt-1">${generateCustomHtml(current_level)}</div>
                     <div class="row justify-content-center">`;
             views.forEach(view => { //  add buttons for each view
                 outhtml += `<div class='col-auto'><a class="btn btn-link text-decoration-none" target="_blank" href="` + baseurl + view[0] + `">` + view[1] + `</a></div>`;
@@ -338,6 +377,7 @@ function handleSearchSubmit() {
 $(document).ready(function () {
     getStarred();
     getSubjects()
+        .then(getCustomContent)
         .then(getStandards)
         .then(updateEverything); // using promises to get synchronisity among multiple functions
     $("#searchbox").val("");
