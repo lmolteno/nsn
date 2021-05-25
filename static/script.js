@@ -70,7 +70,7 @@ function generateSubjectLI(subject) {
     // construct li element for each subject
     outhtml = `<li class='py-1 row'>
                     -
-                    <a class='col link text-decoration-none px-0 mx-2' href=/subject/?id=${subject.subject_id}>
+                    <a class='col link text-decoration-none px-0 mx-2' href=/subject/${subject.subject_id}>
                         ${subject.display_name}
                     </a>
                 </li>`
@@ -188,7 +188,7 @@ function displayStarred() {
             // generate subject header
             outhtml += `<tr>
                             <td colspan="9" class="text-center border border-dark pb-1">
-                                <a href="/subject/?id=${subject_id}" class="text-dark col fw-bold fs-3 text-center">${subject_name}</a>
+                                <a href="/subject/${subject_id}" class="text-dark col fw-bold fs-3 text-center">${subject_name}</a>
                             </td>
                         </tr>`;
             subject_standards.forEach(standard => {
@@ -238,7 +238,7 @@ function generateStandardRow(standard) {
     outhtml = ""
     i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
     is_starred = starred.find((searched) => searched.standard_number == standard.id)
-    stretchedlinkstr = `<a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>`;
+    stretchedlinkstr = `<a href='/standard/${standard.id}' class='stretched-link link'></a>`;
 
     outhtml += "<tr class='clickable " + i_e_class + "'>" // initialise row
 
@@ -307,7 +307,7 @@ async function search() {
             subjects['hits'].forEach(result => {
                 subjecthtml += `<tr>
                                     <td>
-                                        <a href='/subject/?id=${result.id}' class='text-decoration-none link'>${result.display_name}</a>
+                                        <a href='/subject/${result.id}' class='text-decoration-none link'>${result.display_name}</a>
                                     </td>
                                 </tr>`;
             });
@@ -385,23 +385,23 @@ function handleSearchSubmit() {
     var matching_standard = potentially_starred.find(s => s.standard_number == searchTerm); // check if standard number matches
     if (matching_standard != undefined) {
         // go to matching standard
-        window.location.href = '/standard/?num=' + matching_standard.standard_number;
+        window.location.href = '/standard/' + matching_standard.standard_number;
         return false;
     }
     var matching_subject = subjects.find(s => s.display_name.toLowerCase() == searchTerm.toLowerCase())
     if (matching_subject != undefined) {
         // go to matching subject
-        window.location.href = '/subject/?id=' + matching_subject.subject_id;
+        window.location.href = '/subject/' + matching_subject.subject_id;
         return false; // skip the rest of the function
     }
     // go to top hit
     if (top_subject != undefined) {
         // go to subject (it's above standards)
-        window.location.href = '/subject/?id=' + top_subject.id;
+        window.location.href = '/subject/' + top_subject.id;
         return false;   
     }
     if (top_standard != undefined) {
-        window.location.href = '/standard/?num=' + top_standard.id;
+        window.location.href = '/standard/' + top_standard.id;
         return false;
     }
     return false; // don't get the default function to redirect to /

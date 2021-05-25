@@ -205,20 +205,11 @@ async function search() {
     }
 }
 
-function generateSubjectRow(subject) {
-    outhtml = ""
-    outhtml += "<tr>"
-    outhtml += "<td>"
-    outhtml += "<a href='/subject/?id=" + subject.id + "' class='text-decoration-none link'>" + subject.name + "</a></td>"
-    outhtml += "</tr>"
-    return outhtml
-}
-
 function generateSearchStandardRow(standard) {
     outhtml = ""
     i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
     is_starred = starred.find((searched) => searched.standard_number == standard.id)
-    stretchedlinkstr = `<a href='/standard/?num=` + standard.id + `' class='stretched-link link'></a>`;
+    stretchedlinkstr = `<a href='/standard/${standard.id}' class='stretched-link link'></a>`;
 
     outhtml += "<tr class='clickable " + i_e_class + "'>" // initialise row
 
@@ -322,10 +313,10 @@ function updateEverything() { // populate the standards list, and the subject na
    
     navhtml = `<div class='row'><div class='col-auto pe-lg-0'><a class="nav-link" href="/">Home</a></div>
                <div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
-               <div class='col-auto p-lg-0'><a class="nav-link active" href="/subject/?id=` + subject_id + `">` + subject.display_name + `</a></div>`;
+               <div class='col-auto p-lg-0'><a class="nav-link active" href="/subject/${subject_id}">${subject.display_name}</a></div>`;
     if (level != null) { // add the "/ level 1" if the level is there
         navhtml += `<div class='col-auto p-lg-0'><span class='nav-link disabled'>/</span></div>
-                    <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">Level ` + level + `</a></div>`;
+                    <div class='col-auto p-lg-0'><a class="nav-link active" aria-current="page">Level ${level}</a></div>`;
     }
     navhtml += `</div>`
     
@@ -400,11 +391,11 @@ function handleSearchSubmit() {
     var matching_standard = standards.find(s => s.standard_number == searchTerm); // check if standard number matches
     if (matching_standard != undefined) {
         // go to matching standard
-        window.location.href = '/standard/?num=' + matching_standard.standard_number;
+        window.location.href = '/standard/' + matching_standard.standard_number;
         return false;
     }
     if (top_result != undefined) {
-        window.location.href = '/standard/?num=' + top_result.id;
+        window.location.href = '/standard/' + top_result.id;
         return false;
     }
     return false; // don't get the default function to redirect to /

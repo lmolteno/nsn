@@ -155,7 +155,7 @@ function updateSubjects() {
 function generateSubjectLI(subject) {
     // construct li element for each subject
     outhtml = `<li class='py-2 list-group-item list-group-item-action'>
-                    <a class='col link text-decoration-none px-0 ms-1 me-2' href=/subject/?id=${subject.subject_id}>
+                    <a class='col link text-decoration-none px-0 ms-1 me-2' href=/subject/${subject.subject_id}>
                         ${subject.display_name}
                     </a>
                 </li>`
