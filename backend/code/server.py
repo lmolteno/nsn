@@ -15,6 +15,9 @@ class DBManager:
             database=database,
             user=user,
             password=password)
+
+        self.connection.autocommit = True
+
         self.cursor = self.connection.cursor(
             cursor_factory=psycopg2.extras.RealDictCursor)
 
