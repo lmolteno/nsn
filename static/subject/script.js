@@ -6,17 +6,55 @@ starred = [];
 top_result = undefined;
 
 const urlParams = new URLSearchParams(window.location.search); // get url parameters
-if (urlParams.get('id') == null) {
-    window.location = "/"; // if there's no id parameter in the url
-}
-// get level in url parameters, else null (inline ifs can be confusing sorry)
-const level = (urlParams.get('level') == null) ? null : parseInt(urlParams.get('level'));
-const subject_id = parseInt(urlParams.get('id'));
+var subject_id = parseInt(urlParams.get('id'));
+var level = (urlParams.get('level') == null) ? null : parseInt(urlParams.get('level'));
+// this is cursed, but apparently a number that = NaN != NaN, but if you convert it to a string, they're equal
+
+if (subject_id.toString() == "NaN") {
+    // if there's no id parameter in the url
+    // check to see if the end path is not equal to 'subjects' (this is for handling things like /subject/41, in issue #22
+    // bit of a mess, let me explain:
+    // get the window location pathname, split at every '/' (.split())
+    // then filter it so that none of the elements of that array are empty (.filter())
+    // then take the last element (.pop())
+    // and compare it with subjects
+    pathElements = window.location.pathname.split("/").filter(s=>s!='')
+    endOfPath = pathElements.pop() 
+    secondLastOfPath = pathElements.pop() // get second last, in case of levels
+    if (endOfPath != 'subject') { // it can either be a subject or level at the end
+        if (secondLastOfPath != 'subject') { // it must be a /subject/id/level URL
+            secondLastOfPath = parseInt(secondLastOfPath)
+            if (secondLastOfPath.toString() == "NaN") {
+                console.log("redirecting... because of malformed subject")
+                //window.location = '/';
+            } else {
+                subject_id = secondLastOfPath
+                // then try the level
+                endOfPath = parseInt(endOfPath) 
+                if (endOfPath.toString() == "NaN") {
+                    console.log("redirecting... because of malformed level")
+                //    window.location = "/"; // redirect home
+                } else {
+                    level = endOfPath;
+                }
+            }
+        } else { // it must be a /subject/id URL (no level)
+            endOfPath = parseInt(endOfPath)
+            if (endOfPath.toString() == "NaN") {
+                console.log("redirecting...")
+               // window.location = "/"; // redirect home
+            } else {
+                subject_id = endOfPath;
+            }
+        }
+    }
+} 
+
 var subject = 0; // for init of the global subject object
 
 // for accessing the search engine
 const client = new MeiliSearch({
-    host: "https://" + window.location.host.toString(),
+    host: "https://" + window.location.host,
     apiKey: '',
 })
 
