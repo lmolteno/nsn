@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, jsonify
 import psycopg2
 import psycopg2.extras
-
+from waitress import serve
 
 class DBManager:
     def __init__(self,
@@ -169,7 +169,6 @@ class DBManager:
 server = Flask(__name__)
 conn = None
 
-
 @server.route('/api/standards', methods=['GET'])
 def api_standards():
     global conn
@@ -287,4 +286,4 @@ def api_content():
     return jsonify({'success': True, 'content': content})
 
 if __name__ == '__main__':
-    server.run(port=3000)
+    serve(server, listen="*:3000")
