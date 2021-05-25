@@ -113,3 +113,7 @@ CREATE TABLE custom_content (
     REFERENCES subjects(subject_id)
     ON DELETE CASCADE
 );
+
+CREATE TABLE flags (
+  name VARCHAR NOT NULL
+);

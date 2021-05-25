@@ -22,6 +22,27 @@ replacement_words = [
 def debug_time(): # for faster/easier timestamping
     return datetime.now().strftime('%y/%m/%d %H:%M:%S')
 
+def clean(conn):
+    tables = [
+        'standards',
+        'custom_content',
+        'domains',
+        'fields',
+        'ncea_litnum',
+        'resource_categories',
+        'resources',
+        'standard_subject',
+        'standard_types',
+        'subfields',
+        'subjects',
+        'ue_literacy',
+        'flags']
+    with conn.cursor() as curs:
+        for table in tables:
+            curs.execute(f"DELETE FROM {table};")
+    conn.commit()
+
+
 def get_dataset():
     online_url = "https://catalogue.data.govt.nz/dataset/a314d10e-8da6-4640-959f-256160f9ffe4/resource/0986281d-d293-4bc5-950e-640e5bc5a07e/download/list-of-all-standards-2020.csv"
 
@@ -398,6 +419,9 @@ def combine():
     client = meilisearch.Client('http://search:7700')
     client.index('subjects').add_documents(subjects)
     client.index('standards').add_documents(search_standards)
+    
+    print(f"[{debug_time()}] Cleaning PostgreSQL")
+    clean(conn)
 
     print(f"[{debug_time()}] Entering subjects and standards into PostgreSQL")
     # enter info

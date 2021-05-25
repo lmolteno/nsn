@@ -44,14 +44,23 @@ outliers_lut = {
 of = "../output/ncea_standards.json"
 f_string = "%H:%M:%S %d/%m/%Y"
 
+def debug_time(): # for faster/easier timestamping
+    return datetime.now().strftime('%y/%m/%d %H:%M:%S')
 
 def get_subjects():  # this function will parse the NCEA subjects page to find the names and url-names for each subject
     url = "https://www.nzqa.govt.nz/ncea/subjects/"
 
     # debug
-    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Getting subjects")
-
-    page = requests.get(url)  # send request
+    print(f"[{debug_time()}] Getting subjects")
+    success = False
+    page = None # init of variable to get it in scope
+    while not success:
+        try:
+            page = requests.get(url)  # send request
+            success = True
+        except requests.exceptions.ConnectionError:
+            print(f"[{debug_time()}] Failed to establish connection... waiting 10 seconds")
+            time.sleep(10)
     soup = BeautifulSoup(page.content, 'html.parser')  # html/xml parser init
     results = soup.find_all("table")  # find all tables
     # find all list items in the first table

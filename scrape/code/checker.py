@@ -7,42 +7,38 @@ from combine import combine
 import psycopg2
 import psycopg2.extras
 
+def debug_time(): # for faster/easier timestamping
+    return datetime.now().strftime('%y/%m/%d %H:%M:%S')
 
-def clean():
-    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Cleaning database")
-    tables = [
-        'standards',
-        'domains',
-        'fields',
-        'ncea_litnum',
-        'resource_categories',
-        'resources',
-        'standard_subject',
-        'standard_types',
-        'subfields',
-        'subjects',
-        'ue_literacy']
-    success = False  # error handling for while the Postgres is starting
+def refresh_flag():
+    return check_flag("refresh")    
+
+def rescrape_flag():
+    return check_flag("rescrape")
+
+def check_flag(flag_name):
+    print(f"[{debug_time()}] Checking if {flag_name} flag is set")
+    success = False
+    flag = False
     while not success:
         try:
             conn = psycopg2.connect(
-                host="db",  # this is because docker! cool!
+                host="db",
                 database=os.environ.get("POSTGRES_DB"),
                 user=os.environ.get("POSTGRES_USER"),
                 password=os.environ.get("POSTGRES_PASSWORD"))
 
-            with conn.cursor() as curs:
-                for table in tables:
-                    curs.execute(f"DELETE FROM {table};")
-                conn.commit()
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as curs:
+                curs.execute(f"SELECT EXISTS(SELECT 1 FROM flags WHERE name='{flag_name}');")
+                flag = curs.fetchone()['exists']
             conn.close()
             success = True
         except psycopg2.OperationalError:
             time.sleep(5)
-
+    return flag 
 
 def is_empty():
-    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Checking if database is empty")
+    print(f"[{debug_time()}] Checking if database is empty")
     success = False  # error handling for while the Postgres is starting
     while not success:
         try:
@@ -64,7 +60,7 @@ def is_empty():
 
 
 def test():
-    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Testing...")
+    print(f"[{debug_time()}] Testing...")
     success = False  # error handling for while the Postgres is starting
     passing = True
     while not success:
@@ -100,9 +96,9 @@ def test():
                     if not current:
                         passing = False
                         print(
-                            f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Failed field keys")
+                            f"[{debug_time()}] Failed field keys")
                         print(
-                            f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Expected {expected}, got {list(field.keys())}")
+                            f"[{debug_time()}] Expected {expected}, got {list(field.keys())}")
                         break
                 for subfield in structure['subfields']:
                     expected = ["name", "subfield_id"]
@@ -110,9 +106,9 @@ def test():
                     if not current:
                         passing = False
                         print(
-                            f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Failed subfield keys")
+                            f"[{debug_time()}] Failed subfield keys")
                         print(
-                            f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Expected {expected}, got {list(subfield.keys())}")
+                            f"[{debug_time()}] Expected {expected}, got {list(subfield.keys())}")
                         break
                 for domain in structure['domains']:
                     expected = ["name", "domain_id"]
@@ -120,9 +116,9 @@ def test():
                     if not current:
                         passing = False
                         print(
-                            f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Failed domain keys")
+                            f"[{debug_time()}] Failed domain keys")
                         print(
-                            f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Expected {expected}, got {list(domain.keys())}")
+                            f"[{debug_time()}] Expected {expected}, got {list(domain.keys())}")
                         break
 
                 curs.execute('SELECT * FROM subjects;')
@@ -134,9 +130,9 @@ def test():
                     if not current:
                         passing = False
                         print(
-                            f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Failed subject keys")
+                            f"[{debug_time()}] Failed subject keys")
                         print(
-                            f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Expected {expected}, got {list(subject.keys())}")
+                            f"[{debug_time()}] Expected {expected}, got {list(subject.keys())}")
                         break
 
             conn.close()
@@ -147,55 +143,51 @@ def test():
 
 
 if __name__ == "__main__":
-    print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Starting checking")
+    print(f"[{debug_time()}] Starting checking")
     alreadyforcescraped = False
     while True:
         if os.path.isfile(of):  # check if the output file exists
             with open(of) as outfile:
                 print(
-                    f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Loading scraped data...")
+                    f"[{debug_time()}] Loading scraped data...")
                 data = json.load(outfile)
                 lastupdated = datetime.strptime(data['updated'], f_string)
                 # add a year to the previous time and see if it's less than now (i'm not too worried about leap years)
                 olderthanayear = (
                     lastupdated + timedelta(days=365)) < datetime.now()
                 # if FORCE_SCRAPE environment variable is set, scrape even if previous file is young young
-                if olderthanayear or (os.environ.get("FORCE_SCRAPE") == '1' and not alreadyforcescraped):
+                if olderthanayear or (os.environ.get("FORCE_SCRAPE") == '1' and not alreadyforcescraped) or rescrape_flag():
                     alreadyforcescraped =  os.environ.get("FORCE_SCRAPE") == 1 # only force scrape the first time around
                     print(
-                        f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] File is outdated, or scrape is forced.")
+                        f"[{debug_time()}] File is outdated, or scrape is forced.")
                     print(
-                        f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Entering in old data to improve uptime")
-                    clean()
+                        f"[{debug_time()}] Entering in old data to improve uptime")
                     combine()
                     print(
-                        f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Scraping")
+                        f"[{debug_time()}] Scraping")
                     scrape_and_dump(of)
-                    clean()
                     combine()
-                elif is_empty():
-                    clean()
+                elif is_empty() or refresh_flag():
+                    print(f"[{debug_time()}] DB empty or refresh flag")
                     combine()
                 else:
                     print(
-                        f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Nothing to be done, up-to-date scrape data")
+                        f"[{debug_time()}] Nothing to be done, up-to-date scrape data")
 
                 # run testing on database
                 if not test():  # if testing returns false
                     print(
-                        f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Database failed tests!")
+                        f"[{debug_time()}] Database failed tests!")
                     print(
-                        f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Cleaning!")
-                    clean()
+                        f"[{debug_time()}] Cleaning!")
                     combine()
 
         else:
             print(
-                f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] No file exists, scraping data.")
+                f"[{debug_time()}] No file exists, scraping data.")
             scrape_and_dump(of)
-            clean()
             combine()
-        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting 6 hours...")
+        print(f"[{debug_time()}] Waiting 6 hours...")
         time.sleep(6 * (60**2))  # every n seconds (60^2 is an hour)
         print(
-            f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] ======================================")
+            f"[{debug_time()}] ======================================")
