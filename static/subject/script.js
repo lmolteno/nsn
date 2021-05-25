@@ -26,14 +26,14 @@ if (subject_id.toString() == "NaN") {
             secondLastOfPath = parseInt(secondLastOfPath)
             if (secondLastOfPath.toString() == "NaN") {
                 console.log("redirecting... because of malformed subject")
-                //window.location = '/';
+                window.location = '/';
             } else {
                 subject_id = secondLastOfPath
                 // then try the level
                 endOfPath = parseInt(endOfPath) 
                 if (endOfPath.toString() == "NaN") {
                     console.log("redirecting... because of malformed level")
-                //    window.location = "/"; // redirect home
+                    window.location = "/"; // redirect home
                 } else {
                     level = endOfPath;
                 }
@@ -42,7 +42,7 @@ if (subject_id.toString() == "NaN") {
             endOfPath = parseInt(endOfPath)
             if (endOfPath.toString() == "NaN") {
                 console.log("redirecting...")
-               // window.location = "/"; // redirect home
+                window.location = "/"; // redirect home
             } else {
                 subject_id = endOfPath;
             }

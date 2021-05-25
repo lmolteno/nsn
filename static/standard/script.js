@@ -1,14 +1,26 @@
 // globals
 standard = {};
-standard_number = null;
 resources = [];
 starred = [];
 sortbycategory = false; // sorting of resource
 starModal = 0;
 
 const urlParams = new URLSearchParams(window.location.search); // get url parameters
-if (urlParams.get('num') == null) {
-    window.location = "/"; // if there's no id parameter in the url
+var standard_number = parseInt(urlParams.get('num'))
+if (standard_number.toString() == "NaN") { // see /subject/script.js for why this is cursed, and why i had to do it
+    // check to see if the last element of the path in the url is a standard number
+    pathElements = window.location.pathname.split("/").filter(s=>s!='')
+    standard_number = pathElements.pop() // get the last element
+    if (standard_number != "standard") { // we must want to use path-based referencing then
+        standard_number = parseInt(standard_number)
+        if (standard_number.toString() == "NaN") {
+            // malformed standard
+            console.log("redirecting because of malformed standard number")
+            window.location = "/";
+        }
+    } else {
+        window.location = "/"; // we don't want to use path-based referencing, and there's nothing in the parameters, so go home
+    }
 } else {
     standard_number = urlParams.get('num')
 }
