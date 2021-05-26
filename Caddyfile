@@ -1,13 +1,13 @@
-{
-	acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
-}
+#{
+#	acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+#}
 
-nsn.molteno.org {
+nsn.nz, www.nsn.nz {
 	encode gzip
 	file_server {
 		root /static/	
 	}
-	reverse_proxy /api/* api_service:5000
+	reverse_proxy /api/* api_service:3000
 	reverse_proxy /indexes/* search:7700
 	reverse_proxy /search/* search:7700
 	log {
@@ -21,4 +21,15 @@ nsn.molteno.org {
 		header Upgrade    websocket
 	}
 	reverse_proxy @websockets analytics:7890
+
+
+	@subject {
+		path_regexp /subject/(\d+)
+	}
+	rewrite @subject /subject/
+
+	@standard {
+		path_regexp /standard/(\d+)
+	}
+	rewrite @standard /standard/
 }
