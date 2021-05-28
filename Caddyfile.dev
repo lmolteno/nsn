@@ -2,11 +2,7 @@
 #	acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
 #}
 
-<<<<<<< HEAD:Caddyfile.dev
 localhost {
-=======
-nsn.nz, www.nsn.nz {
->>>>>>> c6c3d0fecc21fb108cd37fc426a2bf0660176ee7:Caddyfile
 	encode gzip
 	file_server {
 		root /static/	
@@ -26,10 +22,6 @@ nsn.nz, www.nsn.nz {
 	}
 	reverse_proxy @websockets analytics:7890
 
-<<<<<<< HEAD:Caddyfile.dev
-=======
-
->>>>>>> c6c3d0fecc21fb108cd37fc426a2bf0660176ee7:Caddyfile
 	@subject {
 		path_regexp /subject/(\d+)
 	}
@@ -39,4 +31,6 @@ nsn.nz, www.nsn.nz {
 		path_regexp /standard/(\d+)
 	}
 	rewrite @standard /standard/
+
+	rewrite /privacy* /about/privacy.html
 }
