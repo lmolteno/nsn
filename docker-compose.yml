@@ -37,7 +37,7 @@ services:
         user: root
         volumes:
             - ./static:/static
-            - ./Caddyfile:/etc/caddy/Caddyfile
+            - ./Caddyfile.dev:/etc/caddy/Caddyfile
             - ./certs/config:/root/.config/caddy
             - ./certs/local:/root/.local/share/caddy
             - ./certs/data:/data
@@ -52,6 +52,7 @@ services:
             - ./scrape/code:/code
             - ./scrape/output:/output
             - ./scrape/cache:/cache
+            - ./scrape/content:/content
         environment:
             FORCE_SCRAPE: 0
             HARD_CACHE: 1

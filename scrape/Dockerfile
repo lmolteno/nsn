@@ -7,8 +7,4 @@ COPY ./code /code/
 COPY ./output /output/
 COPY ./content /content/
 COPY ./cache /cache/
-# run the python scraping script. if the current json file is older than a year, re-scrape
-# CMD python3 ncea_scraper.py
-# combine dataset and enter into the database
-# CMD python3 combine.py
 CMD python3 -u checker.py
