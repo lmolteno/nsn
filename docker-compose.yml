@@ -37,6 +37,7 @@ services:
         user: root
         volumes:
             - ./static:/static
+            - ./goaccess:/logs
             - ./Caddyfile.dev:/etc/caddy/Caddyfile
             - ./certs/config:/root/.config/caddy
             - ./certs/local:/root/.local/share/caddy
@@ -68,7 +69,7 @@ services:
         volumes:
             - ./static:/static
             - ./goaccess/:/etc/goaccess
-        command: ['/static/analytics/access.log']
+        command: ['/etc/goaccess/access.log']
 
     search:
         image: getmeili/meilisearch:latest

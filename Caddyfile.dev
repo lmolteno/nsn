@@ -11,7 +11,7 @@ localhost {
 	reverse_proxy /indexes/* search:7700
 	reverse_proxy /search/* search:7700
 	log {
-        output file /static/analytics/access.log {
+        output file /logs/access.log {
             roll_keep_for 2160h
         }
         format json
