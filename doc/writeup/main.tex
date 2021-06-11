@@ -13,7 +13,7 @@
 \usepackage{etoolbox}
 \AtBeginEnvironment{quote}{\singlespacing\small}
 
-\newcommand\Tstrut{\rule{0pt}{2.9ex}}         % "top" strut
+\newcommand\Tstrut{\rule{0pt}{2.9ex}}         % "top" strut for tables
 \newcommand\Bstrut{\rule[-1.2ex]{0pt}{0pt}}   % "bottom" strut
 
 \title{NSN Writeup}
@@ -301,7 +301,7 @@ This feedback is mostly cumulative - for small improvements, I would make them a
 
 \subsection*{Odin}
 \begin{itemize}
-    \item Centre-align the credits and levels, to properly associat ethem with their column.
+    \item Centre-align the credits and levels, to properly associate them with their column.
     \item There are two of everything in Business Studies (I think this is because there's both ``Agribusiness'' and ``Business Studies'' that reference that subject, I fixed this by ignoring Business Studies). 
     \item Pressing enter on the search box breaks it, it goes to /? of the local thing. Searching on the subject page is also broken.
     \item Border between columns of standards as it gets confusing?
@@ -632,39 +632,49 @@ Adminer allowed me to have a quick, easy interface with the database. This prove
 Overall, Docker gave me the ability to far improve the functionality of the whole project, as it expanded the scope of possible extra packages I could use, which I would have otherwise not used for fear of worsening migration cost/energy.
 
 \subsection*{End-user Considerations}
-The end-user was constantly the focus for the foundational decisions made
+The end-user was consistently the focus for the foundational decisions made during development. For every change I made, whether that be migrating from starred subjects to starred standards, I considered how this would impact the end user. There are plenty examples of where I do this throughout the project. Here are a few:
 \begin{itemize}
-    \item Linking to resources is super beneficial from a user standpoint
-    \item Took user feedback (Mr Biggin) and implemented viewing of the most current version of each standard
-    \item Sharing lists of standards allows course designers to preview their course, and teachers to share a course and relevant resources with their students
-    \item Being very selective in what study resources I link to means that every link counts, and that people will pay attention to everything
-    \item Linking directly to PDFs rather than to standard pages for NZQA improves response time (I don't have to go through their search engine, which is slow on repeated queries)
-    \item Not just listing all resources, I organise them by category
-    \item Linking to annotated exemplars, which are hard to find
+    \item Collating the information provided a variety of places on the NZQA website into a contiguous table that allows for easy comparison of standards that exist in a subject at a level.
+    \item Linking directly to resource PDFs allows users to much more quickly access information they may need for studying. This is in part due to NZQA's slow search engine (although in reality they could have rate-limited me)
+    \item Sorting resources by category and year, not just listing them.
+    \item Providing much easier access to annotated exemplars, which are notoriously hard to find. 
+    \item Based on feedback from Mr Biggin, I allowed the specific standard page to show other hard-to-find information such as the most current version of a standard.
+    \item Sharing lists of standards allows course designers to preview their course, and teachers to share their course and relevant resources with their students.
 \end{itemize}
 
+\section{Conclusion}
+The development of this website has been hugely rewarding for a variety of reasons, and I am extremely glad to be able to make a product that has been used by people all over the world (just kidding, I just mean that some people in India saw it in their search results). The website is not complete, there are still a few things to do (currently these are listed as github issues), but it certainly is functional at the present. As there were many changes to the database topography throughout the process, I've waited until now to put the finished diagram (Figure~\ref{fig:finaldb}).
 
-\subsection*{Privacy}
-\begin{itemize}
-    \item Don't store any data
-    \item Actively try to prevent access to data (removing IP from GoAccess dashboard, hiding logs)
-\end{itemize}
+\begin{figure}[h!]
+    \centering
+    \fbox{
+    \includegraphics[scale=0.5]{searchresults.png}
+    }
+    \caption{The final database topography, after all changes made during this development).}
+    \label{fig:finaldb}
+\end{figure}
 
-\subsection*{Future Proofing}
-\begin{itemize}
-    \item Good documentation, a writeup, using accurate git commits, and versioning with github tags + releases. 
-    \item Expandable database format, with constant dynamicism with the scraping script, allows for great flexability.
-    \item Anticipation of the upcoming change to NCEA
-    \begin{itemize}
-        \item Everyone I've talked to has said that things will still be organised as standards with resources, and the NZQA website format should still be okay, so a re-scrape won't create too much of a hazard to functionality.
-    \end{itemize}
-\end{itemize}
-
-\subsection*{Accessibility}
-\begin{itemize}
-    \item \texttt{aria-} tags for labels and purposes
-    \item Alt-texts for all images
-    \item Text-based normal \texttt{<a>} tag navigation means that it's quite easily navigable for screen-readers and non-graphical interfaces (as long as they run Javascript)
-\end{itemize}
+%\subsection*{Privacy}
+%\begin{itemize}
+%    \item Don't store any data
+%    \item Actively try to prevent access to data (removing IP from GoAccess dashboard, hiding logs)
+%\end{itemize}
+%
+%\subsection*{Future Proofing}
+%\begin{itemize}
+%    \item Good documentation, a writeup, using accurate git commits, and versioning with github tags + releases. 
+%    \item Expandable database format, with constant dynamicism with the scraping script, allows for great flexability.
+%    \item Anticipation of the upcoming change to NCEA
+%    \begin{itemize}
+%        \item Everyone I've talked to has said that things will still be organised as standards with resources, and the NZQA website format should still be okay, so a re-scrape won't create too much of a hazard to functionality.
+%    \end{itemize}
+%\end{itemize}
+%
+%\subsection*{Accessibility}
+%\begin{itemize}
+%    \item \texttt{aria-} tags for labels and purposes
+%    \item Alt-texts for all images
+%    \item Text-based normal \texttt{<a>} tag navigation means that it's quite easily navigable for screen-readers and non-graphical interfaces (as long as they run Javascript)
+%\end{itemize}
 
 \end{document}
