@@ -156,7 +156,7 @@ async function search() {
         }
         searched_standards = await standindex.search(searchtext, options) 
         if (searched_standards['hits'].length > 0) {
-            standardshtml = `<h3 class="mb-1">Standards</h3>
+            standardshtml = `<h4 class="mb-1">Search Results:</h4>
 
                         <table class="table-bordered border-0 table table-hover">
                             <thead>
@@ -261,8 +261,54 @@ function generateSearchStandardRow(standard) {
 
 function generateStandardRow(standard) {
     standard['id'] = standard['standard_number']
-    return generateSearchStandardRow(standard); // the only difference between a search-standard and a not one is the id
     // replaced with the standard number 
+    outhtml = ""
+    i_e_class = standard.internal ? "internal_row" : "external_row"; // class for internal vs external colouring
+    is_starred = starred.find((searched) => searched.standard_number == standard.id)
+    stretchedlinkstr = `<a href='/standard/${standard.id}' class='stretched-link link'></a>`;
+
+    outhtml += "<tr class='clickable " + i_e_class + "'>" // initialise row
+
+    // add the star standard button, depending on whether it's starred or not
+    outhtml += `    <th scope='row' style='position: relative;'>
+                        <a onClick='${is_starred ? "unstar" : "star"}Standard(${standard.id}, this)' class='stretched-link link text-decoration-none text-dark text-center d-block'>
+                            ${is_starred ? starFull : starOutline}
+                        </a>
+                    </th>`
+    // add <th> (header) styled standard number with link to the standard page
+    outhtml += `    <th scope='row' style='position: relative;'>
+                        ${stretchedlinkstr}
+                        <span class='float-end'>` + standard.id + `</span>
+                    </th>`
+
+    // add all the other information in <td> styled boxes
+    outhtml += `    <td style='position: relative;'>
+                        ${stretchedlinkstr}
+                        ` + standard.title + `
+                    </td>
+                    <td style='position: relative;'>
+                        ${stretchedlinkstr}
+                        ` + ((parseInt(standard.id) < 90000) ? "Unit" : "Achievement") + `
+                    </td>
+                    <td class='text-center' style='position: relative;'>
+                        ${stretchedlinkstr}
+                        ` + standard.credits + `
+                    </td>
+                    <td style='position: relative;'>
+                        ${stretchedlinkstr}
+                        <span class='float-start'>` + (standard.reading ? "R" : " ") + `</span>
+                        <span class='float-end'>` + (standard.writing ? "W" : " ") + `</span>
+                    </td>
+                    <td class='text-center' style='position: relative;'>
+                        ${stretchedlinkstr}
+                        ` + (standard.numeracy ? "Y" : " ") + `
+                    </td>
+                    <td style='position: relative;'>
+                        ${stretchedlinkstr}
+                        ` + (standard.internal ? `Internal` : `External`) + `
+                    </td>
+                </tr>`;
+    return outhtml
 }
 
 function getCustomContent() {
@@ -324,16 +370,13 @@ function updateEverything() { // populate the standards list, and the subject na
     $("#nav-breadcrumbs").html(navhtml)
     $("#nav-breadcrumbs").fadeIn()
 
-    outhtml = ` <div class="table-responsive">
-                <h3 class="mb-1">Standards</h3>
-                <table class="table table-bordered table-hover bg-white border-0">
+    outhtml = ` <table class="table table-bordered table-hover bg-white border-0">
                     <thead>
                         <tr>
                             <th scope="col" class="col">Star</th>
                             <th scope="col" class="col text-end">Number</th>
                             <th scope="col" class="col">Title</th>
                             <th scope="col">Type</th>
-                            <th scope="col">Level</th>
                             <th scope="col">Credits</th>
                             <th scope="col"><a href='/about/#literacy' class='text-dark'>Literacy</a></th>
                             <th scope="col">Numeracy</th>
@@ -353,20 +396,13 @@ function updateEverything() { // populate the standards list, and the subject na
         standards_for_level = standards.filter(o => o.level == current_level);
         standards_for_level = standards_for_level.sort((a, b) => (a.standard_number > b.standard_number) - (a.standard_number < b.standard_number)); // sort by standard_number
         if (standards_for_level.length > 0) {
-            baseurl = `https://www.nzqa.govt.nz/ncea/assessment/search.do?query=` + subject.name.replace(/\ /g, '+') + `&level=0` + current_level + `&view=`;
-            views = [['reports', 'Schedules'], ['exams', 'Exams'], ['achievements', 'Standards'], ['all', 'All']] // url to display name table
+            customHtml = generateCustomHtml(current_level);
             outhtml += `<thead>
             <tr>
-                <th colspan="9" class="text-center border border-dark pb-1">
+                <th colspan="8" class="border border-dark pb-1">
                     <div class='container px-1'>
-                    <div class="row border-bottom pb-2"><div class="col fw-bold fs-3 text-center">Level ` + current_level + `</div></div>
+                    <div class="row ${customHtml.length > 0 ? "border-bottom pb-2" : ""}"><div class="col text-center fw-bold fs-3">Level ${current_level}</div></div>
                     <div class="mt-2">${generateCustomHtml(current_level)}</div>
-                    <div class="row justify-content-center">`;
-            views.forEach(view => { //  add buttons for each view
-                outhtml += `<div class='col-auto'><a class="btn btn-link text-decoration-none" target="_blank" href="` + baseurl + view[0] + `">` + view[1] + `</a></div>`;
-            });
-            outhtml += `</div>
-                    </div>
                 </th>
             </tr>
             </thead>
@@ -376,10 +412,10 @@ function updateEverything() { // populate the standards list, and the subject na
             });
             outhtml += "</tbody>";
         } else {
-            outhtml += "<thead><tr><th colspan='9' class='text-center border border-dark'>No standards for Level " + current_level + "</th></tr></thead>";
+            outhtml += "<thead><tr><th colspan='8' class='text-center border border-dark'>No standards for Level " + current_level + "</th></tr></thead>";
         }
     });
-    outhtml += "</tbody></table></div>";
+    outhtml += "</tbody></table>";
 
     $("#main-container").hide();
     $("#main-container").html(outhtml);
