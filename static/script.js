@@ -467,7 +467,7 @@ $(document).ready(function () {
     $("#searchbox").val("") // reset value
     search(); // initialise search results
     $("#searchform").submit(handleSearchSubmit); // set submit handler
-    document.getElementById("searchbox").addEventListener('input', search); // when something is input, search
+    document.getElementById("searchbox").addEventListener('input', $.throttle(500, search)); // when something is input, search
 
     $("#shared-title").on("input", updateShareLink);
     $('#shareModal').on('show.bs.modal', updateShareLink)
