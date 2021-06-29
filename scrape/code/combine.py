@@ -281,7 +281,9 @@ def combine():
                 title = scraped['title']
         
         # entry for the search database
+        asus_number = f"AS{standard_number}" if standard_number > 90000 else f"US{standard_number}"
         search_standard = {"id": str(standard_number),
+                           "other_number": asus_number,
                            "title": title,
                            "level": level,
                            "credits": credits,
