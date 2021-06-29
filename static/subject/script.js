@@ -147,7 +147,9 @@ async function search() {
     searchtext = $("#searchbox").val()
     
     // move search icon to spinner
-    $("#searchicon").html(spinner);
+    if ($("#searchicon").html() != spinner) {
+        $("#searchicon").html(spinner);
+    }
 
     if (searchtext.length != 0) {
         options = {
@@ -197,13 +199,20 @@ async function search() {
             $("#search-results").css("visibility", "visible");
         }
         // reset to a magnifying glass
-        $("#searchicon").html(magnifying_glass);
+        reset_searchicon();
     } else {
         $("#standards-results").html("")
         $("#search-results").css("visibility", "hidden");
-        $("#searchicon").html(magnifying_glass);
+        reset_searchicon();
     }
 }
+
+let reset_searchicon = 
+    $.debounce(500, false, () => {
+        $("#searchicon").html(magnifying_glass);
+    });
+
+
 
 function generateSearchStandardRow(standard) {
     outhtml = ""
@@ -444,7 +453,6 @@ $(document).ready(function () {
         .then(getStandards)
         .then(updateEverything); // using promises to get synchronisity among multiple functions
     $("#searchbox").val("");
-    search();
     $("#searchform").submit(handleSearchSubmit); // update submit handler
     document.getElementById("searchbox").addEventListener('input', $.throttle(500, search)); // when something is input, search
 });
