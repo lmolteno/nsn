@@ -43,21 +43,18 @@
             
             <!-- Main Content -->
             <div class="container-lg py-3" id="main-container">
-                <!--<figure class='text-center'>
-                    <blockquote class="blockquote fs-4">
-                        <p>I do not like the NZQA website.</p>
-                    </blockquote>
-                    <figcaption class="blockquote-footer">
-                        My entire computer science class, synchronously
-                    </figcaption>
-                </figure>
-                <p class='text-center lead'>This project was born out of a frustration with the current NZQA website for the purposes of getting information and documents relating to standards students were being assessed on.</p>-->
+                <div class='row text-center'>
+                    <p class='mb-0'>
+                        <strong class='fs-6 fw-bold'>Copyright Disclaimer:</strong> The resources I link to the official NZQA resources for NCEA standards. They are under <a href="https://www.iponz.govt.nz/about-ip/copyright/crown-copyright/">Crown Copyright</a>. They are produced and hosted by the NZQA.
+                    </p>
+                </div>
+                <hr />
                 <div class='row justify-content-end' id='about'>
                     <div class='col-sm ps-3'>
                         <p>The system to support this system is built on the following elements, all containerised through Docker, and composed through Docker Compose</p>
                         <dl>
                             <dt>Python3.9 with Beautiful Soup and Pandas</dt>
-                            <dd>for scraping, parsing, and managing the database.</dd>
+                            <dd>for scraping, parsing, and managing the database of resources, standards, and subjects.</dd>
 
                             <dt>MeiliSearch</dt>
                             <dd>for serving fast, typo-resistant search results for both subjects and standards.</dd>
@@ -65,8 +62,8 @@
                             <dt>PostgreSQL</dt>
                             <dd>for providing a scalable, enterprise-level database.</dd>
 
-                            <dt>Python with Flask</dt>
-                            <dd>for accessing and serving the data from the database to the frontend with a RESTful API.</dd>
+                            <dt>Python with Flask and Waitress</dt>
+                            <dd>for serving the data from the database to the frontend with a RESTful API.</dd>
                             
                             <dt>Caddy</dt>
                             <dd>as a reverse proxy and a service retrieving auto-SSL certificates from LetsEncrypt.</dd>
@@ -77,7 +74,6 @@
                             <dt>HTML/CSS/JS + Bootstrap</dt>
                             <dd>for creating a responsive, dynamic frontend.</dd>
                         </dl>
-                    <!-- <p>This journey began during exams last year. I built up an intense frustration at the number of clicks between going to the NZQA website, and the exam papers I needed for my study. I thought to myself <em>"There must be a better way!"</em> Then, after some research, I discovered that there was a dataset provided by NZQA, describing all their 106k standards that they've made since 1989. From here I'd imagined it would simply be entering this information into a database, writing a quick API to interface with that database, and serving that through a basic frontend. But lo! The dataset they provided didn't have information regarding what NCEA subject each standard fell under. So I went about my day, scraping the NZQA/NCEA subjects page for subject, then for each of those subjects, I would work through the "Search results" page for each level, building up a list of standards for each subject, that I would save in a JSON file. Then &mdash; shock! I discovered why that dataset didn't provide the subject for each standard. Standards can be a part of multiple subjects! Modifying my database to suit this, I moved forward. After many trials and tribulations, I ended up with a functioning site, with the following system diagram.</p>-->
                     </div>
                     <div class='col-sm'>
                         <img src='system_diagram.png' class='img-fluid'></img> 
