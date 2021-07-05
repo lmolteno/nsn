@@ -4,25 +4,36 @@
 \usepackage{tabularx}
 \usepackage{pdfpages}
 \usepackage{hyperref}
+\usepackage[margin=2cm]{geometry}
 \usepackage{dirtytalk}
-\usepackage[margin=2.5cm]{geometry}
 \usepackage{setspace}
-\usepackage{silence}
-\WarningsOff*
 
-\usepackage{etoolbox}
-\AtBeginEnvironment{quote}{\singlespacing\small}
-
-\newcommand\Tstrut{\rule{0pt}{2.9ex}}         % "top" strut for tables
+\newcommand\Tstrut{\rule{0pt}{2.9ex}}         % "top" strut
 \newcommand\Bstrut{\rule[-1.2ex]{0pt}{0pt}}   % "bottom" strut
 
-\title{NSN Writeup}
+\title{\textsc{NSN.nz} Writeup}
 \author{Linus Molteno}
 \date{}
 
 \begin{document}
 
 \maketitle
+
+\section{Introduction}
+My inspiration for designing this website was a frustration with the NZQA website, which I found was not designed for the use most high school students have for it --- getting past exam papers. The interface it had for this was slow, clumsy, and unintuitive in my experience. I proposed a solution to this, which was a website that's sole purpose was to provide easy access to the documents provided by the NZQA. The conception for this idea was in December 2020, and from then until February, I ran the idea over in my head, trying to consider what the best mechanism for doing this was. I landed on the following structure:
+\begin{itemize}
+    \item A PostgreSQL database, storing information from a NZQA-provided dataset they released on \url{data.govt.nz}, and updated annually. I chose this due over a NoSQL database to the data's format being inherently relational (subjects relating to standards, relating to resources, etc.)
+    \item A Python Flask backend, serving information from the database in a format closer to what is necessary for the end-user (i.e. performing \texttt{JOIN}s on tables to collate relevant information).
+    \item An HTML/CSS/JS frontend, which would get the data from the backend and present it in a useful format for the end-user.
+\end{itemize}
+Features I considered important for a product I would consider fit for purpose were:
+\begin{itemize}
+    \item A simple, fast interface (minimise overhead both visually and in data transfer)
+    \item Responsive frontend, allowing use on mobile devices as well as larger screens
+    \item Serving standards at the very least for the most popular subjects. Ideally, all subjects presented on the NCEA subject page.
+    \item Most importantly \textbf{reducing the number of clicks, confusion, and time taken to access resources essential for study}.
+\end{itemize}
+My process for development and changes to my initial structure are given below:
 
 \section{Database}
 
