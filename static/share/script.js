@@ -175,7 +175,7 @@ function convertStandard(standard) {
     standard.writing = standard.ue_literacy.writing
     standard.standard_number = standard.basic_info.standard_number
 
-    s_id = subject_groups.find(sub => sub.standard_numbers.includes(standard_number)).subject_id
+    s_id = subject_groups.find(sub => sub.standard_numbers.includes(standard.standard_number)).subject_id
     standard.subject_id = s_id
     standard.subject_name = standard.subjects.find(sub => sub.subject_id == s_id).display_name
 
