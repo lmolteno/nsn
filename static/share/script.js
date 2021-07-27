@@ -175,7 +175,9 @@ function convertStandard(standard) {
     standard.writing = standard.ue_literacy.writing
     standard.standard_number = standard.basic_info.standard_number
 
-    standard.subject_id = standard.subjects.map(el => el.subject_id);
+    s_id = subject_groups.find(sub => sub.standard_numbers.includes(standard_number)).subject_id
+    standard.subject_id = s_id
+    standard.subject_name = standard.subjects.find(sub => sub.subject_id == s_id).display_name
 
     return standard
 }
@@ -190,15 +192,6 @@ function starStandard(standard_number, element) {
         element.innerHTML = starOutline; // replace with outline
         starred.splice(index, 1); // remove from array
     } else {
-        console.log(`Checking what subject ${standard_number} is in`)
-        s_id = subject_groups.find(sub => sub.standard_numbers.includes(standard_number)).subject_id
-        // sometimes s_id is an array
-        if (typeof(s_id) == 'object') {
-            s_id = s_id[0]
-            console.log("undid objectification of subject id")
-        }
-        standard.subject_id = s_id
-        standard.subject_name = standard.subjects.find(sub => sub.subject_id == s_id).display_name
         element.innerHTML = starFull; // fill star
         starred.push(standard); // add this to the starred list
     }
