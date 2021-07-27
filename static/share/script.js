@@ -190,6 +190,10 @@ function starStandard(standard_number, element) {
         element.innerHTML = starOutline; // replace with outline
         starred.splice(index, 1); // remove from array
     } else {
+        console.log(`Checking what subject ${standard_number} is in`)
+        s_id = subject_groups.find(sub => {sub.standard_numbers.includes(standard_number)}).subject_id
+        standard.subject_id = s_id
+        standard.subject_name = standard.subjects.find(sub => sub.subject_id == s_id).display_name
         element.innerHTML = starFull; // fill star
         starred.push(standard); // add this to the starred list
     }
