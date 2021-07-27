@@ -191,11 +191,7 @@ function starStandard(standard_number, element) {
         starred.splice(index, 1); // remove from array
     } else {
         console.log(`Checking what subject ${standard_number} is in`)
-        s_id = subject_groups.find(sub => {
-            if (sub.standard_numbers.includes(standard_number)) {
-                return sub
-            }
-        }).subject_id
+        s_id = subject_groups.find(sub => sub.standard_numbers.includes(standard_number)).subject_id
         standard.subject_id = s_id
         standard.subject_name = standard.subjects.find(sub => sub.subject_id == s_id).display_name
         element.innerHTML = starFull; // fill star
