@@ -197,7 +197,7 @@ function starStandard(standard_number, element) {
             }
         }).subject_id
         standard.subject_id = s_id
-        standard.subject_name = standard.subjects.find(sub => {sub.subject_id == s_id}).display_name
+        standard.subject_name = standard.subjects.find(sub => sub.subject_id == s_id).display_name
         element.innerHTML = starFull; // fill star
         starred.push(standard); // add this to the starred list
     }
