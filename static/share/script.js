@@ -192,6 +192,11 @@ function starStandard(standard_number, element) {
     } else {
         console.log(`Checking what subject ${standard_number} is in`)
         s_id = subject_groups.find(sub => sub.standard_numbers.includes(standard_number)).subject_id
+        // sometimes s_id is an array
+        if (typeof(s_id) == 'object') {
+            s_id = s_id[0]
+            console.log("undid objectification of subject id")
+        }
         standard.subject_id = s_id
         standard.subject_name = standard.subjects.find(sub => sub.subject_id == s_id).display_name
         element.innerHTML = starFull; // fill star
