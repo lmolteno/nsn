@@ -347,7 +347,9 @@ def scrape_and_dump(of):
         # get assessments for all subjects
         data['assessments'] += get_assessments(subject)
         # get annotated exemplars for all subjects
-        data['resources'] += get_annotated_exemplars(subject)
+        # www2 redirects to their new website.
+        if "www2" not in subject['url']:
+            data['resources'] += get_annotated_exemplars(subject)
 
     for assessment in data['assessments']:  # these should be called standards
         data['resources'] += get_resources(assessment)
