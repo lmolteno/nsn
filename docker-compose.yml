@@ -72,5 +72,5 @@ services:
         command: ['/etc/goaccess/access.log']
 
     search:
-        image: getmeili/meilisearch:latest
+        image: getmeili/meilisearch:v0.30.5
         restart: unless-stopped

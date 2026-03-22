@@ -48,7 +48,8 @@ def debug_time(): # for faster/easier timestamping
     return datetime.now().strftime('%y/%m/%d %H:%M:%S')
 
 def get_subjects():  # this function will parse the NCEA subjects page to find the names and url-names for each subject
-    url = "https://www.nzqa.govt.nz/ncea/subjects/"
+    # url = "https://www.nzqa.govt.nz/ncea/subjects/"
+    url = "https://www2.nzqa.govt.nz/ncea/subjects/select-subject"
 
     # debug
     print(f"[{debug_time()}] Getting subjects")
@@ -62,18 +63,17 @@ def get_subjects():  # this function will parse the NCEA subjects page to find t
             print(f"[{debug_time()}] Failed to establish connection... waiting 10 seconds")
             time.sleep(10)
     soup = BeautifulSoup(page.content, 'html.parser')  # html/xml parser init
-    results = soup.find_all("table")  # find all tables
+    results = soup.find_all("li", { "class": "links-list-block__list-item"})  # find all tables
     # find all list items in the first table
-    results = results[0].find_all("li")
 
     subjects = []  # empty list will be populated with subjects
 
     for item in results:  # for all the list items
-        url_name = "https://www.nzqa.govt.nz" + item.a['href']  # add base url
+        url_name = "https://www2.nzqa.govt.nz" + item.a['href']  # add base url
         # if the url name has levels/ at the end, remove it
         url_name = url_name.replace("levels/", "")
         # remove accents from the subject name with unidecode
-        subject_name = unidecode(item.a.text)
+        subject_name = item.a.text.strip()
         display_name = subject_name
 
         if subject_name.lower() in outliers_lut.keys():  # check if the subject is in the LUT
@@ -112,13 +112,13 @@ def get_assessments(subject):
     url = "https://www.nzqa.govt.nz/ncea/assessment/search.do?query={subjname}&view=all&level={level:02d}"
     assessments = []  # empty list that will be populated with standards
 
-    # e.g. turn Digital Technologies into Digital+Technologies for the query
-    subjectname = subject['name'].replace(" ", "+")
+    # e.g. turn Digital Technologies (level 1 only) into Digital+Technologies for the query
+    subjectname = subject['name'].split('(')[0].strip().replace(" ", "+")
     print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Getting standards for {subject["name"]}')
     for level in (1, 2, 3):  # for all the levels we're worried about
         # put info into url format
         formatted = url.format(subjname=subjectname.lower(), level=level)
-        fn = f"/cache/{subjectname.lower()}/{level}.html"
+        fn = f"../cache/{subjectname.lower()}/{level}.html"
 
         # get text from cache, or don't
         text = ""
@@ -126,6 +126,7 @@ def get_assessments(subject):
             with open(fn, 'r') as f:
                 text = f.read()
         else:  # there was no cached file
+            print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Fetching {formatted}")
             delay = random.randint(5, 10)
             print(
                 f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting {delay}s to avoid being suspicious")
@@ -144,6 +145,7 @@ def get_assessments(subject):
             with open(fn, 'r') as f:
                 text = f.read()
         else:  # there was no cached file
+            print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Fetching {formatted}")
             delay = random.randint(5, 10)
             print(
                 f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting {delay}s to avoid being suspicious")
@@ -164,9 +166,11 @@ def get_assessments(subject):
         results = soup.find_all('tr', class_="dataHighlight")
         num_ass = 0
         for row in results:  # for all the header rows
-
-            num, title, credits, external = row.find_all(
-                'strong')  # find the bolded text
+            strongs = list(row.find_all('strong'))  # find the bolded text
+            if len(strongs) == 5:
+                num, _subj_name, title, credits, external = strongs
+            else:
+                num, title, credits, external = strongs
 
             if "expired" not in str(row):
                 new_ass = {  # populate dictionary
@@ -213,6 +217,7 @@ def get_resources(standard):
         with open(fn, 'r') as f:
             text = f.read()
     else:  # there was no cached file
+        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Fetching {url}")
         delay = random.randint(5, 10)
         print(
             f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting {delay}s to avoid being suspicious")
@@ -273,7 +278,8 @@ def get_resources(standard):
 
 def get_annotated_exemplars(subject):
     print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Getting annotated exemplars for {subject['name']}")
-    url = f"{subject['url']}annotated-exemplars/"
+    url = subject['url'].replace('select-subject', 'past-exams-and-exemplars')
+    # url = f"{subject['url']}annotated-exemplars/"
     subject_fn = subject['name'].replace(" ", "+")
     # name for cached file
     fn = f"../cache/resources/annotated-exemplars/{subject_fn}.html"
@@ -287,6 +293,7 @@ def get_annotated_exemplars(subject):
                     f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Encountered 404")
                 return []
     else:  # there was no cached file
+        print(f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Fetching {url}")
         delay = random.randint(5, 10)
         print(
             f"[{datetime.now().strftime('%y/%m/%d %H:%M:%S')}] Waiting {delay}s to avoid being suspicious")
@@ -302,7 +309,7 @@ def get_annotated_exemplars(subject):
             return []  # no resources for internal annotated exemplars
         # if there is stuff
         if os.environ.get("HARD_CACHE") == "1":
-            print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Caching')
+            print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Caching to {fn}')
             # make directories on the way to the caching location
             os.makedirs(os.path.dirname(fn), exist_ok=True)
             with open(fn, 'w') as f:
@@ -315,26 +322,27 @@ def get_annotated_exemplars(subject):
     resources = []  # list of resources
 
     # this method of finding the link to the annotated exemplars means that there will be some level 4 standards,
-    main_div = soup.find("div", {'id': "mainPage"})
-    list_items = main_div.find_all("li")
-    a_tags = [a_tag for list_item in list_items for a_tag in list_item.find_all(
-        "a")]  # this is a mess
+    main_div = soup.find("article")
+    a_tags = main_div.find_all("a")
     for a_tag in a_tags:
-        print(a_tag.text, a_tag['href'])
+        if not a_tag.text.strip()[:5].isnumeric():
+            continue
 
         # each a-tag represents a resource with the category of annotated-exemplars, or that's what i'm calling it
         outdict = {
             # remove the "AS" or "US" at the beginning
-            "standard_number": int(a_tag.text[2:]),
+            "standard_number": int(a_tag.text[:5]),
             "title": "Annotated exemplar",
             # add the baseurl of nzqa.govt.nz
-            "nzqa_url": "https://www.nzqa.govt.nz" + a_tag['href'],
+            "nzqa_url": "https://www2.nzqa.govt.nz" + a_tag['href'],
             "filepath": None,  # there isn't a file path because it's not a pdf
             "year": 0,  # there isn't an associated year
             "category": "annotated-exemplars"
         }
 
         resources.append(outdict)
+
+    print(f'[{datetime.now().strftime("%y/%m/%d %H:%M:%S")}] Found {len(resources)} annotated exemplars')
 
     return resources
 
@@ -347,9 +355,7 @@ def scrape_and_dump(of):
         # get assessments for all subjects
         data['assessments'] += get_assessments(subject)
         # get annotated exemplars for all subjects
-        # www2 redirects to their new website.
-        if "www2" not in subject['url']:
-            data['resources'] += get_annotated_exemplars(subject)
+        data['resources'] += get_annotated_exemplars(subject)
 
     for assessment in data['assessments']:  # these should be called standards
         data['resources'] += get_resources(assessment)
@@ -359,6 +365,17 @@ def scrape_and_dump(of):
 
 
 if __name__ == "__main__":  # if the module isn't imported
+    subjects = get_subjects()
+    subject = next(filter(lambda s: s["name"] == "Business and Management", subjects))
+    get_assessments(subject)
+        #print(json.dumps(get_resources(assessments[0])))
+    #print(json.dumps({"assessments": assessments}))
     # french one for testing audio/transcripts
-    print(get_annotated_exemplars({"name": "Biology", "display_name": "Biology",
-          "url": "https://www.nzqa.govt.nz/ncea/subjects/biology/"}))
+    #print(get_assessments({"name": "Biology", "display_name": "Biology",
+    #      "url": "https://www.nzqa.govt.nz/ncea/subjects/biology/"}))
+    scrape_and_dump('./output.json')
+    # assessments = []
+    # subjects = get_subjects()
+    # for subject in subjects[:1]:
+    #     assessments += get_assessments(subject)
+    #     print(json.dumps(get_annotated_exemplars(subject)))

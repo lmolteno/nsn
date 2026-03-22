@@ -1,6 +1,7 @@
 # this file will combine the data from the nzqa dataset, as well as the scraped json data.
 import json
 import requests
+import re
 from urllib.request import urlopen
 import pandas as pd
 import psycopg2
@@ -15,8 +16,48 @@ from literacy_numeracy import get_ncea_litnum, get_ue_lit
 
 
 replacement_words = [
-    ("M?ori", "Maori"),
-    ("P?keh?", "Pakeha")
+    ("Maori", "Māori"),
+    ("M?ori", "Māori"),
+    ("P?keh?", "Pākeha"),
+    ("S?moa", "Sāmoa"),
+    ("Samoa", "Sāmoa"),
+    ("K?ki", "Kūki"),
+    ("'?irani", "'Āirani"),
+    ("m?ramatanga", "māramatanga"),
+    ("ng?", "ngā"),
+    ("hu?nga", "huānga"),
+    ("r?hia", "rēhia"),
+    ("k?rero", "kōrero"),
+    ("korero", "kōrero"),
+    ("?-iwi", "ā-iwi"),
+    ("?huatanga", "āhuatanga"),
+    ("m?tauranga", "mātauranga"),
+    ("p?taiao", "pūtaiao"),
+    ("t?roa", "tūroa"),
+    ("m?", "mō"),
+    ("t?tahi", "tētahi"),
+    ("wh?inga", "whāinga"),
+    ("m?teatea", "mōteatea"),
+    ("?-ringa", "ā-ringa"),
+    ("w?", "wā"),
+    ("p?p?", "pāpā"),
+    ("k?", "kē"),
+    ("p?", "pā"),
+    ("m?t?pono", "mātāpono"),
+    ("?na", "ōna"),
+    ("t?hura", "tūhura"),
+    ("?huahanga", "āhuahanga"),
+    ("?tahi", "ētahi"),
+    ("ari?", "ariā"),
+    ("?kona", "ākona"),
+    ("t?karo", "tākaro"),
+    ("h?ngai", "hāngai"),
+    ("m?t?pono", "mātāpono"),
+    ("whakam?rama", "whakamārama"),
+    ("k?rerorero", "kōrerorero"),
+    ("p?rongo", "pārongo"),
+    ("p?nga", "pānga"),
+    ("pangarau", "pāngarau"),
 ]
 
 def debug_time(): # for faster/easier timestamping
@@ -235,7 +276,15 @@ def combine():
 
         # do the replacement for the LUT of replaced words
         for word, replacement in replacement_words:
-            title = title.replace(word, replacement)
+            # Pattern explanation:
+            # (^|[^a-zA-Z]) -> Group 1: Match start of string OR any non-letter
+            # {re.escape(word)} -> Your target word (escaped for '?' etc)
+            # (?![a-zA-Z]) -> Lookahead: Ensure NOT followed by a letter (allows end of string/punctuation)
+            
+            pattern = rf"(^|[^a-zA-Z]){re.escape(word)}(?![a-zA-Z])"
+            
+            # \1 preserves whatever character was matched in the first group (like a space or comma)
+            title = re.sub(pattern, rf"\1{replacement}", title)
 
         # this is a flag for when there is/n't a related entry in the provided dataset
         related_entry = True
@@ -279,6 +328,19 @@ def combine():
                 # use the scraped title as these are what people would expect, what's on the website and stuff
                 # only do this if there aren't ? in the scraped title though
                 title = scraped['title']
+
+        # do the replacement for the LUT of replaced words
+        for word, replacement in replacement_words:
+            # Pattern explanation:
+            # (^|[^a-zA-Z]) -> Group 1: Match start of string OR any non-letter
+            # {re.escape(word)} -> Your target word (escaped for '?' etc)
+            # (?![a-zA-Z]) -> Lookahead: Ensure NOT followed by a letter (allows end of string/punctuation)
+            
+            pattern = rf"(^|[^a-zA-Z]){re.escape(word)}(?![a-zA-Z])"
+            
+            # \1 preserves whatever character was matched in the first group (like a space or comma)
+            title = re.sub(pattern, rf"\1{replacement}", title)
+
         
         # entry for the search database
         asus_number = f"AS{standard_number}" if standard_number > 90000 else f"US{standard_number}"

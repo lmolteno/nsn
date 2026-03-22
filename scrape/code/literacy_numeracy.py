@@ -10,7 +10,7 @@ def debug_time(): # for faster/easier timestamping
 def get_ncea_litnum():
 
     # get the literacy/numeracy xls spreadsheet
-    litnum_url = "https://www.nzqa.govt.nz/assets/qualifications-and-standards/qualifications/ncea/NCEA-subject-resources/Literacy-and-Numeracy/literacy-numeracy-assessment-standards-April-2019.xls"
+    litnum_url = "https://www2.nzqa.govt.nz/assets/NCEA/LitNum/Standards-lists/2024-2027-Literacy-and-Numeracy-standards.xlsx"
     litnum_fn = "../cache/litnum.xls"
     if os.path.isfile(litnum_fn):  # if it's cached, use it
         print(
@@ -28,29 +28,26 @@ def get_ncea_litnum():
             f.write(page.content)
 
     # read it with pandas
-    # header=1 because the header is on the second row
-    ln_df = pd.read_excel(litnum_fn, header=1)
-    # 'Registered' is the standard number
+    # header=2 because the header is on the third row
+    ln_df = pd.read_excel(litnum_fn, header=2)
+    # 'Standard_No' is the standard number
     # 'Title' is the title, with macrons!
     # 'Literacy' is either Y or blank
     # 'Numeracy' is either Y or blank
-    # 'Status' is either 'Expiring', 'Registered', or 'Expired'
     ln_dict = {}  # this dict will be filled with key-value pairs for sn: {'literacy': bool, 'numeracy': bool}
     print(f'[{debug_time()}] Parsing...')
     for _, row in ln_df.iterrows():
-        sn = int(row['Registered'])
-        literacy = str(row['Literacy']).upper().strip() == "Y"
-        numeracy = str(row['Numeracy']).upper().strip() == "Y"
-        status = row['Status']
-        if status == 'Registered':
-            ln_dict[sn] = {'literacy': literacy, 'numeracy': numeracy}
+        sn = int(row['Standard\n_No'])
+        literacy = str(row['Literacy\n']).upper().strip() == "Y"
+        numeracy = str(row['Numeracy/\nPāngarau']).upper().strip() == "Y"
+        ln_dict[sn] = {'literacy': literacy, 'numeracy': numeracy}
 
     return ln_dict
 
 
 def get_ue_lit():
     # get the UE literacy xls*X* spreadsheet (the X is frustrating because I need a different engine to actually reference it)
-    uelit_url = "https://www.nzqa.govt.nz/assets/qualifications-and-standards/Awards/University-Entrance/UE-Literacy-List/University-Entrance-Literacy-list-from-1-January-2020-1.xlsx"
+    uelit_url = "https://www2.nzqa.govt.nz/assets/NCEA/University-entrance/University-Entrance-Literacy-list.xlsx"
     uelit_fn = "../cache/uelit.xlsx"
     if os.path.isfile(uelit_fn):  # if it's cached, use it
         print(
